@@ -11,10 +11,14 @@ from .utils.string import (
     coerce_return_to_text,
 )
 
+solc_folder = __file__.rsplit('/', maxsplit=2)[0] + "/bin"
+
+def set_solc_binary_path(identifier):
+    global solc_bin
+    solc_bin = "{}/solc-{}".format(solc_folder, identifier)
 
 def get_solc_binary_path():
-    return os.environ.get('SOLC_BINARY', 'solc')
-
+    return solc_bin
 
 @coerce_return_to_text
 def solc_wrapper(solc_binary=None,
@@ -80,8 +84,9 @@ def solc_wrapper(solc_binary=None,
         command.extend(('--output-dir', output_dir))
 
     if combined_json:
+        if "v0.5" in command[0]:
+            combined_json = combined_json.replace(',clone-bin','')
         command.extend(('--combined-json', combined_json))
-
     if gas:
         command.append('--gas')
 

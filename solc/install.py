@@ -32,7 +32,8 @@ V0_4_22 = 'v0.4.22'
 V0_4_23 = 'v0.4.23'
 V0_4_24 = 'v0.4.24'
 V0_4_25 = 'v0.4.25'
-
+V0_5_0 = 'v0.5.0'
+V0_5_1 = 'v0.5.1'
 
 LINUX = 'linux'
 OSX = 'darwin'
@@ -174,6 +175,7 @@ def get_extract_path(identifier):
 
 
 def get_executable_path(identifier):
+    return __file__.rsplit('/',maxsplit=2)[0]+'/bin/solc-'+identifier
     extract_path = get_extract_path(identifier)
     return os.path.join(
         extract_path,
@@ -414,6 +416,8 @@ install_v0_4_22_linux = functools.partial(install_solc_from_static_linux, V0_4_2
 install_v0_4_23_linux = functools.partial(install_solc_from_static_linux, V0_4_23)
 install_v0_4_24_linux = functools.partial(install_solc_from_static_linux, V0_4_24)
 install_v0_4_25_linux = functools.partial(install_solc_from_static_linux, V0_4_25)
+install_v0_5_0_linux = functools.partial(install_solc_from_static_linux, V0_5_0)
+install_v0_5_1_linux = functools.partial(install_solc_from_static_linux, V0_5_1)
 
 
 def install_from_source(identifier):
@@ -442,7 +446,8 @@ install_v0_4_22_osx = functools.partial(install_from_source, V0_4_22)
 install_v0_4_23_osx = functools.partial(install_from_source, V0_4_23)
 install_v0_4_24_osx = functools.partial(install_from_source, V0_4_24)
 install_v0_4_25_osx = functools.partial(install_from_source, V0_4_25)
-
+install_v0_5_0_osx = functools.partial(install_from_source, V0_5_0)
+install_v0_5_1_osx = functools.partial(install_from_source, V0_5_1)
 
 INSTALL_FUNCTIONS = {
     LINUX: {
@@ -467,6 +472,8 @@ INSTALL_FUNCTIONS = {
         V0_4_23: install_v0_4_23_linux,
         V0_4_24: install_v0_4_24_linux,
         V0_4_25: install_v0_4_25_linux,
+        V0_5_0: install_v0_5_0_linux,
+        V0_5_1: install_v0_5_1_linux,
     },
     OSX: {
         V0_4_8: install_v0_4_8_osx,
@@ -485,6 +492,8 @@ INSTALL_FUNCTIONS = {
         V0_4_23: install_v0_4_23_osx,
         V0_4_24: install_v0_4_24_osx,
         V0_4_25: install_v0_4_25_osx,
+        V0_5_0: install_v0_5_0_osx,
+        V0_5_1: install_v0_5_1_osx,
     }
 }
 
