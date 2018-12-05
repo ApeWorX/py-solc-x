@@ -175,12 +175,7 @@ def get_extract_path(identifier):
 
 
 def get_executable_path(identifier):
-    return __file__.rsplit('/',maxsplit=2)[0]+'/bin/solc-'+identifier
-    extract_path = get_extract_path(identifier)
-    return os.path.join(
-        extract_path,
-        'solc',
-    )
+    return __file__.rsplit('/', maxsplit=2)[0] + '/bin/solc-' + identifier
 
 
 def get_build_dir(identifier):
@@ -319,7 +314,7 @@ def install_solc_from_ubuntu_release_zip(identifier):
 
     extract_path = get_extract_path(identifier)
     executable_path = get_executable_path(identifier)
-    assert os.path.exists(executable_path), "Executable not found @".format(executable_path)
+    assert os.path.exists(executable_path), "Executable not found @ {}".format(executable_path)
 
     check_version_command = [executable_path, '--version']
 
