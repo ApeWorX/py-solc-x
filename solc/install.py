@@ -1,6 +1,7 @@
 """
 Install solc
 """
+from io import BytesIO
 import os
 import requests
 import shutil
@@ -132,9 +133,9 @@ def install_solc_windows(version):
         ],
         message="Downloading solc for windows from {}".format(download)
     )
-
-    with zipfile.ZipFile(zip_path) as zf:
-        zf.extractall("solc.exe")
+    request = requests.get(download)
+    with zipfile.ZipFile(BytesIO(request.content)) as zf:
+        zf.extract("solc.exe")
     os.remove(zip_path)
     os.rename("solc.exe", binary_path)
 
