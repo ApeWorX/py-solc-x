@@ -15,6 +15,7 @@ from .utils.filesystem import (
 )
 from .install import (  # noqa: F401
     install_solc,
+    get_solc_folder
 )
 from .wrapper import (
     get_solc_binary_path,
@@ -24,7 +25,10 @@ from .wrapper import (
 
 import semantic_version
 
-SOLC_FOLDER = __file__[:__file__.rindex('/')] + "/bin"
+
+
+
+SOLC_FOLDER = get_solc_folder()
 VERSION_DEV_DATE_MANGLER_RE = re.compile(r'(\d{4})\.0?(\d{1,2})\.0?(\d{1,2})')
 strip_zeroes_from_month_and_day = functools.partial(VERSION_DEV_DATE_MANGLER_RE.sub,
                                                     r'\g<1>.\g<2>.\g<3>')

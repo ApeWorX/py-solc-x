@@ -11,11 +11,12 @@ from .utils.string import (
     coerce_return_to_text,
 )
 
-solc_folder = __file__[:__file__.rindex('/')] + "/bin"
+from .install import get_solc_folder
+
 
 def set_solc_binary_path(identifier):
     global solc_bin
-    solc_bin = "{}/solc-{}".format(solc_folder, identifier)
+    solc_bin = "{}solc-{}".format(get_solc_folder(), identifier)
 
 def get_solc_binary_path():
     return solc_bin

@@ -10,8 +10,17 @@ import sys
 import tarfile
 import zipfile
 
-BINARY_FOLDER = __file__[:__file__.rindex('/')] + "/bin/"
-SOLC_BASE = BINARY_FOLDER+"solc-{}"
+
+def get_solc_folder():    
+    if sys.platform=="win32":
+        s = '\\'
+    else:
+        s = '/'
+    return __file__[:__file__.rindex(s)] + s + 'bin' + s
+
+
+BINARY_FOLDER = get_solc_folder()
+SOLC_BASE = get_solc_folder()+"solc-{}"
 DOWNLOAD_BASE = "https://github.com/ethereum/solidity/releases/download/{}/{}"
 API = "https://api.github.com/repos/ethereum/solidity/releases/latest"
 
@@ -141,8 +150,8 @@ def install_solc(version = None):
         version = requests.get(API).json()['tag_name']
     else:
         version = "v0." + version.lstrip("v0.")
-    if not os.path.exists(__file__[:__file__.rindex('/')] + "/bin"):
-        os.mkdir(__file__[:__file__.rindex('/')] + "/bin")
+    if not os.path.exists(BINARY_FOLDER):
+        os.mkdir(BINARY_FOLDER)
     if sys.platform.startswith('linux'):
         return install_solc_linux(version)
     elif sys.platform == 'darwin':

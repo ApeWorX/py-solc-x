@@ -16,6 +16,7 @@ from .main import (  # noqa: F401
 )
 from .install import (
     install_solc,
+    get_solc_folder
 )
 
 if sys.version_info.major < 3:
