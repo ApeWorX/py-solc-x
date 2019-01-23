@@ -19,20 +19,11 @@ from .install import (
     get_solc_folder
 )
 
-if sys.version_info.major < 3:
-    warnings.simplefilter('always', DeprecationWarning)
-    warnings.warn(DeprecationWarning(
-        "The `py-solc` library is dropping support for Python 2.  Upgrade to Python 3."
-    ))
-    warnings.resetwarnings()
-
-solc_folder = __file__[:__file__.rindex('/')] + "/bin"
-
-
+solc_folder = get_solc_folder()
 if not os.path.exists(solc_folder):
     os.mkdir(solc_folder)
 
 if not get_installed_solc_versions():
-    install_solc("v0.5.1")
+    install_solc()
 
 set_solc_version(get_installed_solc_versions()[-1])
