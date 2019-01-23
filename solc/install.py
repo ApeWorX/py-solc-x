@@ -216,29 +216,30 @@ def _chmod_plus_x(executable_path):
     current_st = os.stat(executable_path)
     os.chmod(executable_path, current_st.st_mode | stat.S_IEXEC)
 
-def install_solc_from_static_linux(identifier):
-    download = DOWNLOAD_BASE.format(identifier, "solc-static-linux")
-    binary_path = SOLC_BASE.format(identifier)
-    
-    command = [
-        "wget", download,
-        '-c',  # resume previously incomplete download.
-        '-O', binary_path,
-    ]
+def install_solc_from_static_linux(version):
+    download = DOWNLOAD_BASE.format(version, "solc-static-linux")
+    binary_path = SOLC_BASE.format(version)
+    if os.path.exists(binary_path):
+        print("solc {} already installed at: {}".format(version, binary_path))
+        return
 
     _check_subprocess_call(
-        command,
-        message="Downloading static linux binary from {0}".format(download),
+        [
+            "wget", download,
+            '-c',  # resume previously incomplete download.
+            '-O', binary_path,
+        ],
+        message="Downloading static linux binary from {}".format(download)
     )
 
     _chmod_plus_x(binary_path)
 
     _check_subprocess_call(
         [binary_path, '--version'],
-        message="Checking installed executable version @ {0}".format(binary_path),
+        message="Checking installed executable version @ {}".format(binary_path)
     )
 
-    print("solc successfully installed at: {0}".format(binary_path))
+    print("solc {} successfully installed at: {}".format(version, binary_path))
 
 
 # def build_solc_from_source(identifier):
@@ -280,14 +281,14 @@ def install_solc_from_static_linux(identifier):
 
 
 
-def install_solc(identifier):
-    identifier = "v0." + identifier.lstrip("v0.")
+def install_solc(version):
+    version = "v0." + version.lstrip("v0.")
     if not os.path.exists(__file__[:__file__.rindex('/')] + "/bin"):
         os.mkdir(__file__[:__file__.rindex('/')] + "/bin")
     if sys.platform.startswith('linux'):
-        return install_solc_from_static_linux(identifier)
+        return install_solc_from_static_linux(version)
     elif sys.platform == 'darwin':
-        return install_from_source(identifier)
+        return install_from_source(version)
     elif sys.platform == 'win32':
         return ##
     raise KeyError("Unknown platform: {}".format(sys.platform))
@@ -295,9 +296,9 @@ def install_solc(identifier):
 
 if __name__ == "__main__":
     try:
-        identifier = sys.argv[1]
+        version = sys.argv[1]
     except IndexError:
         print("Invocation error.  Should be invoked as `./install_solc.py <release-tag>`")
         sys.exit(1)
 
-    install_solc(identifier)
+    install_solc(version)
