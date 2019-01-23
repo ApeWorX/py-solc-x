@@ -2,6 +2,7 @@
 Install solc
 """
 import os
+import requests
 import shutil
 import stat
 import subprocess
@@ -12,6 +13,7 @@ import zipfile
 BINARY_FOLDER = __file__[:__file__.rindex('/')] + "/bin/"
 SOLC_BASE = BINARY_FOLDER+"solc-{}"
 DOWNLOAD_BASE = "https://github.com/ethereum/solidity/releases/download/{}/{}"
+API = "https://api.github.com/repos/ethereum/solidity/releases/latest"
 
 
 def _check_subprocess_call(command, message=None, verbose=True, **proc_kwargs):
@@ -134,8 +136,11 @@ def install_solc_windows(version):
 
     print("solc {} successfully installed at: {}".format(version, binary_path))
 
-def install_solc(version):
-    version = "v0." + version.lstrip("v0.")
+def install_solc(version = None):
+    if not version:
+        version = requests.get(API).json()['tag_name']
+    else:
+        version = "v0." + version.lstrip("v0.")
     if not os.path.exists(__file__[:__file__.rindex('/')] + "/bin"):
         os.mkdir(__file__[:__file__.rindex('/')] + "/bin")
     if sys.platform.startswith('linux'):
