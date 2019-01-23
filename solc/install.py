@@ -125,14 +125,6 @@ def install_solc_windows(version):
         print("solc {} already installed at: {}".format(version, binary_path))
         return
 
-    _check_subprocess_call(
-        [
-            "wget", download,
-            '-c',  # resume previously incomplete download.
-            '-O', zip_path,
-        ],
-        message="Downloading solc for windows from {}".format(download)
-    )
     request = requests.get(download)
     with zipfile.ZipFile(BytesIO(request.content)) as zf:
         zf.extract("solc.exe")
