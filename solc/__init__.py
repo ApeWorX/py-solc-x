@@ -25,7 +25,8 @@ if sys.version_info.major < 3:
     ))
     warnings.resetwarnings()
 
-solc_folder = __file__.rsplit('/', maxsplit=2)[0] + "/bin"
+solc_folder = __file__[:__file__.rindex('/')] + "/bin"
+
 
 if not os.path.exists(solc_folder):
     os.mkdir(solc_folder)

@@ -201,14 +201,14 @@ DOWNLOAD_BASE = "https://github.com/ethereum/solidity/releases/download/{}/{}"
 
 
 
-def _check_subprocess_output(command, message=None, stderr=subprocess.STDOUT, **proc_kwargs):
+def _check_subprocess_call(command, message=None, verbose=True, **proc_kwargs):
     if message:
         print(message)
     print("Executing: {0}".format(" ".join(command)))
 
-    return subprocess.check_output(
+    return subprocess.check_call(
         command,
-        stderr=subprocess.STDOUT,
+        stderr=subprocess.STDOUT if verbose else subprocess.DEVNULL,
         **proc_kwargs
     )
 
@@ -226,19 +226,19 @@ def install_solc_from_static_linux(identifier):
         '-O', binary_path,
     ]
 
-    _check_subprocess_output(
+    _check_subprocess_call(
         command,
         message="Downloading static linux binary from {0}".format(download),
     )
 
     _chmod_plus_x(binary_path)
 
-    check_subprocess_output(
-        [executable_path, '--version'],
-        message="Checking installed executable version @ {0}".format(executable_path),
+    _check_subprocess_call(
+        [binary_path, '--version'],
+        message="Checking installed executable version @ {0}".format(binary_path),
     )
 
-    print("solc successfully installed at: {0}".format(executable_path))
+    print("solc successfully installed at: {0}".format(binary_path))
 
 
 # def build_solc_from_source(identifier):
@@ -286,7 +286,7 @@ def install_solc(identifier):
         os.mkdir(__file__[:__file__.rindex('/')] + "/bin")
     if sys.platform.startswith('linux'):
         return install_solc_from_static_linux(identifier)
-    elif sys.platform == 'darwin'
+    elif sys.platform == 'darwin':
         return install_from_source(identifier)
     elif sys.platform == 'win32':
         return ##

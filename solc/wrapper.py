@@ -11,7 +11,7 @@ from .utils.string import (
     coerce_return_to_text,
 )
 
-solc_folder = __file__.rsplit('/', maxsplit=2)[0] + "/bin"
+solc_folder = __file__[:__file__.rindex('/')] + "/bin"
 
 def set_solc_binary_path(identifier):
     global solc_bin
