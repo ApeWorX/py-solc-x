@@ -11,19 +11,39 @@ import sys
 import tarfile
 import zipfile
 
-
-def get_solc_folder():    
-    if sys.platform=="win32":
-        s = '\\'
-    else:
-        s = '/'
-    return __file__[:__file__.rindex(s)] + s + 'bin' + s
-
-
-BINARY_FOLDER = get_solc_folder()
-SOLC_BASE = get_solc_folder()+"solc-{}"
 DOWNLOAD_BASE = "https://github.com/ethereum/solidity/releases/download/{}/{}"
 API = "https://api.github.com/repos/ethereum/solidity/releases/latest"
+
+sep = "\\" if    sys.platform == "win32" else "/"
+solc_version = None
+
+
+def _check_version(version):
+    if not version:
+        return requests.get(API).json()['tag_name']
+    return "v0." + version.lstrip("v0.")
+
+def set_solc_version(version = None):
+    version = _check_version(version)
+    if not os.path.exists(get_executable(version)):
+        install_solc(version)
+    global solc_version
+    solc_version = version
+
+def get_executable(version = None):
+    if not version:
+        version = solc_version
+    solc_bin = "{}solc-{}".format(get_solc_folder(), version)
+    if sys.platform == "win32":
+        return solc_bin + sep + "solc.exe"
+    return solc_bin
+
+def get_solc_folder():
+    return __file__[:__file__.rindex(sep)] + sep + "bin" + sep
+
+def get_installed_solc_versions():
+    return sorted([i[5:] for i in os.listdir(get_solc_folder()) if 'solc-v' in i])
+
 
 
 def _check_subprocess_call(command, message=None, verbose=True, **proc_kwargs):
@@ -45,7 +65,7 @@ def _chmod_plus_x(executable_path):
 
 def install_solc_linux(version):
     download = DOWNLOAD_BASE.format(version, "solc-static-linux")
-    binary_path = SOLC_BASE.format(version)
+    binary_path = get_solc_folder()+"solc-{}".format(version)
     if os.path.exists(binary_path):
         print("solc {} already installed at: {}".format(version, binary_path))
         return
@@ -70,10 +90,10 @@ def install_solc_linux(version):
 
 
 def install_solc_osx(version):
-    tar_path = BINARY_FOLDER + "solc-{}.tar.gz".format(version)
-    source_folder = BINARY_FOLDER+"solidity_{}".format(version[1:])
+    tar_path = get_solc_folder() + "solc-{}.tar.gz".format(version)
+    source_folder = get_solc_folder() + "solidity_{}".format(version[1:])
     download = DOWNLOAD_BASE.format(version, "solidity_{}.tar.gz".format(version[1:]))
-    binary_path = SOLC_BASE.format(version)
+    binary_path = get_solc_folder()+"solc-{}".format(version)
     
     if os.path.exists(binary_path):
         print("solc {} already installed at: {}".format(version, binary_path))
@@ -119,18 +139,17 @@ def install_solc_osx(version):
 
 def install_solc_windows(version):
     download = DOWNLOAD_BASE.format(version, "solidity-windows.zip")
-    zip_path = BINARY_FOLDER + 'solc_{}.zip'.format(version[1:])
-    binary_path = SOLC_BASE.format(version)
-    if os.path.exists(binary_path):
-        print("solc {} already installed at: {}".format(version, binary_path))
+    zip_path = get_solc_folder() + 'solc_{}.zip'.format(version[1:])
+    install_folder = get_solc_folder()+"solc-{}".format(version)
+    if os.path.exists(install_folder):
+        print("solc {} already installed at: {}".format(version, install_folder))
         return
 
     request = requests.get(download)
     with zipfile.ZipFile(BytesIO(request.content)) as zf:
-        zf.extract("solc.exe")
-    os.remove(zip_path)
-    os.rename("solc.exe", binary_path)
-
+        zf.extractall(install_folder)
+    
+    binary_path = get_executable(version)
     _check_subprocess_call(
         [binary_path, '--version'],
         message="Checking installed executable version @ {}".format(binary_path)
@@ -139,12 +158,7 @@ def install_solc_windows(version):
     print("solc {} successfully installed at: {}".format(version, binary_path))
 
 def install_solc(version = None):
-    if not version:
-        version = requests.get(API).json()['tag_name']
-    else:
-        version = "v0." + version.lstrip("v0.")
-    if not os.path.exists(BINARY_FOLDER):
-        os.mkdir(BINARY_FOLDER)
+    version = _check_version(version)
     if sys.platform.startswith('linux'):
         return install_solc_linux(version)
     elif sys.platform == 'darwin':
@@ -152,6 +166,19 @@ def install_solc(version = None):
     elif sys.platform == 'win32':
         return install_solc_windows(version)
     raise KeyError("Unknown platform: {}".format(sys.platform))
+
+
+if not os.path.exists(get_solc_folder()):
+    os.mkdir(get_solc_folder())
+
+if not get_installed_solc_versions():
+    install_solc()
+
+set_solc_version(get_installed_solc_versions()[-1])
+
+
+
+
 
 
 if __name__ == "__main__":
