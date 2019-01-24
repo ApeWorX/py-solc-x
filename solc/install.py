@@ -18,17 +18,9 @@ sep = "\\" if    sys.platform == "win32" else "/"
 solc_version = None
 
 
-def _check_version(version):
-    if not version:
-        return requests.get(API).json()['tag_name']
-    return "v0." + version.lstrip("v0.")
+def get_solc_folder():
+    return __file__[:__file__.rindex(sep)] + sep + "bin" + sep
 
-def set_solc_version(version = None):
-    version = _check_version(version)
-    if not os.path.exists(get_executable(version)):
-        install_solc(version)
-    global solc_version
-    solc_version = version
 
 def get_executable(version = None):
     if not version:
@@ -38,12 +30,34 @@ def get_executable(version = None):
         return solc_bin + sep + "solc.exe"
     return solc_bin
 
-def get_solc_folder():
-    return __file__[:__file__.rindex(sep)] + sep + "bin" + sep
+
+def set_solc_version(version = None):
+    version = _check_version(version)
+    if not os.path.exists(get_executable(version)):
+        install_solc(version)
+    global solc_version
+    solc_version = version
+
 
 def get_installed_solc_versions():
     return sorted([i[5:] for i in os.listdir(get_solc_folder()) if 'solc-v' in i])
 
+
+def install_solc(version = None):
+    version = _check_version(version)
+    if sys.platform.startswith('linux'):
+        return _install_solc_linux(version)
+    elif sys.platform == 'darwin':
+        return _install_solc_osx(version)
+    elif sys.platform == 'win32':
+        return _install_solc_windows(version)
+    raise KeyError("Unknown platform: {}".format(sys.platform))
+
+
+def _check_version(version):
+    if not version:
+        return requests.get(API).json()['tag_name']
+    return "v0." + version.lstrip("v0.")
 
 
 def _check_subprocess_call(command, message=None, verbose=True, **proc_kwargs):
@@ -63,7 +77,7 @@ def _chmod_plus_x(executable_path):
     os.chmod(executable_path, current_st.st_mode | stat.S_IEXEC)
 
 
-def install_solc_linux(version):
+def _install_solc_linux(version):
     download = DOWNLOAD_BASE.format(version, "solc-static-linux")
     binary_path = get_solc_folder()+"solc-{}".format(version)
     if os.path.exists(binary_path):
@@ -89,7 +103,7 @@ def install_solc_linux(version):
     print("solc {} successfully installed at: {}".format(version, binary_path))
 
 
-def install_solc_osx(version):
+def _install_solc_osx(version):
     tar_path = get_solc_folder() + "solc-{}.tar.gz".format(version)
     source_folder = get_solc_folder() + "solidity_{}".format(version[1:])
     download = DOWNLOAD_BASE.format(version, "solidity_{}.tar.gz".format(version[1:]))
@@ -137,7 +151,7 @@ def install_solc_osx(version):
     print("solc {} successfully installed at: {}".format(version, binary_path))
 
 
-def install_solc_windows(version):
+def _install_solc_windows(version):
     download = DOWNLOAD_BASE.format(version, "solidity-windows.zip")
     zip_path = get_solc_folder() + 'solc_{}.zip'.format(version[1:])
     install_folder = get_solc_folder()+"solc-{}".format(version)
@@ -145,6 +159,7 @@ def install_solc_windows(version):
         print("solc {} already installed at: {}".format(version, install_folder))
         return
 
+    print("Downloading solc {} from {}".format(version, download))
     request = requests.get(download)
     with zipfile.ZipFile(BytesIO(request.content)) as zf:
         zf.extractall(install_folder)
@@ -156,29 +171,6 @@ def install_solc_windows(version):
     )
 
     print("solc {} successfully installed at: {}".format(version, binary_path))
-
-def install_solc(version = None):
-    version = _check_version(version)
-    if sys.platform.startswith('linux'):
-        return install_solc_linux(version)
-    elif sys.platform == 'darwin':
-        return install_solc_osx(version)
-    elif sys.platform == 'win32':
-        return install_solc_windows(version)
-    raise KeyError("Unknown platform: {}".format(sys.platform))
-
-
-if not os.path.exists(get_solc_folder()):
-    os.mkdir(get_solc_folder())
-
-if not get_installed_solc_versions():
-    install_solc()
-
-set_solc_version(get_installed_solc_versions()[-1])
-
-
-
-
 
 
 if __name__ == "__main__":
