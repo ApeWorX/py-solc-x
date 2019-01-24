@@ -1,3 +1,16 @@
+0.1.0
+-----
+
+ - Initial forked release
+ - Support for `solc 0.5.x`
+ - Drop support for `solc < 0.4.11`
+ - Add Windows installer
+ - Change install location to ./solcx/bin - no longer uses standard installed verion
+ - Change active solc version with `solcx.set_solc_version`
+
+
+Original py-solc changelog:
+
 3.0.0
 -----
 

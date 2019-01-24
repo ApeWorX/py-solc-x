@@ -1,19 +1,17 @@
 # Development
 
-To start development for Populus you should begin by cloning the repo.
+To start development for py-solc-x you should begin by cloning the repo.
 
 ```bash
-$ git clone git@github.com/pipermerriam/py-solc.git
+$ git clone https://github.com/iamdefinitelyahuman/py-solc.git
 ```
 
-
-# Cute Animal Pictures
+## Cute Animal Pictures
 
 All pull requests need to have a cute animal picture.  This is a very important
 part of the development process.
 
-
-# Pull Requests
+## Pull Requests
 
 In general, pull requests are welcome.  Please try to adhere to the following.
 
