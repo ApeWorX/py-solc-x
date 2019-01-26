@@ -137,10 +137,10 @@ def _install_solc_osx(version):
 
     _wget(download, tar_path)
 
-    with tarfile.open(tar_path, "w:gz") as tar:
-        tar.extractall()
+    with tarfile.open(tar_path, "r") as tar:
+        tar.extractall(get_solc_folder())
     os.remove(tar_path)
-    
+
     _check_subprocess_call(
         ["sh", source_folder+'/scripts/install_deps.sh'],
         message="Running dependency installation script `install_deps.sh` @ {}".format(tar_path)
@@ -148,11 +148,9 @@ def _install_solc_osx(version):
 
     original_path = os.getcwd()
     os.mkdir(source_folder+'/build') 
-    os.chdir(source_folder)
-    _check_subprocess_call(
-        ["cmake", "..", "&&", "make"],
-        message="Running cmake and make commands",
-    )
+    os.chdir(source_folder+'/build')
+    _check_subprocess_call(["cmake", ".."], message="Running cmake")
+    _check_subprocess_call(["make"], message="Running make")
     os.chdir(original_path)
     os.rename(source_folder+'/build/solc/solc', binary_path)
     shutil.rmtree(source_folder)
