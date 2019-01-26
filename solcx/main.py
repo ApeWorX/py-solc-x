@@ -2,7 +2,6 @@ from __future__ import absolute_import
 
 import functools
 import json
-import os
 import re
 
 from .exceptions import (
@@ -13,25 +12,21 @@ from .exceptions import (
 from .utils.filesystem import (
     is_executable_available,
 )
-from .install import (  # noqa: F401
-    install_solc,
-)
-from .wrapper import (
-    get_solc_binary_path,
-    set_solc_binary_path,
-    solc_wrapper,
-)
+from .wrapper import solc_wrapper
+
+from .install import get_executable
 
 import semantic_version
 
-SOLC_FOLDER = __file__.rsplit('/',maxsplit=2)[0]+'/bin'
+
+
 VERSION_DEV_DATE_MANGLER_RE = re.compile(r'(\d{4})\.0?(\d{1,2})\.0?(\d{1,2})')
 strip_zeroes_from_month_and_day = functools.partial(VERSION_DEV_DATE_MANGLER_RE.sub,
                                                     r'\g<1>.\g<2>.\g<3>')
 
 
 def is_solc_available():
-    solc_binary = get_solc_binary_path()
+    solc_binary = get_executable()
     return is_executable_available(solc_binary)
 
 
@@ -58,18 +53,6 @@ def get_solc_version(**kwargs):
             get_solc_version_string(**kwargs)
             [len('Version: '):]
             .replace('++', 'pp')))
-
-def set_solc_version(identifier):
-    if identifier[0]!="v":
-        identifier = "v"+identifier
-    if not os.path.exists(SOLC_FOLDER+"/solc-"+identifier):
-        install_solc(identifier)
-    set_solc_binary_path(identifier)
-
-def get_installed_solc_versions():
-    return sorted([i[5:] for i in os.listdir(SOLC_FOLDER) if 'solc-v' in i])
-
-    
 
 
 def solc_supports_standard_json_interface(**kwargs):

@@ -1,6 +1,5 @@
 from __future__ import absolute_import
 
-import os
 import subprocess
 
 from .exceptions import (
@@ -11,14 +10,8 @@ from .utils.string import (
     coerce_return_to_text,
 )
 
-solc_folder = __file__.rsplit('/', maxsplit=2)[0] + "/bin"
+from .install import get_executable
 
-def set_solc_binary_path(identifier):
-    global solc_bin
-    solc_bin = "{}/solc-{}".format(solc_folder, identifier)
-
-def get_solc_binary_path():
-    return solc_bin
 
 @coerce_return_to_text
 def solc_wrapper(solc_binary=None,
@@ -55,7 +48,7 @@ def solc_wrapper(solc_binary=None,
                  success_return_code=0,
                  evm_version=None):
     if solc_binary is None:
-        solc_binary = get_solc_binary_path()
+        solc_binary = get_executable()
 
     command = [solc_binary]
 

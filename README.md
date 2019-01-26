@@ -1,100 +1,54 @@
-# py-solc
+# py-solc-x
 
-[![Build Status](https://travis-ci.org/ethereum/py-solc.png)](https://travis-ci.org/ethereum/py-solc)
-[![PyPi version](https://img.shields.io/pypi/v/py-solc.svg)](https://pypi.python.org/pypi/py-solc)
-   
+Python wrapper around the `solc` Solidity compiler with `0.5.x` support.
 
-Python wrapper around the `solc` Solidity compiler.
+Forked from [py-solc](https://github.com/ethereum/py-solc).
 
+## Dependencies
 
-## Dependency
+This library allows the use of multiple versions of solc, and installs them as needed. You must have all required [solc dependencies](https://solidity.readthedocs.io/en/latest/installing-solidity.html#building-from-source) installed for it to work properly.
 
-This library requires the `solc` executable to be present.
-
-Only versions `>=0.4.2` are supported and tested though this library may work
-with other versions.
-
-[solc installation instructions](http://solidity.readthedocs.io/en/latest/installing-solidity.html)
-
+Versions `>=0.4.11` may be installed, however only versions `>=0.4.2` are supported and tested.
 
 ## Quickstart
 
 Installation
 
 ```sh
-pip install py-solc
+pip install py-solc-x
 ```
 
-## Development
+## Installing the `solc` Executable
 
-Clone the repository and then run:
+The first time py-solc-x is imported it will automatically install the latest version of solc. If you wish to install a different version you may do so from within python:
 
-```sh
-pip install -e . -r requirements-dev.txt
+```python
+>>> from solcx import install_solc
+>>> install_solc('v0.4.25')
 ```
 
+Or via the command line:
 
-### Running the tests
-
-You can run the tests with:
-
-```sh
-py.test tests
+```bash
+$ python -m solcx.install v0.4.25
 ```
 
-Or you can install `tox` to run the full test suite.
+You can also view available versions or change the active version of solc:
 
+```python
+>>> from solcx import get_installed_solc_versions, set_solc_version
+>>> get_installed_solc_versions()
+['v0.4.25', 'v0.5.3']
 
-### Releasing
-
-Pandoc is required for transforming the markdown README to the proper format to
-render correctly on pypi.
-
-For Debian-like systems:
-
+>>> set_solc_version('v0.4.25)
 ```
-apt install pandoc
-```
-
-Or on OSX:
-
-```sh
-brew install pandoc
-```
-
-To release a new version:
-
-```sh
-bumpversion $$VERSION_PART_TO_BUMP$$
-git push && git push --tags
-make release
-```
-
-
-#### How to bumpversion
-
-The version format for this repo is `{major}.{minor}.{patch}` for stable, and
-`{major}.{minor}.{patch}-{stage}.{devnum}` for unstable (`stage` can be alpha or beta).
-
-To issue the next version in line, use bumpversion and specify which part to bump,
-like `bumpversion minor` or `bumpversion devnum`.
-
-If you are in a beta version, `bumpversion stage` will switch to a stable.
-
-To issue an unstable version when the current version is stable, specify the
-new version explicitly, like `bumpversion --new-version 4.0.0-alpha.1 devnum`
-
-
-
 
 ## Standard JSON Compilation
 
-Use the `solc.compile_standard` function to make use the [standard-json] compilation feature.
+Use the `solcx.compile_standard` function to make use of the [standard-json](http://solidity.readthedocs.io/en/latest/using-the-compiler.html#compiler-input-and-output-json-description) compilation feature.
 
-[Solidity Documentation for Standard JSON input and ouptup format](http://solidity.readthedocs.io/en/develop/using-the-compiler.html#compiler-input-and-output-json-description)
-
-```
->>> from solc import compile_standard
+```python
+>>> from solcx import compile_standard
 >>> compile_standard({
 ...     'language': 'Solidity',
 ...     'sources': {'Foo.sol': 'content': "...."},
@@ -115,12 +69,10 @@ Use the `solc.compile_standard` function to make use the [standard-json] compila
 }
 ```
 
-
 ## Legacy Combined JSON compilation
 
-
 ```python
->>> from solc import compile_source, compile_files, link_code
+>>> from solcx import compile_source, compile_files, link_code
 >>> compile_source("contract Foo { function Foo() {} }")
 {
     'Foo': {
@@ -165,69 +117,36 @@ Use the `solc.compile_standard` function to make use the [standard-json] compila
 ... "606060405260768060106000396000f3606060405260e060020a6000350463e7f09e058114601a575b005b60187f0c55699c00000000000000000000000000000000000000000000000000000000606090815273d3cda913deb6f67967b99d67acdfa1712c29360190630c55699c906064906000906004818660325a03f41560025750505056"
 ```
 
-## Setting the path to the `solc` binary
-
-You can use the environment variable `SOLC_BINARY` to set the path to your solc binary.
-
-
-## Installing the `solc` binary
-
-> This feature is experimental and subject to breaking changes.
-
-Any of the following versions of `solc` can be installed using `py-solc` on the
-listed platforms.
-
-* `v0.4.1` (linux)
-* `v0.4.2` (linux)
-* `v0.4.6` (linux)
-* `v0.4.7` (linux)
-* `v0.4.8` (linux/osx)
-* `v0.4.9` (linux)
-* `v0.4.11` (linux/osx)
-* `v0.4.12` (linux/osx)
-* `v0.4.13` (linux/osx)
-* `v0.4.14` (linux/osx)
-* `v0.4.15` (linux/osx)
-* `v0.4.16` (linux/osx)
-* `v0.4.17` (linux/osx)
-* `v0.4.18` (linux/osx)
-* `v0.4.19` (linux/osx)
-* `v0.4.20` (linux/osx)
-* `v0.4.21` (linux/osx)
-* `v0.4.22` (linux/osx)
-* `v0.4.23` (linux/osx)
-* `v0.4.24` (linux/osx)
-* `v0.4.25` (linux/osx)
-
-Installation can be done via the command line:
-
-```bash
-$ python -m solc.install v0.4.25
-```
-
-Or from python using the `install_solc` function.
-
-```python
->>> from solc import install_solc
->>> install_solc('v0.4.25')
-```
-
-The installed binary can be found under your home directory.  The `v0.4.25`
-binary would be located at `$HOME/.py-solc/solc-v0.4.25/bin/solc`.  Older linux
-installs will also require that you set the environment variable
-`LD_LIBRARY_PATH=$HOME/.py-solc/solc-v0.4.25/bin`
-
-
-## Import path remappings
+## Import Path Remappings
 
 `solc` provides path aliasing allow you to have more reusable project configurations.
- 
+
 You can use this like:
 
-```
-from solc import compile_source, compile_files, link_code
+```python
+>>> from solcx import compile_source, compile_files, link_code
 
-compile_files([source_file_path], import_remappings=["zeppeling=/my-zeppelin-checkout-folder"])
+>>> compile_files([source_file_path], import_remappings=["zeppeling=/my-zeppelin-checkout-folder"])
 ```
 
 [More information about solc import aliasing](http://solidity.readthedocs.io/en/develop/layout-of-source-files.html#paths) 
+
+## Development
+
+This project was recently forked from [py-solc](https://github.com/ethereum/py-solc) and should be considered a beta. Comments, questions, criticisms and pull requests are welcomed.
+
+### Running the tests
+
+> Tests have not been updated from py-solc and will likely fail.
+
+You can run the tests with:
+
+```sh
+py.test tests
+```
+
+Or you can install `tox` to run the full test suite.
+
+## License
+
+This project is licensed under the [MIT license](LICENSE).
