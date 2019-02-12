@@ -149,11 +149,20 @@ def _install_solc_osx(version):
     original_path = os.getcwd()
     os.mkdir(source_folder+'/build') 
     os.chdir(source_folder+'/build')
-    _check_subprocess_call(["cmake", ".."], message="Running cmake")
-    _check_subprocess_call(["make"], message="Running make")
-    os.chdir(original_path)
-    os.rename(source_folder+'/build/solc/solc', binary_path)
-    shutil.rmtree(source_folder)
+    try:
+        for cmd in (["cmake", ".."], ["make"]):
+            _check_subprocess_call(cmd, message="Running {}".format(cmd[0]))
+        os.chdir(original_path)
+        os.rename(source_folder+'/build/solc/solc', binary_path)
+    except subprocess.CalledProcessError as e:
+        raise OSError(
+            "{} returned non-zero exit status {}".format(cmd[0], e.returncode) +
+            " while attempting to build solc from the source. This is likely " +
+            "due to a missing or incorrect version of an external dependency."
+        )
+    finally:
+        os.chdir(original_path)
+        shutil.rmtree(source_folder)
 
     _chmod_plus_x(binary_path)
 
