@@ -60,7 +60,7 @@ Use the `solcx.compile_standard` function to make use of the [standard-json](htt
 }
 >>> compile_standard({
 ...     'language': 'Solidity',
-...     'sources': {'Foo.sol': 'urls': ["/path/to/my/sources/Foo.sol"]},
+...     'sources': {'Foo.sol': {'urls': ["/path/to/my/sources/Foo.sol"]}},
 ... }, allow_paths="/path/to/my/sources")
 {
     'contracts': {...},
