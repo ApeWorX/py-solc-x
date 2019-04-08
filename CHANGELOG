@@ -3,6 +3,7 @@
 
  - Fix "No input files given" bug in `solcx.compile_source()` on v0.5.x
  - `install.py` - replace `os.path` with `pathlib.Path`
+ - Linux/OSX - copy from `which solc` path to save time installing solc
 
 0.1.1
 -----

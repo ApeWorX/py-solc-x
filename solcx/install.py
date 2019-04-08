@@ -24,6 +24,19 @@ def get_solc_folder():
     return path
 
 
+def import_installed_solc():
+    if sys.platform == "win32":
+        return
+    path = subprocess.check_output(['which','solc']).decode().strip()
+    if not path:
+        return
+    version = subprocess.check_output([path, '--version']).decode()
+    version = "v"+version[version.index("Version: ")+9:version.index('+')]
+    if version not in get_installed_solc_versions():
+        shutil.copy(path, str(get_solc_folder().joinpath("solc-" + version)))
+    return version
+
+
 def get_executable(version=None):
     if not version:
         version = solc_version
