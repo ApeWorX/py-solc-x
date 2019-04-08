@@ -21,9 +21,6 @@ from .install import (
 # install if none found
 # default to latest version
 
-if not os.path.exists(get_solc_folder()):
-    os.mkdir(get_solc_folder())
-
 if not get_installed_solc_versions():
     print("Cannot find solc, installing...")
     install_solc()
