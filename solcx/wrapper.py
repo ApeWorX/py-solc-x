@@ -80,6 +80,7 @@ def solc_wrapper(solc_binary=None,
         if "v0.5" in command[0]:
             combined_json = combined_json.replace(',clone-bin','')
         command.extend(('--combined-json', combined_json))
+
     if gas:
         command.append('--gas')
 
@@ -150,6 +151,13 @@ def solc_wrapper(solc_binary=None,
 
     if evm_version:
         command.extend(('--evm-version', evm_version))
+
+    if (
+        standard_json is None and
+        source_files is None and
+        "v0.5" in command[0]
+    ):
+        command.append('-')
 
     proc = subprocess.Popen(command,
                             stdin=subprocess.PIPE,
