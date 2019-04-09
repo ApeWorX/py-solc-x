@@ -8,7 +8,7 @@ from setuptools import (
 
 setup(
     name='py-solc-x',
-    version='0.1.1',
+    version='0.2.0',
     description="""Python wrapper around the solc binary with 0.5.x support""",
     long_description_markdown_filename='README.md',
     author='Benjamin Hauser (forked from py-solc by Piper Merriam)',

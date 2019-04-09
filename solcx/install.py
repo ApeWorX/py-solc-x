@@ -25,16 +25,20 @@ def get_solc_folder():
 
 
 def import_installed_solc():
-    if sys.platform == "win32":
+    if sys.platform.startswith('linux'):
+        path_list = [subprocess.check_output(['which','solc']).decode().strip()]
+        if not path_list[0]:
+            return
+    elif sys.platform == 'darwin':
+        path_list = [str(i) for i in Path('/usr/local/Cellar').glob('solidity*/**/solc')]
+    else:
         return
-    path = subprocess.check_output(['which','solc']).decode().strip()
-    if not path:
-        return
-    version = subprocess.check_output([path, '--version']).decode()
-    version = "v"+version[version.index("Version: ")+9:version.index('+')]
-    if version not in get_installed_solc_versions():
+    for path in path_list:
+        version = subprocess.check_output([path, '--version']).decode()
+        version = "v"+version[version.index("Version: ")+9:version.index('+')]
+        if version in get_installed_solc_versions():
+            continue
         shutil.copy(path, str(get_solc_folder().joinpath("solc-" + version)))
-    return version
 
 
 def get_executable(version=None):
@@ -139,6 +143,11 @@ def _install_solc_windows(version):
 
 
 def _install_solc_osx(version):
+    if "v0.4" in version:
+        raise ValueError(
+            "Py-solc-x cannot build solc versions 0.4.x on OSX. If you install solc 0.4.x\n"
+            "using brew and reload solcx, the installed version will be available.\n\n"
+            "See https://github.com/ethereum/homebrew-ethereum for installation instructions.")
     tar_path = get_solc_folder().joinpath("solc-{}.tar.gz".format(version))
     source_folder = get_solc_folder().joinpath("solidity_" + version[1:])
     download = DOWNLOAD_BASE.format(version, "solidity_{}.tar.gz".format(version[1:]))
