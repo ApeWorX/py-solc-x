@@ -26,7 +26,7 @@ def get_solc_folder():
 
 def import_installed_solc():
     if sys.platform.startswith('linux'):
-        path_list = [subprocess.check_output(['which','solc']).decode().strip()]
+        path_list = [subprocess.run(['which', 'solc'], capture_output=True).stdout.decode().strip()]
         if not path_list[0]:
             return
     elif sys.platform == 'darwin':
