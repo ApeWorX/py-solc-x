@@ -24,21 +24,36 @@ def get_solc_folder():
     return path
 
 
+def _import_version(path):
+    version = subprocess.check_output([path, '--version']).decode()
+    return "v" + version[version.index("Version: ")+9:version.index('+')]
+
+
 def import_installed_solc():
     if sys.platform.startswith('linux'):
+        # on Linux, copy active version of solc
         path_list = [subprocess.run(['which', 'solc'], capture_output=True).stdout.decode().strip()]
         if not path_list[0]:
             return
     elif sys.platform == 'darwin':
+        # on OSX, copy all versions of solc from cellar
         path_list = [str(i) for i in Path('/usr/local/Cellar').glob('solidity*/**/solc')]
     else:
+        # on Windows, do nothing
         return
     for path in path_list:
-        version = subprocess.check_output([path, '--version']).decode()
-        version = "v"+version[version.index("Version: ")+9:version.index('+')]
-        if version in get_installed_solc_versions():
+        try:
+            version = _import_version(path)
+            assert version not in get_installed_solc_versions()
+        except Exception:
             continue
-        shutil.copy(path, str(get_solc_folder().joinpath("solc-" + version)))
+        copy_path = str(get_solc_folder().joinpath("solc-" + version))
+        shutil.copy(path, copy_path)
+        try:
+            # confirm that solc still works after being copied
+            assert version == _import_version(copy_path)
+        except Exception:
+            os.unlink(copy_path)
 
 
 def get_executable(version=None):
