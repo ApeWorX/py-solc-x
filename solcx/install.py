@@ -14,6 +14,7 @@ import zipfile
 
 DOWNLOAD_BASE = "https://github.com/ethereum/solidity/releases/download/{}/{}"
 API = "https://api.github.com/repos/ethereum/solidity/releases/latest"
+ALL_RELEASES = "https://api.github.com/repos/ethereum/solidity/releases"
 
 solc_version = None
 
@@ -57,6 +58,25 @@ def set_solc_version(version=None):
     global solc_version
     solc_version = version
 
+def set_solc_version_range(max_version=None, min_version='v0.4.11'):
+    max_version = _check_version(max_version)
+    min_version = _check_version(min_version)
+    vmin = [int(i) for i in min_version[1:].split('.')]
+    vmax = [int(i) for i in max_version[1:].split('.')]
+    if vmin[0] > vmax[0] or (vmin[0] == vmax[0] and (vmin[1] > vmax[1] or (vmin[1] == vmax[1] and vmin[2] > vmax[2]))):
+        raise ValueError("max solc version must be higher than or equal to min solc version")
+    installed_versions = get_installed_solc_versions()
+    version = None
+    for installed_version in reversed(installed_versions):
+        vins = [int(i) for i in installed_version[1:].split('.')]
+        if vins[0] < vmax[0] or (vins[0] == vmax[0] and (vins[1] < vmax[1] or (vins[1] == vmax[1] and vins[2] <= vmax[2]))):
+            if vmin[0] < vins[0] or (vmin[0] == vins[0] and (vmin[1] < vins[1] or (vmin[1] == vins[1] and vmin[2] <= vins[2]))):
+                version = installed_version
+    if not version:
+        version = install_solc_range(max_version, min_version)
+    global solc_version
+    solc_version = version
+
 
 def get_installed_solc_versions():
     return sorted(i.name[5:] for i in get_solc_folder().glob('solc-v*'))
@@ -78,6 +98,20 @@ def install_solc(version=None):
         message="Checking installed executable version @ {}".format(binary_path)
     )
     print("solc {} successfully installed at: {}".format(version, binary_path))
+
+def install_solc_range(max_version=None, min_version='v0.4.11'):
+    max_version = _check_version(max_version)
+    min_version = _check_version(min_version)
+    vmin = [int(i) for i in min_version[1:].split('.')]
+    vmax = [int(i) for i in max_version[1:].split('.')]
+    versions_json = requests.get(ALL_RELEASES).json()
+    for version in versions_json:
+        v = [int(i) for i in version['tag_name'][1:].split('.')]
+        if v[0] < vmax[0] or (v[0] == vmax[0] and (v[1] < vmax[1] or (v[1] == vmax[1] and v[2] <= vmax[2]))):
+            if vmin[0] < v[0] or (vmin[0] == v[0] and (vmin[1] < v[1] or (vmin[1] == v[1] and vmin[2] <= v[2]))):
+                install_solc(version['tag_name'])
+                return version['tag_name']
+    raise ValueError("solc version does not exist")
 
 
 def _check_version(version):
