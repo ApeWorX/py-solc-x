@@ -77,6 +77,32 @@ def set_solc_version_range(max_version=None, min_version='v0.4.11'):
     global solc_version
     solc_version = version
 
+def set_solc_version_pragma(version):
+    version = version.strip()
+    comparator_set_range = [i.strip() for i in version.split('||')]
+    installed_versions = get_installed_solc_versions()
+    comparator_regex = re.compile(r'(?P<operator>([<>]?=?|\^))(?P<version>(?P<major>\d+)\.(?P<minor>\d+)\.(?P<patch>\d+))')
+    range_flag = False
+    set_version = None
+    for installed_version in reversed(installed_versions):
+        for comparator_set in comparator_set_range:
+            comparators = comparator_regex.findall(version)
+            comparator_set_flag = True
+            for comparator in comparators:
+                operator = comparator.group('operator')
+                if not _compare_versions(installed_version, comparator.group('version'), operator):
+                    comparator_set_flag = False
+            if comparator_set_flag:
+                range_flag = True
+        if range_flag:
+            set_version = installed_version
+            break
+    if not set_version:
+        set_version = install_solc_pragma(version)
+    global solc_version
+    solc_version = set_version
+
+
 
 def get_installed_solc_versions():
     return sorted(i.name[5:] for i in get_solc_folder().glob('solc-v*'))
@@ -112,6 +138,12 @@ def install_solc_range(max_version=None, min_version='v0.4.11'):
                 install_solc(version['tag_name'])
                 return version['tag_name']
     raise ValueError("solc version does not exist")
+
+def install_solc_pragma(version):
+    return
+
+def _compare_versions(v1, v2, operator='='):
+    return
 
 
 def _check_version(version):
