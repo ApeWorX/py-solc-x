@@ -11,6 +11,7 @@ import subprocess
 import sys
 import tarfile
 import zipfile
+import re
 
 DOWNLOAD_BASE = "https://github.com/ethereum/solidity/releases/download/{}/{}"
 API = "https://api.github.com/repos/ethereum/solidity/releases/latest"
@@ -58,25 +59,6 @@ def set_solc_version(version=None):
     global solc_version
     solc_version = version
 
-def set_solc_version_range(max_version=None, min_version='v0.4.11'):
-    max_version = _check_version(max_version)
-    min_version = _check_version(min_version)
-    vmin = [int(i) for i in min_version[1:].split('.')]
-    vmax = [int(i) for i in max_version[1:].split('.')]
-    if vmin[0] > vmax[0] or (vmin[0] == vmax[0] and (vmin[1] > vmax[1] or (vmin[1] == vmax[1] and vmin[2] > vmax[2]))):
-        raise ValueError("max solc version must be higher than or equal to min solc version")
-    installed_versions = get_installed_solc_versions()
-    version = None
-    for installed_version in reversed(installed_versions):
-        vins = [int(i) for i in installed_version[1:].split('.')]
-        if vins[0] < vmax[0] or (vins[0] == vmax[0] and (vins[1] < vmax[1] or (vins[1] == vmax[1] and vins[2] <= vmax[2]))):
-            if vmin[0] < vins[0] or (vmin[0] == vins[0] and (vmin[1] < vins[1] or (vmin[1] == vins[1] and vmin[2] <= vins[2]))):
-                version = installed_version
-    if not version:
-        version = install_solc_range(max_version, min_version)
-    global solc_version
-    solc_version = version
-
 def set_solc_version_pragma(version):
     version = version.strip()
     comparator_set_range = [i.strip() for i in version.split('||')]
@@ -86,7 +68,7 @@ def set_solc_version_pragma(version):
     set_version = None
     for installed_version in reversed(installed_versions):
         for comparator_set in comparator_set_range:
-            comparators = comparator_regex.findall(version)
+            comparators = comparator_regex.findall(comparator_set)
             comparator_set_flag = True
             for comparator in comparators:
                 operator = comparator.group('operator')
@@ -125,25 +107,53 @@ def install_solc(version=None):
     )
     print("solc {} successfully installed at: {}".format(version, binary_path))
 
-def install_solc_range(max_version=None, min_version='v0.4.11'):
-    max_version = _check_version(max_version)
-    min_version = _check_version(min_version)
-    vmin = [int(i) for i in min_version[1:].split('.')]
-    vmax = [int(i) for i in max_version[1:].split('.')]
-    versions_json = requests.get(ALL_RELEASES).json()
-    for version in versions_json:
-        v = [int(i) for i in version['tag_name'][1:].split('.')]
-        if v[0] < vmax[0] or (v[0] == vmax[0] and (v[1] < vmax[1] or (v[1] == vmax[1] and v[2] <= vmax[2]))):
-            if vmin[0] < v[0] or (vmin[0] == v[0] and (vmin[1] < v[1] or (vmin[1] == v[1] and vmin[2] <= v[2]))):
-                install_solc(version['tag_name'])
-                return version['tag_name']
-    raise ValueError("solc version does not exist")
-
 def install_solc_pragma(version):
-    return
+    version = version.strip()
+    comparator_set_range = [i.strip() for i in version.split('||')]
+    comparator_regex = re.compile(r'(?P<operator>([<>]?=?|\^))(?P<version>(?P<major>\d+)\.(?P<minor>\d+)\.(?P<patch>\d+))')
+    versions_json = requests.get(ALL_RELEASES).json()
+    range_flag = False
+    for version_json in versions_json:
+        v = [int(i) for i in version_json['tag_name'][1:].split('.')]
+        for comparator_set in comparator_set_range:
+            comparators = comparator_regex.findall(comparator_set)
+            comparator_set_flag = True
+            for comparator in comparators:
+                operator = comparator.group('operator')
+                if not _compare_versions(v, comparator.group('version'), operator):
+                    comparator_set_flag = False
+            if comparator_set_flag:
+                range_flag = True
+        if range_flag:
+            _check_version(version_json['tag_name'])
+            install_solc(version_json['tag_name'])
+            return version_json['tag_name']
+    raise ValueError("compatible solc version does not exist")
 
 def _compare_versions(v1, v2, operator='='):
-    return
+    v1_split = [int(i) for i in v1.split('.')]
+    v2_split = [int(i) for i in v2.split('.')]
+    if operator == '=':
+        if v1_split[0] == v2_split[0] and v1_split[1] == v2_split[1] and v1_split[2] == v2_split[2]:
+            return True
+    elif operator == '>=':
+        if v1_split[0] > v2_split[0] or (v1_split[0] == v2_split[0] and (v1_split[1] > v2_split[1] or (v1_split[1] == v2_split[1] and v1_split[2] >= v2_split[2]))):
+            return True
+    elif operator == '>':
+        if v1_split[0] > v2_split[0] or (v1_split[0] == v2_split[0] and (v1_split[1] > v2_split[1] or (v1_split[1] == v2_split[1] and v1_split[2] > v2_split[2]))):
+            return True
+    elif operator == '<=':
+        if v1_split[0] > v2_split[0] or (v1_split[0] == v2_split[0] and (v1_split[1] > v2_split[1] or (v1_split[1] == v2_split[1] and v1_split[2] <= v2_split[2]))):
+            return True
+    elif operator == '<':
+        if v1_split[0] > v2_split[0] or (v1_split[0] == v2_split[0] and (v1_split[1] > v2_split[1] or (v1_split[1] == v2_split[1] and v1_split[2] < v2_split[2]))):
+            return True
+    elif operator == '^':
+        if v1_split[0] == v2_split[0] and v1_split[1] == v2_split[1] and v1_split[2] >= v2_split[2]:
+            return True
+    else:
+        raise ValueError("operator {} not supported".format(operator))
+    return False
 
 
 def _check_version(version):
