@@ -68,11 +68,11 @@ def set_solc_version_pragma(version):
     set_version = None
     for installed_version in reversed(installed_versions):
         for comparator_set in comparator_set_range:
-            comparators = comparator_regex.findall(comparator_set)
+            comparators = [m.groupdict() for m in comparator_regex.finditer(comparator_set)]
             comparator_set_flag = True
             for comparator in comparators:
-                operator = comparator.group('operator')
-                if not _compare_versions(installed_version, comparator.group('version'), operator):
+                operator = comparator['operator']
+                if not _compare_versions(installed_version, comparator['version'], operator):
                     comparator_set_flag = False
             if comparator_set_flag:
                 range_flag = True
@@ -116,11 +116,11 @@ def install_solc_pragma(version):
     for version_json in versions_json:
         v = [int(i) for i in version_json['tag_name'][1:].split('.')]
         for comparator_set in comparator_set_range:
-            comparators = comparator_regex.findall(comparator_set)
+            comparators = [m.groupdict() for m in comparator_regex.finditer(comparator_set)]
             comparator_set_flag = True
             for comparator in comparators:
-                operator = comparator.group('operator')
-                if not _compare_versions(v, comparator.group('version'), operator):
+                operator = comparator['operator']
+                if not _compare_versions(v, comparator['version'], operator):
                     comparator_set_flag = False
             if comparator_set_flag:
                 range_flag = True
