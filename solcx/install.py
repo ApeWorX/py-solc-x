@@ -114,7 +114,7 @@ def install_solc_pragma(version):
     versions_json = requests.get(ALL_RELEASES).json()
     range_flag = False
     for version_json in versions_json:
-        v = [int(i) for i in version_json['tag_name'][1:].split('.')]
+        v = version_json['tag_name'][1:]
         for comparator_set in comparator_set_range:
             comparators = [m.groupdict() for m in comparator_regex.finditer(comparator_set)]
             comparator_set_flag = True
