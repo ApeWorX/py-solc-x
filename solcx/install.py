@@ -152,10 +152,10 @@ def _compare_versions(v1, v2, operator='='):
         if v1_split[0] > v2_split[0] or (v1_split[0] == v2_split[0] and (v1_split[1] > v2_split[1] or (v1_split[1] == v2_split[1] and v1_split[2] > v2_split[2]))):
             return True
     elif operator == '<=':
-        if v1_split[0] > v2_split[0] or (v1_split[0] == v2_split[0] and (v1_split[1] > v2_split[1] or (v1_split[1] == v2_split[1] and v1_split[2] <= v2_split[2]))):
+        if v1_split[0] < v2_split[0] or (v1_split[0] == v2_split[0] and (v1_split[1] < v2_split[1] or (v1_split[1] == v2_split[1] and v1_split[2] <= v2_split[2]))):
             return True
     elif operator == '<':
-        if v1_split[0] > v2_split[0] or (v1_split[0] == v2_split[0] and (v1_split[1] > v2_split[1] or (v1_split[1] == v2_split[1] and v1_split[2] < v2_split[2]))):
+        if v1_split[0] < v2_split[0] or (v1_split[0] == v2_split[0] and (v1_split[1] < v2_split[1] or (v1_split[1] == v2_split[1] and v1_split[2] < v2_split[2]))):
             return True
     elif operator == '^':
         if v1_split[0] == v2_split[0] and v1_split[1] == v2_split[1] and v1_split[2] >= v2_split[2]:
