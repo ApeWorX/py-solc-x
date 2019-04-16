@@ -133,6 +133,8 @@ def install_solc_pragma(version):
 def _compare_versions(v1, v2, operator='='):
     v1_split = [int(i) for i in v1.split('.')]
     v2_split = [int(i) for i in v2.split('.')]
+    if operator == '' or operator == None:
+        operator = '='
     if operator == '=':
         if v1_split[0] == v2_split[0] and v1_split[1] == v2_split[1] and v1_split[2] == v2_split[2]:
             return True
