@@ -73,7 +73,7 @@ def set_solc_version_pragma(version):
             comparator_set_flag = True
             for comparator in comparators:
                 operator = comparator['operator']
-                if not _compare_versions(installed_version[1:], comparator['version'], operator):
+                if not _compare_versions(installed_version, comparator['version'], operator):
                     comparator_set_flag = False
             if comparator_set_flag:
                 range_flag = True
@@ -119,13 +119,12 @@ def install_solc_pragma(version, install=True):
     versions_json = requests.get(ALL_RELEASES).json()
     range_flag = False
     for version_json in versions_json:
-        v = version_json['tag_name'][1:]
         for comparator_set in comparator_set_range:
             comparators = [m.groupdict() for m in comparator_regex.finditer(comparator_set)]
             comparator_set_flag = True
             for comparator in comparators:
                 operator = comparator['operator']
-                if not _compare_versions(v, comparator['version'], operator):
+                if not _compare_versions(version_json['tag_name'], comparator['version'], operator):
                     comparator_set_flag = False
             if comparator_set_flag:
                 range_flag = True
@@ -137,6 +136,8 @@ def install_solc_pragma(version, install=True):
     raise ValueError("Compatible solc version does not exist")
 
 def _compare_versions(v1, v2, operator='='):
+    v1 = v1.lstrip('v')
+    v2 = v2.lstrip('v')
     v1_split = [int(i) for i in v1.split('.')]
     v2_split = [int(i) for i in v2.split('.')]
     if operator == '' or operator == None:
