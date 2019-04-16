@@ -72,7 +72,7 @@ def set_solc_version_pragma(version):
             comparator_set_flag = True
             for comparator in comparators:
                 operator = comparator['operator']
-                if not _compare_versions(installed_version, comparator['version'], operator):
+                if not _compare_versions(installed_version[1:], comparator['version'], operator):
                     comparator_set_flag = False
             if comparator_set_flag:
                 range_flag = True
