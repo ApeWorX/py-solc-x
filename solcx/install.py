@@ -58,6 +58,7 @@ def set_solc_version(version=None):
         install_solc(version)
     global solc_version
     solc_version = version
+    print("Using solc version {}".format(solc_version))
 
 def set_solc_version_pragma(version):
     version = version.strip()
@@ -78,11 +79,15 @@ def set_solc_version_pragma(version):
                 range_flag = True
         if range_flag:
             set_version = installed_version
+            newer_version = install_solc_pragma(version, install=False)
+            if _compare_versions(set_version, newer_version, '<'):
+                print("Newer compatible solc version exists: {}".format(newer_version))
             break
     if not set_version:
         set_version = install_solc_pragma(version)
     global solc_version
     solc_version = set_version
+    print("Using solc version {}".format(solc_version))
 
 
 
@@ -107,7 +112,7 @@ def install_solc(version=None):
     )
     print("solc {} successfully installed at: {}".format(version, binary_path))
 
-def install_solc_pragma(version):
+def install_solc_pragma(version, install=True):
     version = version.strip()
     comparator_set_range = [i.strip() for i in version.split('||')]
     comparator_regex = re.compile(r'(?P<operator>([<>]?=?|\^))(?P<version>(?P<major>\d+)\.(?P<minor>\d+)\.(?P<patch>\d+))')
@@ -126,9 +131,10 @@ def install_solc_pragma(version):
                 range_flag = True
         if range_flag:
             _check_version(version_json['tag_name'])
-            install_solc(version_json['tag_name'])
+            if install:
+                install_solc(version_json['tag_name'])
             return version_json['tag_name']
-    raise ValueError("compatible solc version does not exist")
+    raise ValueError("Compatible solc version does not exist")
 
 def _compare_versions(v1, v2, operator='='):
     v1_split = [int(i) for i in v1.split('.')]
