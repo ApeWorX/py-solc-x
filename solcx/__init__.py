@@ -13,9 +13,11 @@ from .main import (  # noqa: F401
 from .install import (
     import_installed_solc,
     install_solc,
+    install_solc_pragma,
     get_installed_solc_versions,
     get_solc_folder,
-    set_solc_version
+    set_solc_version,
+    set_solc_version_pragma
 )
 
 # check for installed version of solc
