@@ -2,6 +2,7 @@
 Install solc
 """
 from io import BytesIO
+import operator
 import os
 from pathlib import Path
 import requests
@@ -135,34 +136,29 @@ def install_solc_pragma(version, install=True):
             return version_json['tag_name']
     raise ValueError("Compatible solc version does not exist")
 
-def _compare_versions(v1, v2, operator='='):
+operator_map = {
+    '<': operator.lt,
+    '<=':operator.le,
+    '=': operator.eq,
+    '>=': operator.ge,
+    '>': operator.gt,
+    '^': operator.ge
+}
+
+def _compare_versions(v1, v2, comp='='):
     v1 = v1.lstrip('v')
     v2 = v2.lstrip('v')
     v1_split = [int(i) for i in v1.split('.')]
     v2_split = [int(i) for i in v2.split('.')]
-    if operator == '' or operator == None:
-        operator = '='
-    if operator == '=':
-        if v1_split[0] == v2_split[0] and v1_split[1] == v2_split[1] and v1_split[2] == v2_split[2]:
-            return True
-    elif operator == '>=':
-        if v1_split[0] > v2_split[0] or (v1_split[0] == v2_split[0] and (v1_split[1] > v2_split[1] or (v1_split[1] == v2_split[1] and v1_split[2] >= v2_split[2]))):
-            return True
-    elif operator == '>':
-        if v1_split[0] > v2_split[0] or (v1_split[0] == v2_split[0] and (v1_split[1] > v2_split[1] or (v1_split[1] == v2_split[1] and v1_split[2] > v2_split[2]))):
-            return True
-    elif operator == '<=':
-        if v1_split[0] < v2_split[0] or (v1_split[0] == v2_split[0] and (v1_split[1] < v2_split[1] or (v1_split[1] == v2_split[1] and v1_split[2] <= v2_split[2]))):
-            return True
-    elif operator == '<':
-        if v1_split[0] < v2_split[0] or (v1_split[0] == v2_split[0] and (v1_split[1] < v2_split[1] or (v1_split[1] == v2_split[1] and v1_split[2] < v2_split[2]))):
-            return True
-    elif operator == '^':
-        if v1_split[0] == v2_split[0] and v1_split[1] == v2_split[1] and v1_split[2] >= v2_split[2]:
-            return True
-    else:
-        raise ValueError("operator {} not supported".format(operator))
-    return False
+    if comp in ('==', '', None):
+        comp = '='
+    if comp not in operator_map:
+        raise ValueError("operator {} not supported".format(comp))
+    if v1_split[0] > v2_split[0] or v1_split[1] > v2_split[1]:
+        return comp in ('>', '>=')
+    if v1_split[0] < v2_split[0] or v1_split[1] < v2_split[1]:
+        return comp in ('<', '<=')
+    return operator_map[comp](v1_split[2], v2_split[2])
 
 
 def _check_version(version):
