@@ -1,7 +1,5 @@
 from __future__ import absolute_import
 
-import os
-
 from .main import (  # noqa: F401
     get_solc_version_string,
     get_solc_version,

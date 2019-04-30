@@ -13,15 +13,11 @@ import subprocess
 import sys
 import tarfile
 import zipfile
-import re
 
 DOWNLOAD_BASE = "https://github.com/ethereum/solidity/releases/download/{}/{}"
-API = "https://api.github.com/repos/ethereum/solidity/releases/latest"
 ALL_RELEASES = "https://api.github.com/repos/ethereum/solidity/releases"
 
 MINIMAL_SOLC_VERSION = "0.4.11"
-
-
 VERSION_REGEX = {
     'darwin': "solidity_[0-9].[0-9].[0-9]{1,}.tar.gz",
     'linux': "solc-static-linux",
@@ -98,6 +94,7 @@ def set_solc_version(version=None):
     solc_version = version
     print("Using solc version {}".format(solc_version))
 
+
 def set_solc_version_pragma(version):
     version = version.strip()
     comparator_set_range = [i.strip() for i in version.split('||')]
@@ -126,7 +123,6 @@ def set_solc_version_pragma(version):
     global solc_version
     solc_version = set_version
     print("Using solc version {}".format(solc_version))
-
 
 
 def get_available_solc_versions():
@@ -161,6 +157,7 @@ def install_solc(version=None):
     )
     print("solc {} successfully installed at: {}".format(version, binary_path))
 
+
 def install_solc_pragma(version, install=True):
     version = version.strip()
     comparator_set_range = [i.strip() for i in version.split('||')]
@@ -184,13 +181,15 @@ def install_solc_pragma(version, install=True):
             return version_json['tag_name']
     raise ValueError("Compatible solc version does not exist")
 
+
 operator_map = {
     '<': operator.lt,
-    '<=':operator.le,
+    '<=': operator.le,
     '>=': operator.ge,
     '>': operator.gt,
     '^': operator.ge
 }
+
 
 def _compare_versions(v1, v2, comp='='):
     v1 = v1.lstrip('v')
