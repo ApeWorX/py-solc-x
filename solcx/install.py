@@ -2,6 +2,7 @@
 Install solc
 """
 from io import BytesIO
+import operator
 import os
 from pathlib import Path
 import re
@@ -12,8 +13,10 @@ import subprocess
 import sys
 import tarfile
 import zipfile
+import re
 
 DOWNLOAD_BASE = "https://github.com/ethereum/solidity/releases/download/{}/{}"
+API = "https://api.github.com/repos/ethereum/solidity/releases/latest"
 ALL_RELEASES = "https://api.github.com/repos/ethereum/solidity/releases"
 
 MINIMAL_SOLC_VERSION = "0.4.11"
@@ -93,6 +96,37 @@ def set_solc_version(version=None):
         install_solc(version)
     global solc_version
     solc_version = version
+    print("Using solc version {}".format(solc_version))
+
+def set_solc_version_pragma(version):
+    version = version.strip()
+    comparator_set_range = [i.strip() for i in version.split('||')]
+    installed_versions = get_installed_solc_versions()
+    comparator_regex = re.compile(r'(?P<operator>([<>]?=?|\^))(?P<version>(?P<major>\d+)\.(?P<minor>\d+)\.(?P<patch>\d+))')
+    range_flag = False
+    set_version = None
+    for installed_version in reversed(installed_versions):
+        for comparator_set in comparator_set_range:
+            comparators = [m.groupdict() for m in comparator_regex.finditer(comparator_set)]
+            comparator_set_flag = True
+            for comparator in comparators:
+                operator = comparator['operator']
+                if not _compare_versions(installed_version, comparator['version'], operator):
+                    comparator_set_flag = False
+            if comparator_set_flag:
+                range_flag = True
+        if range_flag:
+            set_version = installed_version
+            newer_version = install_solc_pragma(version, install=False)
+            if _compare_versions(set_version, newer_version, '<'):
+                print("Newer compatible solc version exists: {}".format(newer_version))
+            break
+    if not set_version:
+        set_version = install_solc_pragma(version)
+    global solc_version
+    solc_version = set_version
+    print("Using solc version {}".format(solc_version))
+
 
 
 def get_available_solc_versions():
@@ -126,6 +160,51 @@ def install_solc(version=None):
         message="Checking installed executable version @ {}".format(binary_path)
     )
     print("solc {} successfully installed at: {}".format(version, binary_path))
+
+def install_solc_pragma(version, install=True):
+    version = version.strip()
+    comparator_set_range = [i.strip() for i in version.split('||')]
+    comparator_regex = re.compile(r'(?P<operator>([<>]?=?|\^))(?P<version>(?P<major>\d+)\.(?P<minor>\d+)\.(?P<patch>\d+))')
+    versions_json = requests.get(ALL_RELEASES).json()
+    range_flag = False
+    for version_json in versions_json:
+        for comparator_set in comparator_set_range:
+            comparators = [m.groupdict() for m in comparator_regex.finditer(comparator_set)]
+            comparator_set_flag = True
+            for comparator in comparators:
+                operator = comparator['operator']
+                if not _compare_versions(version_json['tag_name'], comparator['version'], operator):
+                    comparator_set_flag = False
+            if comparator_set_flag:
+                range_flag = True
+        if range_flag:
+            _check_version(version_json['tag_name'])
+            if install:
+                install_solc(version_json['tag_name'])
+            return version_json['tag_name']
+    raise ValueError("Compatible solc version does not exist")
+
+operator_map = {
+    '<': operator.lt,
+    '<=':operator.le,
+    '>=': operator.ge,
+    '>': operator.gt,
+    '^': operator.ge
+}
+
+def _compare_versions(v1, v2, comp='='):
+    v1 = v1.lstrip('v')
+    v2 = v2.lstrip('v')
+    v1_split = [int(i) for i in v1.split('.')]
+    v2_split = [int(i) for i in v2.split('.')]
+    if comp in ('=', '==', '', None):
+        return v1_split == v2_split
+    if comp not in operator_map:
+        raise ValueError("operator {} not supported".format(comp))
+    idx = next((i for i in range(3) if v1_split[i] != v2_split[i]), 2)
+    if comp == '^' and idx != 2:
+        return False
+    return operator_map[comp](v1_split[idx], v2_split[idx])
 
 
 def _check_version(version):

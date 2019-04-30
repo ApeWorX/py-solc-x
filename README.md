@@ -35,6 +35,20 @@ Or via the command line:
 $ python -m solcx.install v0.4.25
 ```
 
+To install the highest compatible version based on the pragma version string:
+
+```python
+>>> from solcx import install_solc_pragma
+>>> install_solc_pragma('^0.4.20 || >0.5.5 <0.7.0')
+```
+
+To set the version based on the pragma version string - this will use the highest compatible version installed, if you have a compatible version installed, or it will install the highest compatible version:
+
+```python
+>>> from solcx import set_solc_version_pragma
+>>> set_solc_version_pragma('^0.4.20 || >0.5.5 <0.7.0')
+```
+
 To view available and installed versions:
 
 ```python
