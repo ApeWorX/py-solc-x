@@ -15,7 +15,19 @@ import zipfile
 DOWNLOAD_BASE = "https://github.com/ethereum/solidity/releases/download/{}/{}"
 API = "https://api.github.com/repos/ethereum/solidity/releases/latest"
 
+
 solc_version = None
+
+
+def _get_platform():
+    if sys.platform.startswith('linux'):
+        return "linux"
+    if sys.platform in ('darwin', 'win32'):
+        return sys.platform
+    raise KeyError(
+        "Unknown platform: '{}' - py-solc-x supports"
+        " Linux, OSX and Windows".format(sys.platform)
+    )
 
 
 def get_solc_folder():
@@ -30,12 +42,13 @@ def _import_version(path):
 
 
 def import_installed_solc():
-    if sys.platform.startswith('linux'):
+    platform = _get_platform()
+    if platform == 'linux':
         # on Linux, copy active version of solc
         path_list = [subprocess.run(['which', 'solc'], stdout=subprocess.PIPE).stdout.decode().strip()]
         if not path_list[0]:
             return
-    elif sys.platform == 'darwin':
+    elif platform == 'darwin':
         # on OSX, copy all versions of solc from cellar
         path_list = [str(i) for i in Path('/usr/local/Cellar').glob('solidity*/**/solc')]
     else:
@@ -79,14 +92,13 @@ def get_installed_solc_versions():
 
 def install_solc(version=None):
     version = _check_version(version)
-    if sys.platform.startswith('linux'):
+    platform = _get_platform()
+    if platform == 'linux':
         _install_solc_linux(version)
-    elif sys.platform == 'darwin':
+    elif platform == 'darwin':
         _install_solc_osx(version)
-    elif sys.platform == 'win32':
+    elif platform == 'win32':
         _install_solc_windows(version)
-    else:
-        raise KeyError("Unknown platform: {}".format(sys.platform))
     binary_path = get_executable(version)
     _check_subprocess_call(
         [binary_path, '--version'],
