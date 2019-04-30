@@ -4,6 +4,7 @@ Install solc
 from io import BytesIO
 import os
 from pathlib import Path
+import re
 import requests
 import shutil
 import stat
@@ -13,8 +14,16 @@ import tarfile
 import zipfile
 
 DOWNLOAD_BASE = "https://github.com/ethereum/solidity/releases/download/{}/{}"
-API = "https://api.github.com/repos/ethereum/solidity/releases/latest"
+ALL_RELEASES = "https://api.github.com/repos/ethereum/solidity/releases"
 
+MINIMAL_SOLC_VERSION = "0.4.11"
+
+
+VERSION_REGEX = {
+    'darwin': "solidity_[0-9].[0-9].[0-9]{1,}.tar.gz",
+    'linux': "solc-static-linux",
+    'win32': "solidity-windows.zip"
+}
 
 solc_version = None
 
@@ -86,6 +95,18 @@ def set_solc_version(version=None):
     solc_version = version
 
 
+def get_available_solc_versions():
+    versions = []
+    pattern = VERSION_REGEX[_get_platform()]
+    for release in requests.get(ALL_RELEASES).json():
+        asset = next((i for i in release['assets'] if re.match(pattern, i['name'])), False)
+        if asset:
+            versions.append(release['tag_name'])
+        if release['tag_name'] == MINIMAL_SOLC_VERSION:
+            break
+    return versions
+
+
 def get_installed_solc_versions():
     return sorted(i.name[5:] for i in get_solc_folder().glob('solc-v*'))
 
@@ -109,7 +130,7 @@ def install_solc(version=None):
 
 def _check_version(version):
     if not version:
-        return requests.get(API).json()['tag_name']
+        return get_available_solc_versions()[0]
     version = "v0." + version.lstrip("v0.")
     if version.count('.') != 2:
         raise ValueError("solc version must be in the format v0.x.x")
