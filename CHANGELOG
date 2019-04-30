@@ -1,3 +1,9 @@
+0.3.0
+-----
+
+ - Install and set solc version based on pragma
+ - Get available solc versions, only install version if available for user's OS
+
 0.2.1
 -----
 
