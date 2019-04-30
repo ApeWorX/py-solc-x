@@ -13,6 +13,7 @@ from .main import (  # noqa: F401
 from .install import (
     import_installed_solc,
     install_solc,
+    get_available_solc_versions,
     get_installed_solc_versions,
     get_solc_folder,
     set_solc_version
