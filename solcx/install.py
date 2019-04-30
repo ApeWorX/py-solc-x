@@ -139,7 +139,6 @@ def install_solc_pragma(version, install=True):
 operator_map = {
     '<': operator.lt,
     '<=':operator.le,
-    '=': operator.eq,
     '>=': operator.ge,
     '>': operator.gt,
     '^': operator.ge
@@ -150,15 +149,14 @@ def _compare_versions(v1, v2, comp='='):
     v2 = v2.lstrip('v')
     v1_split = [int(i) for i in v1.split('.')]
     v2_split = [int(i) for i in v2.split('.')]
-    if comp in ('==', '', None):
-        comp = '='
+    if comp in ('=', '==', '', None):
+        return v1_split == v2_split
     if comp not in operator_map:
         raise ValueError("operator {} not supported".format(comp))
-    if v1_split[0] > v2_split[0] or v1_split[1] > v2_split[1]:
-        return comp in ('>', '>=')
-    if v1_split[0] < v2_split[0] or v1_split[1] < v2_split[1]:
-        return comp in ('<', '<=')
-    return operator_map[comp](v1_split[2], v2_split[2])
+    idx = next((i for i in range(3) if v1_split[i] != v2_split[i]), 2)
+    if comp == '^' and idx != 2:
+        return False
+    return operator_map[comp](v1_split[idx], v2_split[idx])
 
 
 def _check_version(version):
