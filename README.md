@@ -161,17 +161,9 @@ You can use this like:
 
 This project was recently forked from [py-solc](https://github.com/ethereum/py-solc) and should be considered a beta. Comments, questions, criticisms and pull requests are welcomed.
 
-### Running the tests
+### Tests
 
-> Tests have not been updated from py-solc and will likely fail.
-
-You can run the tests with:
-
-```sh
-py.test tests
-```
-
-Or you can install `tox` to run the full test suite.
+Tests have not been updated from py-solc and are currently failing. If you would like to contribute by updating them, please don't hesitate :)
 
 ## License
 

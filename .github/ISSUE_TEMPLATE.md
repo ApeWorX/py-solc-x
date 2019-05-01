@@ -11,7 +11,3 @@ Please include information like:
 * full output of the error you received
 * what command you ran
 * the code that caused the failure
-
-#### Cute Animal Picture
-
-> put a cute animal picture here.

@@ -1,8 +1,8 @@
-### What was wrong?
+### What was wrong / missing?
 
 
 
-### How was it fixed?
+### How was it fixed / added?
 
 
 
