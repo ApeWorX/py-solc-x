@@ -166,6 +166,8 @@ def install_solc(version):
         [binary_path, '--version'],
         message="Checking installed executable version @ {}".format(binary_path)
     )
+    if not solc_version:
+        set_solc_version(version)
     print("solc {} successfully installed at: {}".format(version, binary_path))
 
 
