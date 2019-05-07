@@ -246,26 +246,36 @@ def _wget(url, path):
         raise
 
 
+def _check_for_installed_version(version):
+    path = get_solc_folder().joinpath("solc-" + version)
+    if path.exists():
+        print("solc {} already installed at: {}".format(version, path))
+        return False
+    return path
+
+
+def _get_temp_folder():
+    path = Path(__file__).parent.joinpath('temp')
+    path.mkdir(exist_ok=True)
+    return path
+
+
 def _install_solc_linux(version):
     download = DOWNLOAD_BASE.format(version, "solc-static-linux")
-    binary_path = get_solc_folder().joinpath("solc-" + version)
-    if binary_path.exists():
-        print("solc {} already installed at: {}".format(version, binary_path))
-        return
-    _wget(download, binary_path)
-    _chmod_plus_x(binary_path)
+    binary_path = _check_for_installed_version(version)
+    if not binary_path:
+        _wget(download, binary_path)
+        _chmod_plus_x(binary_path)
 
 
 def _install_solc_windows(version):
     download = DOWNLOAD_BASE.format(version, "solidity-windows.zip")
-    install_folder = get_solc_folder().joinpath("solc-" + version)
-    if install_folder.exists():
-        print("solc {} already installed at: {}".format(version, install_folder))
-        return
-    print("Downloading solc {} from {}".format(version, download))
-    request = requests.get(download)
-    with zipfile.ZipFile(BytesIO(request.content)) as zf:
-        zf.extractall(str(install_folder))
+    install_folder = check_for_installed_version(version)
+    if install_folder:
+        print("Downloading solc {} from {}".format(version, download))
+        request = requests.get(download)
+        with zipfile.ZipFile(BytesIO(request.content)) as zf:
+            zf.extractall(str(install_folder))
 
 
 def _install_solc_osx(version):
@@ -277,10 +287,8 @@ def _install_solc_osx(version):
     tar_path = get_solc_folder().joinpath("solc-{}.tar.gz".format(version))
     source_folder = get_solc_folder().joinpath("solidity_" + version[1:])
     download = DOWNLOAD_BASE.format(version, "solidity_{}.tar.gz".format(version[1:]))
-    binary_path = get_solc_folder().joinpath("solc-" + version)
-
-    if binary_path.exists():
-        print("solc {} already installed at: {}".format(version, binary_path))
+    binary_path = _check_for_installed_version(version)
+    if not binary_path:
         return
 
     _wget(download, tar_path)
