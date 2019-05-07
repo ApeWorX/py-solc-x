@@ -20,9 +20,7 @@ pip install py-solc-x
 
 ## Installing the `solc` Executable
 
-The first time py-solc-x is imported it will automatically check for an installed version of solc on your system. If none is found, it will install the most recently released version that is compatible with your operating system.
-
-If you wish to install a different version you may do so from within python:
+The first time py-solc-x is imported it will automatically check for an installed version of solc on your system. If none is found, you must manually install via `solcx.install_solc`
 
 ```python
 >>> from solcx import install_solc
@@ -33,6 +31,16 @@ Or via the command line:
 
 ```bash
 $ python -m solcx.install v0.4.25
+```
+
+Py-solc-x defaults to the most recent installed version set as the active one. To check or modify the active version:
+
+```python
+>>> from solcx import get_solc_version, set_solc_version
+>>> get_solc_version()
+Version('0.5.7+commit.6da8b019.Linux.gpp')
+>>> set_solc_version('v0.4.25')
+>>>
 ```
 
 To install the highest compatible version based on the pragma version string:
@@ -52,21 +60,11 @@ To set the version based on the pragma version string - this will use the highes
 To view available and installed versions:
 
 ```python
->>> from solcx import get_installed_solc_versions, set_solc_version
+>>> from solcx import get_installed_solc_versions, get_available_solc_versions
 >>> get_installed_solc_versions()
 ['v0.4.25', 'v0.5.3']
 >>> get_available_solc_versions()
 ['v0.5.8', 'v0.5.7', 'v0.5.6', 'v0.5.5', 'v0.5.4', 'v0.5.3', 'v0.5.2', 'v0.5.1', 'v0.5.0', 'v0.4.25', 'v0.4.24', 'v0.4.23', 'v0.4.22', 'v0.4.21', 'v0.4.20', 'v0.4.19', 'v0.4.18', 'v0.4.17', 'v0.4.16', 'v0.4.15', 'v0.4.14', 'v0.4.13', 'v0.4.12', 'v0.4.11']
-```
-
-To check or modify the active version:
-
-```python
->>> from solcx import get_solc_version, set_solc_version
->>> solcx.get_solc_version()
-Version('0.5.7+commit.6da8b019.Linux.gpp')
->>> set_solc_version('v0.4.25')
->>>
 ```
 
 ## Standard JSON Compilation

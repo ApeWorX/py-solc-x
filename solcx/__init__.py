@@ -22,10 +22,6 @@ from .install import (
 # check for installed version of solc
 import_installed_solc()
 
-# if no installed version, download
-if not get_installed_solc_versions():
-    print("Cannot find solc, installing...")
-    install_solc()
-
 # default to latest version
-set_solc_version(get_installed_solc_versions()[-1])
+if get_installed_solc_versions():
+    set_solc_version(get_installed_solc_versions()[-1])

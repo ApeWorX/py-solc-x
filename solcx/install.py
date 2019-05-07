@@ -14,10 +14,12 @@ import sys
 import tarfile
 import zipfile
 
+from .exceptions import SolcNotInstalled
+
 DOWNLOAD_BASE = "https://github.com/ethereum/solidity/releases/download/{}/{}"
 ALL_RELEASES = "https://api.github.com/repos/ethereum/solidity/releases"
 
-MINIMAL_SOLC_VERSION = "0.4.11"
+MINIMAL_SOLC_VERSION = "v0.4.11"
 VERSION_REGEX = {
     'darwin': "solidity_[0-9].[0-9].[0-9]{1,}.tar.gz",
     'linux': "solc-static-linux",
@@ -80,16 +82,25 @@ def import_installed_solc():
 def get_executable(version=None):
     if not version:
         version = solc_version
+    if not version:
+        raise SolcNotInstalled(
+            "Solc is not installed. Call solcx.get_available_solc_versions()"
+            " to view for available versions and solcx.install_solc() to install."
+        )
     solc_bin = get_solc_folder().joinpath("solc-" + version)
     if sys.platform == "win32":
-        return str(solc_bin.joinpath("solc.exe"))
+        solc_bin = solc_bin.joinpath("solc.exe")
+    if not solc_bin.exists():
+        raise SolcNotInstalled(
+            "solc {} has not been installed. ".format(version) +
+            "Use solcx.install_solc('{}') to install.".format(version)
+        )
     return str(solc_bin)
 
 
-def set_solc_version(version=None):
+def set_solc_version(version):
     version = _check_version(version)
-    if not Path(get_executable(version)).exists():
-        install_solc(version)
+    get_executable(version)
     global solc_version
     solc_version = version
     print("Using solc version {}".format(solc_version))
@@ -141,13 +152,13 @@ def get_installed_solc_versions():
     return sorted(i.name[5:] for i in get_solc_folder().glob('solc-v*'))
 
 
-def install_solc(version=None):
+def install_solc(version, allow_osx=False):
     version = _check_version(version)
     platform = _get_platform()
     if platform == 'linux':
         _install_solc_linux(version)
     elif platform == 'darwin':
-        _install_solc_osx(version)
+        _install_solc_osx(version, allow_osx)
     elif platform == 'win32':
         _install_solc_windows(version)
     binary_path = get_executable(version)
@@ -155,6 +166,8 @@ def install_solc(version=None):
         [binary_path, '--version'],
         message="Checking installed executable version @ {}".format(binary_path)
     )
+    if not solc_version:
+        set_solc_version(version)
     print("solc {} successfully installed at: {}".format(version, binary_path))
 
 
@@ -207,11 +220,9 @@ def _compare_versions(v1, v2, comp='='):
 
 
 def _check_version(version):
-    if not version:
-        return get_available_solc_versions()[0]
     version = "v0." + version.lstrip("v0.")
     if version.count('.') != 2:
-        raise ValueError("solc version must be in the format v0.x.x")
+        raise ValueError("Invalid solc version '{}' - must be in the format v0.x.x".format(version))
     v = [int(i) for i in version[1:].split('.')]
     if v[1] < 4 or (v[1] == 4 and v[2] < 11):
         raise ValueError("py-solc-x does not support solc versions <0.4.11")
@@ -246,52 +257,67 @@ def _wget(url, path):
         raise
 
 
+def _check_for_installed_version(version):
+    path = get_solc_folder().joinpath("solc-" + version)
+    if path.exists():
+        print("solc {} already installed at: {}".format(version, path))
+        return False
+    return path
+
+
+def _get_temp_folder():
+    path = Path(__file__).parent.joinpath('temp')
+    if path.exists():
+        shutil.rmtree(str(path))
+    path.mkdir()
+    return path
+
+
 def _install_solc_linux(version):
     download = DOWNLOAD_BASE.format(version, "solc-static-linux")
-    binary_path = get_solc_folder().joinpath("solc-" + version)
-    if binary_path.exists():
-        print("solc {} already installed at: {}".format(version, binary_path))
-        return
-    _wget(download, binary_path)
-    _chmod_plus_x(binary_path)
+    binary_path = _check_for_installed_version(version)
+    if binary_path:
+        temp_path = _get_temp_folder().joinpath("solc-binary")
+        _wget(download, temp_path)
+        temp_path.rename(binary_path)
+        _chmod_plus_x(binary_path)
 
 
 def _install_solc_windows(version):
     download = DOWNLOAD_BASE.format(version, "solidity-windows.zip")
-    install_folder = get_solc_folder().joinpath("solc-" + version)
-    if install_folder.exists():
-        print("solc {} already installed at: {}".format(version, install_folder))
-        return
-    print("Downloading solc {} from {}".format(version, download))
-    request = requests.get(download)
-    with zipfile.ZipFile(BytesIO(request.content)) as zf:
-        zf.extractall(str(install_folder))
+    install_folder = _check_for_installed_version(version)
+    if install_folder:
+        temp_path = _get_temp_folder()
+        print("Downloading solc {} from {}".format(version, download))
+        request = requests.get(download)
+        with zipfile.ZipFile(BytesIO(request.content)) as zf:
+            zf.extractall(str(temp_path))
+        install_folder = get_solc_folder().joinpath("solc-" + version)
+        temp_path.rename(install_folder)
 
 
-def _install_solc_osx(version):
-    if "v0.4" in version:
+def _install_solc_osx(version, allow):
+    if version.startswith("v0.4") and not allow:
         raise ValueError(
-            "Py-solc-x cannot build solc versions 0.4.x on OSX. If you install solc 0.4.x\n"
-            "using brew and reload solcx, the installed version will be available.\n\n"
-            "See https://github.com/ethereum/homebrew-ethereum for installation instructions.")
-    tar_path = get_solc_folder().joinpath("solc-{}.tar.gz".format(version))
-    source_folder = get_solc_folder().joinpath("solidity_" + version[1:])
+            "Py-solc-x cannot build solc versions 0.4.x on OSX. If you install solc 0.4.x "
+            "using brew and reload solcx, the installed version will be available. "
+            "See https://github.com/ethereum/homebrew-ethereum for installation instructions.\n\n"
+            "To ignore this error, include 'allow_osx=True' when calling solcx.install_solc()"
+        )
+    temp_path = _get_temp_folder().joinpath("solc-source.tar.gz".format(version))
+    source_folder = _get_temp_folder().joinpath("solidity_" + version[1:])
     download = DOWNLOAD_BASE.format(version, "solidity_{}.tar.gz".format(version[1:]))
-    binary_path = get_solc_folder().joinpath("solc-" + version)
-
-    if binary_path.exists():
-        print("solc {} already installed at: {}".format(version, binary_path))
+    binary_path = _check_for_installed_version(version)
+    if not binary_path:
         return
 
-    _wget(download, tar_path)
-
-    with tarfile.open(str(tar_path), "r") as tar:
-        tar.extractall(str(get_solc_folder()))
-    tar_path.unlink()
+    _wget(download, temp_path)
+    with tarfile.open(str(temp_path), "r") as tar:
+        tar.extractall(str(_get_temp_folder()))
 
     _check_subprocess_call(
         ["sh", str(source_folder.joinpath('scripts/install_deps.sh'))],
-        message="Running dependency installation script `install_deps.sh` @ {}".format(tar_path)
+        message="Running dependency installation script `install_deps.sh` @ {}".format(temp_path)
     )
 
     original_path = os.getcwd()
@@ -310,7 +336,7 @@ def _install_solc_osx(version):
         )
     finally:
         os.chdir(original_path)
-        shutil.rmtree(str(source_folder))
+        shutil.rmtree(str(temp_path.parent))
 
     _chmod_plus_x(binary_path)
 
