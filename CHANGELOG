@@ -2,7 +2,7 @@
 -----
 
  - Install new versions into solcx/temp - prevents issues with aborted installs
- - set_solc_version raises instead of installing when version is uninstalled
+ - set_solc_version raises instead of installing when requested version is not installed
  - Do not allow version=None on installer methods
 
 0.3.0
