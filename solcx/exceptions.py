@@ -40,3 +40,7 @@ class SolcError(Exception):
 
 class ContractsNotFound(SolcError):
     message = "No contracts found during compilation"
+
+
+class SolcNotInstalled(Exception):
+    pass

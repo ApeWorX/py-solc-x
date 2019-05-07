@@ -14,10 +14,12 @@ import sys
 import tarfile
 import zipfile
 
+from .exceptions import SolcNotInstalled
+
 DOWNLOAD_BASE = "https://github.com/ethereum/solidity/releases/download/{}/{}"
 ALL_RELEASES = "https://api.github.com/repos/ethereum/solidity/releases"
 
-MINIMAL_SOLC_VERSION = "0.4.11"
+MINIMAL_SOLC_VERSION = "v0.4.11"
 VERSION_REGEX = {
     'darwin': "solidity_[0-9].[0-9].[0-9]{1,}.tar.gz",
     'linux': "solc-static-linux",
@@ -80,16 +82,25 @@ def import_installed_solc():
 def get_executable(version=None):
     if not version:
         version = solc_version
+    if not version:
+        raise SolcNotInstalled(
+            "Solc is not installed. Call solcx.get_available_solc_versions()"
+            " to view for available versions and solcx.install_solc() to install."
+        )
     solc_bin = get_solc_folder().joinpath("solc-" + version)
     if sys.platform == "win32":
-        return str(solc_bin.joinpath("solc.exe"))
+        solc_bin = solc_bin.joinpath("solc.exe")
+    if not solc_bin.exists():
+        raise SolcNotInstalled(
+            "solc {} has not been installed. ".format(version) +
+            "Use solcx.install_solc('{}') to install.".format(version)
+        )
     return str(solc_bin)
 
 
-def set_solc_version(version=None):
+def set_solc_version(version):
     version = _check_version(version)
-    if not Path(get_executable(version)).exists():
-        install_solc(version)
+    get_executable(version)
     global solc_version
     solc_version = version
     print("Using solc version {}".format(solc_version))
@@ -141,7 +152,7 @@ def get_installed_solc_versions():
     return sorted(i.name[5:] for i in get_solc_folder().glob('solc-v*'))
 
 
-def install_solc(version=None):
+def install_solc(version):
     version = _check_version(version)
     platform = _get_platform()
     if platform == 'linux':
@@ -207,11 +218,9 @@ def _compare_versions(v1, v2, comp='='):
 
 
 def _check_version(version):
-    if not version:
-        return get_available_solc_versions()[0]
     version = "v0." + version.lstrip("v0.")
     if version.count('.') != 2:
-        raise ValueError("solc version must be in the format v0.x.x")
+        raise ValueError("Invalid solc version '{}' - must be in the format v0.x.x".format(version))
     v = [int(i) for i in version[1:].split('.')]
     if v[1] < 4 or (v[1] == 4 and v[2] < 11):
         raise ValueError("py-solc-x does not support solc versions <0.4.11")
