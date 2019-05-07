@@ -152,13 +152,13 @@ def get_installed_solc_versions():
     return sorted(i.name[5:] for i in get_solc_folder().glob('solc-v*'))
 
 
-def install_solc(version):
+def install_solc(version, allow_osx=False):
     version = _check_version(version)
     platform = _get_platform()
     if platform == 'linux':
         _install_solc_linux(version)
     elif platform == 'darwin':
-        _install_solc_osx(version)
+        _install_solc_osx(version, allow_osx)
     elif platform == 'win32':
         _install_solc_windows(version)
     binary_path = get_executable(version)
@@ -296,12 +296,13 @@ def _install_solc_windows(version):
         temp_path.rename(install_folder)
 
 
-def _install_solc_osx(version):
-    if "v0.4" in version:
+def _install_solc_osx(version, allow):
+    if "v0.4" in version and not allow:
         raise ValueError(
             "Py-solc-x cannot build solc versions 0.4.x on OSX. If you install solc 0.4.x\n"
             "using brew and reload solcx, the installed version will be available.\n\n"
-            "See https://github.com/ethereum/homebrew-ethereum for installation instructions."
+            "See https://github.com/ethereum/homebrew-ethereum for installation instructions.\n"
+            "To ignore this error, include 'allow_osx=True' when calling solcx.yinstall_solc()"
         )
     temp_path = _get_temp_folder().joinpath("solc-source.tar.gz".format(version))
     source_folder = _get_temp_folder().joinpath("solidity_" + version[1:])
