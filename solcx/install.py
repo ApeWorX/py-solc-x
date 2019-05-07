@@ -277,6 +277,7 @@ def _install_solc_linux(version):
     if binary_path:
         temp_path = _get_temp_folder().joinpath("solc-binary")
         _wget(download, temp_path)
+        temp_path.rename(binary_path)
         _chmod_plus_x(binary_path)
 
 
