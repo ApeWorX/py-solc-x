@@ -19,7 +19,6 @@ from .install import get_executable
 import semantic_version
 
 
-
 VERSION_DEV_DATE_MANGLER_RE = re.compile(r'(\d{4})\.0?(\d{1,2})\.0?(\d{1,2})')
 strip_zeroes_from_month_and_day = functools.partial(VERSION_DEV_DATE_MANGLER_RE.sub,
                                                     r'\g<1>.\g<2>.\g<3>')

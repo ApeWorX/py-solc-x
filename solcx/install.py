@@ -98,15 +98,16 @@ def get_executable(version=None):
     return str(solc_bin)
 
 
-def set_solc_version(version):
+def set_solc_version(version, silent=False):
     version = _check_version(version)
     get_executable(version)
     global solc_version
     solc_version = version
-    print("Using solc version {}".format(solc_version))
+    if not silent:
+        print("Using solc version {}".format(solc_version))
 
 
-def set_solc_version_pragma(version):
+def set_solc_version_pragma(version, silent=False):
     version = version.strip()
     comparator_set_range = [i.strip() for i in version.split('||')]
     installed_versions = get_installed_solc_versions()
@@ -126,14 +127,15 @@ def set_solc_version_pragma(version):
         if range_flag:
             set_version = installed_version
             newer_version = install_solc_pragma(version, install=False)
-            if _compare_versions(set_version, newer_version, '<'):
+            if not silent and _compare_versions(set_version, newer_version, '<'):
                 print("Newer compatible solc version exists: {}".format(newer_version))
             break
     if not set_version:
         set_version = install_solc_pragma(version)
     global solc_version
     solc_version = set_version
-    print("Using solc version {}".format(solc_version))
+    if not silent:
+        print("Using solc version {}".format(solc_version))
 
 
 def get_available_solc_versions():

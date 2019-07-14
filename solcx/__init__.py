@@ -24,4 +24,4 @@ import_installed_solc()
 
 # default to latest version
 if get_installed_solc_versions():
-    set_solc_version(get_installed_solc_versions()[-1])
+    set_solc_version(get_installed_solc_versions()[-1], silent=True)
