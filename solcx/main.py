@@ -70,7 +70,7 @@ def _parse_compiler_output(stdoutdata):
 
     for source, data in contracts.items():
         data['abi'] = json.loads(data['abi'])
-        data['ast'] = sources[source.split(':')[0]]['AST']
+        data['ast'] = sources[source.rsplit(':', maxsplit=1)[0]]['AST']
 
     return contracts
 
