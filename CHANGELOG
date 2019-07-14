@@ -1,3 +1,9 @@
+0.4.1
+-----
+
+ - Bugfix: absolute paths on windows systems
+ - Allow silencing of console output when changing solc version
+
 0.4.0
 -----
 

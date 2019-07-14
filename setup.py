@@ -8,11 +8,11 @@ from setuptools import (
 
 setup(
     name='py-solc-x',
-    version='0.4.0',
+    version='0.4.1',
     description="""Python wrapper around the solc binary with 0.5.x support""",
     long_description_markdown_filename='README.md',
-    author='Benjamin Hauser (forked from py-solc by Piper Merriam)',
-    author_email='ben.hauser@hyperlink.technology',
+    author='Ben Hauser (forked from py-solc by Piper Merriam)',
+    author_email='b.hauser@zerolaw.tech',
     url='https://github.com/iamdefinitelyahuman/py-solc-x',
     include_package_data=True,
     py_modules=['solcx'],
