@@ -1,5 +1,7 @@
 # py-solc-x
 
+[![Pypi Status](https://img.shields.io/pypi/v/py-solc-x.svg)](https://pypi.org/project/py-solc-x/) [![Build Status](https://img.shields.io/travis/com/iamdefinitelyahuman/py-solc-x.svg)](https://travis-ci.com/iamdefinitelyahuman/py-solc-x) [![Coverage Status](https://coveralls.io/repos/github/iamdefinitelyahuman/py-solc-x/badge.svg?branch=master)](https://coveralls.io/github/iamdefinitelyahuman/py-solc-x?branch=master)
+
 Python wrapper around the `solc` Solidity compiler with `0.5.x` support.
 
 Forked from [py-solc](https://github.com/ethereum/py-solc).
@@ -8,7 +10,14 @@ Forked from [py-solc](https://github.com/ethereum/py-solc).
 
 Py-solc-x allows the use of multiple versions of solc and installs them as needed. You must have all required [solc dependencies](https://solidity.readthedocs.io/en/latest/installing-solidity.html#building-from-source) installed for it to work properly.
 
-Versions `>=0.4.11` may be installed, however only versions `>=0.4.2` are supported and tested.
+## Supported Versions
+
+Py-solc-x can install the following `solc` versions:
+
+Linux and Windows: `>=0.4.11`
+OSX: `>=0.5.0`
+
+`0.4.x` versions are available on OSX if they have been [installed via brew](https://github.com/ethereum/homebrew-ethereum), but cannot be installed directly by py-solc-x.
 
 ## Quickstart
 
@@ -161,7 +170,13 @@ This project was recently forked from [py-solc](https://github.com/ethereum/py-s
 
 ### Tests
 
-Tests have not been updated from py-solc and are currently failing. If you would like to contribute by updating them, please don't hesitate :)
+To run the test suite:
+
+```bash
+$ pytest tests/
+```
+
+Tests are still a work in progress.  The old (some failing) ``py-solc`` tests are available [here](https://github.com/iamdefinitelyahuman/py-solc-x/tree/master/tests-old).
 
 ## License
 
