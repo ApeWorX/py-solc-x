@@ -55,7 +55,9 @@ def import_installed_solc():
     platform = _get_platform()
     if platform == 'linux':
         # on Linux, copy active version of solc
-        path_list = [subprocess.run(['which', 'solc'], stdout=subprocess.PIPE).stdout.decode().strip()]
+        path_list = [
+            subprocess.run(['which', 'solc'], stdout=subprocess.PIPE).stdout.decode().strip()
+        ]
         if not path_list[0]:
             return
     elif platform == 'darwin':
@@ -111,7 +113,9 @@ def set_solc_version_pragma(version, silent=False):
     version = version.strip()
     comparator_set_range = [i.strip() for i in version.split('||')]
     installed_versions = get_installed_solc_versions()
-    comparator_regex = re.compile(r'(?P<operator>([<>]?=?|\^))(?P<version>(?P<major>\d+)\.(?P<minor>\d+)\.(?P<patch>\d+))')
+    comparator_regex = re.compile(
+        r'(?P<operator>([<>]?=?|\^))(?P<version>(?P<major>\d+)\.(?P<minor>\d+)\.(?P<patch>\d+))'
+    )
     range_flag = False
     set_version = None
     for installed_version in reversed(installed_versions):
@@ -138,10 +142,10 @@ def set_solc_version_pragma(version, silent=False):
         print("Using solc version {}".format(solc_version))
 
 
-def get_available_solc_versions():
+def get_available_solc_versions(headers={}):
     versions = []
     pattern = VERSION_REGEX[_get_platform()]
-    for release in requests.get(ALL_RELEASES).json():
+    for release in requests.get(ALL_RELEASES, headers=headers).json():
         asset = next((i for i in release['assets'] if re.match(pattern, i['name'])), False)
         if asset:
             versions.append(release['tag_name'])
@@ -176,7 +180,9 @@ def install_solc(version, allow_osx=False):
 def install_solc_pragma(version, install=True):
     version = version.strip()
     comparator_set_range = [i.strip() for i in version.split('||')]
-    comparator_regex = re.compile(r'(?P<operator>([<>]?=?|\^))(?P<version>(?P<major>\d+)\.(?P<minor>\d+)\.(?P<patch>\d+))')
+    comparator_regex = re.compile(
+        r'(?P<operator>([<>]?=?|\^))(?P<version>(?P<major>\d+)\.(?P<minor>\d+)\.(?P<patch>\d+))'
+    )
     versions_json = requests.get(ALL_RELEASES).json()
     range_flag = False
     for version_json in versions_json:

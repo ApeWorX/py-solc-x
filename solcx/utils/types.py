@@ -1,6 +1,6 @@
 import sys
 import numbers
-import collections
+from collections import abc
 
 
 if sys.version_info.major == 2:
@@ -36,11 +36,11 @@ def is_boolean(value):
 
 
 def is_dict(obj):
-    return isinstance(obj, collections.Mapping)
+    return isinstance(obj, abc.Mapping)
 
 
 def is_list_like(obj):
-    return not is_string(obj) and isinstance(obj, collections.Sequence)
+    return not is_string(obj) and isinstance(obj, abc.Sequence)
 
 
 def is_null(obj):

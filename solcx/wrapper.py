@@ -78,7 +78,7 @@ def solc_wrapper(solc_binary=None,
 
     if combined_json:
         if "v0.5" in command[0]:
-            combined_json = combined_json.replace(',clone-bin','')
+            combined_json = combined_json.replace(',clone-bin', '')
         command.extend(('--combined-json', combined_json))
 
     if gas:
