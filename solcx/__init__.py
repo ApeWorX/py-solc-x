@@ -8,7 +8,7 @@ from .main import (  # noqa: F401
     compile_standard,
     link_code,
 )
-from .install import (
+from .install import (  # noqa: F401
     import_installed_solc,
     install_solc,
     install_solc_pragma,
