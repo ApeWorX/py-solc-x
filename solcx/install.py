@@ -142,10 +142,10 @@ def set_solc_version_pragma(version, silent=False):
         print("Using solc version {}".format(solc_version))
 
 
-def get_available_solc_versions():
+def get_available_solc_versions(headers={}):
     versions = []
     pattern = VERSION_REGEX[_get_platform()]
-    for release in requests.get(ALL_RELEASES).json():
+    for release in requests.get(ALL_RELEASES, headers=headers).json():
         asset = next((i for i in release['assets'] if re.match(pattern, i['name'])), False)
         if asset:
             versions.append(release['tag_name'])
