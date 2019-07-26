@@ -193,4 +193,4 @@ def link_code(unlinked_data, libraries):
         libraries=libraries_arg,
     )
 
-    return stdoutdata.strip()
+    return stdoutdata.replace("Linking completed.", "").strip()
