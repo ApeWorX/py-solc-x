@@ -42,7 +42,7 @@ def get_solc_version_string(**kwargs):
             stderr_data=stderrdata,
             message="Unable to extract version string from command output",
         )
-    return version_string
+    return version_string.rstrip()
 
 
 def get_solc_version(**kwargs):
