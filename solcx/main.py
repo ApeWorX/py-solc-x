@@ -42,7 +42,7 @@ def get_solc_version_string(**kwargs):
             stderr_data=stderrdata,
             message="Unable to extract version string from command output",
         )
-    return version_string
+    return version_string.rstrip()
 
 
 def get_solc_version(**kwargs):
@@ -182,15 +182,15 @@ def compile_standard(input_data, allow_empty=False, **kwargs):
     return compiler_output
 
 
-def link_code(unlinked_data, libraries):
+def link_code(unlinked_bytecode, libraries):
     libraries_arg = ','.join((
         ':'.join((lib_name, lib_address))
         for lib_name, lib_address in libraries.items()
     ))
     stdoutdata, stderrdata, _, _ = solc_wrapper(
-        stdin=unlinked_data,
+        stdin=unlinked_bytecode,
         link=True,
         libraries=libraries_arg,
     )
 
-    return stdoutdata.strip()
+    return stdoutdata.replace("Linking completed.", "").strip()

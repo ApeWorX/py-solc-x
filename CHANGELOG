@@ -1,3 +1,9 @@
+0.4.2
+-----
+
+ - Fix link_code to support 0.5.x
+ - Remove trailing whitespace on solcx.get_version_string - fixes windows 0.5.x bug
+
 0.4.1
 -----
 
