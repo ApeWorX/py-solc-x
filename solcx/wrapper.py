@@ -153,8 +153,8 @@ def solc_wrapper(solc_binary=None,
         command.extend(('--evm-version', evm_version))
 
     if (
-        standard_json is None and
-        source_files is None and
+        not standard_json and
+        not source_files and
         "v0.5" in command[0]
     ):
         command.append('-')

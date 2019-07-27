@@ -1,18 +1,11 @@
+#!/usr/bin/python3
+
 from base64 import b64encode
 import os
 import pytest
 import sys
 
 import solcx
-
-TEST_CONTRACT = '''pragma solidity >=0.4.11 <0.6.0;
-
-contract Foo {
-    function return13() public returns (uint) {
-        return 13;
-    }
-}
-'''
 
 if sys.platform == "darwin":
     VERSIONS = solcx.get_installed_solc_versions()
@@ -49,13 +42,48 @@ def all_versions(request):
 
 
 @pytest.fixture()
-def contract_path(tmp_path):
-    source = tmp_path.joinpath('test.sol')
-    with source.open('w') as fp:
-        fp.write(TEST_CONTRACT)
-    return str(source)
+def foo_source():
+    yield """pragma solidity >=0.4.11;
+
+contract Foo {
+    function return13() public returns (uint) {
+        return 13;
+    }
+}
+"""
 
 
 @pytest.fixture()
-def contract_source():
-    yield TEST_CONTRACT
+def bar_source():
+    yield """
+pragma solidity >=0.4.11;
+
+import "contracts/Foo.sol";
+
+contract Bar is Foo {
+    function getFunky() public returns (bytes4) {
+        return 0x420Faded;
+    }
+}"""
+
+
+@pytest.fixture()
+def invalid_source():
+    yield """pragma solidity >=0.4.11;
+contract Foo {"""
+
+
+@pytest.fixture()
+def foo_path(tmp_path, foo_source):
+    source = tmp_path.joinpath('Foo.sol')
+    with source.open('w') as fp:
+        fp.write(foo_source)
+    return source.as_posix()
+
+
+@pytest.fixture()
+def bar_path(tmp_path, bar_source):
+    source = tmp_path.joinpath('Bar.sol')
+    with source.open('w') as fp:
+        fp.write(bar_source)
+    return source.as_posix()

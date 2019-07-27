@@ -182,13 +182,13 @@ def compile_standard(input_data, allow_empty=False, **kwargs):
     return compiler_output
 
 
-def link_code(unlinked_data, libraries):
+def link_code(unlinked_bytecode, libraries):
     libraries_arg = ','.join((
         ':'.join((lib_name, lib_address))
         for lib_name, lib_address in libraries.items()
     ))
     stdoutdata, stderrdata, _, _ = solc_wrapper(
-        stdin=unlinked_data,
+        stdin=unlinked_bytecode,
         link=True,
         libraries=libraries_arg,
     )
