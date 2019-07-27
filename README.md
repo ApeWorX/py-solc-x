@@ -12,7 +12,7 @@ Py-solc-x allows the use of multiple versions of solc and installs them as neede
 
 ## Supported Versions
 
-Py-solc-x can install the following `solc` versions:
+Py-solc-x can install the following solc versions:
 
 * Linux and Windows: `>=0.4.11`
 * OSX: `>=0.5.0`
@@ -52,18 +52,15 @@ Version('0.5.7+commit.6da8b019.Linux.gpp')
 >>>
 ```
 
-To install the highest compatible version based on the pragma version string:
-
-```python
->>> from solcx import install_solc_pragma
->>> install_solc_pragma('^0.4.20 || >0.5.5 <0.7.0')
-```
-
-To set the version based on the pragma version string - this will use the highest compatible version installed, if you have a compatible version installed, or it will install the highest compatible version:
+You can also set the version based on the pragma version string. The highest compatible version will be used:
 
 ```python
 >>> from solcx import set_solc_version_pragma
 >>> set_solc_version_pragma('^0.4.20 || >0.5.5 <0.7.0')
+Using solc version 0.5.8
+>>> set_solc_version_pragma('^0.4.20 || >0.5.5 <0.7.0', check_new=True)
+Using solc version 0.5.8
+Newer compatible solc version exists: 0.5.10
 ```
 
 To view available and installed versions:
@@ -73,7 +70,14 @@ To view available and installed versions:
 >>> get_installed_solc_versions()
 ['v0.4.25', 'v0.5.3']
 >>> get_available_solc_versions()
-['v0.5.8', 'v0.5.7', 'v0.5.6', 'v0.5.5', 'v0.5.4', 'v0.5.3', 'v0.5.2', 'v0.5.1', 'v0.5.0', 'v0.4.25', 'v0.4.24', 'v0.4.23', 'v0.4.22', 'v0.4.21', 'v0.4.20', 'v0.4.19', 'v0.4.18', 'v0.4.17', 'v0.4.16', 'v0.4.15', 'v0.4.14', 'v0.4.13', 'v0.4.12', 'v0.4.11']
+['v0.5.10', 'v0.5.9', 'v0.5.8', 'v0.5.7', 'v0.5.6', 'v0.5.5', 'v0.5.4', 'v0.5.3', 'v0.5.2', 'v0.5.1', 'v0.5.0', 'v0.4.25', 'v0.4.24', 'v0.4.23', 'v0.4.22', 'v0.4.21', 'v0.4.20', 'v0.4.19', 'v0.4.18', 'v0.4.17', 'v0.4.16', 'v0.4.15', 'v0.4.14', 'v0.4.13', 'v0.4.12', 'v0.4.11']
+```
+
+To install the highest compatible version based on the pragma version string:
+
+```python
+>>> from solcx import install_solc_pragma
+>>> install_solc_pragma('^0.4.20 || >0.5.5 <0.7.0')
 ```
 
 ## Standard JSON Compilation
@@ -105,7 +109,7 @@ Use the `solcx.compile_standard` function to make use of the [standard-json](htt
 ## Legacy Combined JSON compilation
 
 ```python
->>> from solcx import compile_source, compile_files, link_code
+>>> from solcx import compile_source, compile_files
 >>> compile_source("contract Foo { function Foo() {} }")
 {
     'Foo': {
@@ -145,8 +149,14 @@ Use the `solcx.compile_standard` function to make use of the [standard-json](htt
         },
     },
 }
->>> unlinked_code = "606060405260768060106000396000f3606060405260e060020a6000350463e7f09e058114601a575b005b60187f0c55699c00000000000000000000000000000000000000000000000000000000606090815273__TestA_________________________________90630c55699c906064906000906004818660325a03f41560025750505056"
->>> link_code(unlinked_code, {'TestA': '0xd3cda913deb6f67967b99d67acdfa1712c293601'})
+```
+
+## Unlinked Libraries
+
+```python
+>>> from solcx import link_code
+>>> unlinked_bytecode = "606060405260768060106000396000f3606060405260e060020a6000350463e7f09e058114601a575b005b60187f0c55699c00000000000000000000000000000000000000000000000000000000606090815273__TestA_________________________________90630c55699c906064906000906004818660325a03f41560025750505056"
+>>> link_code(unlinked_bytecode, {'TestA': '0xd3cda913deb6f67967b99d67acdfa1712c293601'})
 ... "606060405260768060106000396000f3606060405260e060020a6000350463e7f09e058114601a575b005b60187f0c55699c00000000000000000000000000000000000000000000000000000000606090815273d3cda913deb6f67967b99d67acdfa1712c29360190630c55699c906064906000906004818660325a03f41560025750505056"
 ```
 
@@ -157,7 +167,7 @@ Use the `solcx.compile_standard` function to make use of the [standard-json](htt
 You can use this like:
 
 ```python
->>> from solcx import compile_source, compile_files, link_code
+>>> from solcx import compile_files
 
 >>> compile_files([source_file_path], import_remappings=["zeppeling=/my-zeppelin-checkout-folder"])
 ```
@@ -170,13 +180,13 @@ This project was recently forked from [py-solc](https://github.com/ethereum/py-s
 
 ### Tests
 
+Py-solc-x is tested on Linux and Windows with solc versions ``>=0.4.11``.
+
 To run the test suite:
 
 ```bash
 $ pytest tests/
 ```
-
-Tests are still a work in progress.  The old (some failing) ``py-solc`` tests are available [here](https://github.com/iamdefinitelyahuman/py-solc-x/tree/master/tests-old).
 
 ## License
 
