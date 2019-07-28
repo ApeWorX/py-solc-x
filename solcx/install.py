@@ -141,10 +141,18 @@ def install_solc_pragma(pragma_string, install=True):
     return version
 
 
-def get_available_solc_versions(headers={}):
+def get_available_solc_versions(headers=None):
     versions = []
     pattern = VERSION_REGEX[_get_platform()]
-    for release in requests.get(ALL_RELEASES, headers=headers).json():
+    data = requests.get(ALL_RELEASES, headers=headers)
+    if data.status_code != 200:
+        raise ConnectionError(
+            "{} when getting solc versions from Github: '{}'".format(
+                data.status_code,
+                data.json()['message']
+            )
+        )
+    for release in data.json():
         asset = next((i for i in release['assets'] if re.match(pattern, i['name'])), False)
         if asset:
             versions.append(release['tag_name'])
