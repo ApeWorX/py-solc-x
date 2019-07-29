@@ -1,7 +1,9 @@
-0.4.3 (unreleased)
+0.5.0 (unreleased)
 -----
 
  - Improved verbosity when get_available_solc_versions raises
+ - Remove interace flag (was removed from solc in 0.4.0)
+ - Raise on clone-bin and formal flags when using 0.5.x
 
 0.4.2
 -----
