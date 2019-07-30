@@ -1,7 +1,5 @@
 #!/usr/bin/python3
 
-from base64 import b64encode
-import os
 import pytest
 import sys
 
@@ -10,9 +8,7 @@ import solcx
 if sys.platform == "darwin":
     VERSIONS = solcx.get_installed_solc_versions()
 else:
-    auth = b64encode(os.environ['GITAUTH'].encode()).decode('ascii')
-    headers = {'Authorization': f"Basic {auth}"}
-    VERSIONS = solcx.get_available_solc_versions(headers=headers)
+    VERSIONS = solcx.get_available_solc_versions()
 
 
 # auto-parametrize the all_versions fixture with all target solc versions

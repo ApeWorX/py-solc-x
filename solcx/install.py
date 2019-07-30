@@ -1,6 +1,7 @@
 """
 Install solc
 """
+from base64 import b64encode
 from io import BytesIO
 import os
 from pathlib import Path
@@ -141,10 +142,27 @@ def install_solc_pragma(pragma_string, install=True):
     return version
 
 
-def get_available_solc_versions(headers={}):
+def get_available_solc_versions(headers=None):
     versions = []
     pattern = VERSION_REGEX[_get_platform()]
-    for release in requests.get(ALL_RELEASES, headers=headers).json():
+
+    # Github sometimes blocks CI from calling their API, if you are having issues try
+    # saving an API token to the environment variable GITHUB_TOKEN in your build environment
+    # https://github.blog/2013-05-16-personal-api-tokens/
+    if not headers and os.getenv('GITHUB_TOKEN'):
+        auth = b64encode(os.getenv('GITHUB_TOKEN').encode()).decode()
+        headers = {'Authorization': "Basic {}".format(auth)}
+
+    data = requests.get(ALL_RELEASES, headers=headers)
+    if data.status_code != 200:
+        raise ConnectionError(
+            "Status {} when getting solc versions from Github: '{}'".format(
+                data.status_code,
+                data.json()['message']
+            )
+        )
+
+    for release in data.json():
         asset = next((i for i in release['assets'] if re.match(pattern, i['name'])), False)
         if asset:
             versions.append(release['tag_name'])

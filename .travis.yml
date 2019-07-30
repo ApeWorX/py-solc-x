@@ -37,5 +37,10 @@ matrix:
       script: python -m pytest tests --cov=solcx
       after_success: python -m coveralls
 
+env:
+  global: COVERALLS_PARALLEL=true
+
+
 notifications:
   email: false
+  webhooks: https://coveralls.io/webhook

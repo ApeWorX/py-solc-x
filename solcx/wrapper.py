@@ -38,7 +38,6 @@ def solc_wrapper(solc_binary=None,
                  bin_runtime=None,
                  clone_bin=None,
                  abi=None,
-                 interface=None,
                  hashes=None,
                  userdoc=None,
                  devdoc=None,
@@ -58,6 +57,7 @@ def solc_wrapper(solc_binary=None,
     if version:
         command.append('--version')
 
+    # removed in 0.4.21 and does nothing since <0.4.11, should be removed in the future
     if add_std:
         command.append('--add-std')
 
@@ -123,14 +123,8 @@ def solc_wrapper(solc_binary=None,
     if bin_runtime:
         command.append('--bin-runtime')
 
-    if clone_bin:
-        command.append('--clone-bin')
-
     if abi:
         command.append('--abi')
-
-    if interface:
-        command.append('--interface')
 
     if hashes:
         command.append('--hashes')
@@ -141,9 +135,6 @@ def solc_wrapper(solc_binary=None,
     if devdoc:
         command.append('--devdoc')
 
-    if formal:
-        command.append('--formal')
-
     if stdin is not None:
         # solc seems to expects utf-8 from stdin:
         # see Scanner class in Solidity source
@@ -151,6 +142,17 @@ def solc_wrapper(solc_binary=None,
 
     if evm_version:
         command.extend(('--evm-version', evm_version))
+
+    # only supported by 0.4.x versions
+    if clone_bin:
+        if "v0.5" in command[0]:
+            raise AttributeError(f"solc 0.5.x does not support the --clone-bin flag")
+        command.append('--clone-bin')
+
+    if formal:
+        if "v0.5" in command[0]:
+            raise AttributeError(f"solc 0.5.x does not support the --formal flag")
+        command.append('--formal')
 
     if (
         not standard_json and
