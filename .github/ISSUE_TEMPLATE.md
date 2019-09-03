@@ -1,10 +1,11 @@
-* `py-solc` Version: x.x.x
+# Version Info
+
+* `py-solc-x` Version: x.x.x
 * `solc` Version: x.x.x
 * Python Version: x.x.x
 * OS: osx/linux/win
 
-
-### What was wrong?
+## The Issue
 
 Please include information like:
 
