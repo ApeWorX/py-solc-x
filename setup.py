@@ -19,7 +19,7 @@ setup(
     setup_requires=['setuptools-markdown'],
     python_requires='>=3.4, <4',
     install_requires=[
-        "semantic_version>=2.6.0",
+        "semantic_version>=2.8.1",
         "requests>=2.9.1"
     ],
     license="MIT",

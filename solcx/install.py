@@ -7,7 +7,7 @@ import os
 from pathlib import Path
 import re
 import requests
-from semantic_version import Version, Spec
+from semantic_version import Version, SimpleSpec
 import shutil
 import stat
 import subprocess
@@ -177,7 +177,7 @@ def _select_pragma_version(pragma_string, version_list):
     version = None
 
     for comparator_set in comparator_set_range:
-        spec = Spec(*(i[0] for i in comparator_regex.findall(comparator_set)))
+        spec = SimpleSpec(*(i[0] for i in comparator_regex.findall(comparator_set)))
         selected = spec.select(version_list)
         if selected and (not version or version < selected):
             version = selected
@@ -210,7 +210,7 @@ def install_solc(version, allow_osx=False):
 
 def _check_version(version):
     version = Version(version.lstrip('v'))
-    if version not in Spec('>=0.4.11'):
+    if version not in SimpleSpec('>=0.4.11'):
         raise ValueError("py-solc-x does not support solc versions <0.4.11")
     return "v" + str(version)
 
