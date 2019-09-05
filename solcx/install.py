@@ -14,6 +14,7 @@ import subprocess
 import sys
 import tarfile
 import zipfile
+import logging
 
 from .exceptions import SolcNotInstalled
 
@@ -26,6 +27,7 @@ VERSION_REGEX = {
     'linux': "solc-static-linux",
     'win32': "solidity-windows.zip"
 }
+LOGGER = logging.getLogger("solcx")
 
 solc_version = None
 
@@ -107,7 +109,7 @@ def set_solc_version(version, silent=False):
     global solc_version
     solc_version = version
     if not silent:
-        print("Using solc version {}".format(solc_version))
+        LOGGER.info("Using solc version {}".format(solc_version))
 
 
 def set_solc_version_pragma(pragma_string, silent=False, check_new=False):
@@ -123,11 +125,11 @@ def set_solc_version_pragma(pragma_string, silent=False, check_new=False):
     global solc_version
     solc_version = version
     if not silent:
-        print("Using solc version {}".format(solc_version))
+        LOGGER.info("Using solc version {}".format(solc_version))
     if check_new:
         latest = install_solc_pragma(pragma_string, False)
         if Version(latest) > Version(version):
-            print("Newer compatible solc version exists: {}".format(latest))
+            LOGGER.info("Newer compatible solc version exists: {}".format(latest))
 
 
 def install_solc_pragma(pragma_string, install=True):
@@ -205,7 +207,7 @@ def install_solc(version, allow_osx=False):
     )
     if not solc_version:
         set_solc_version(version)
-    print("solc {} successfully installed at: {}".format(version, binary_path))
+    LOGGER.info("solc {} successfully installed at: {}".format(version, binary_path))
 
 
 def _check_version(version):
@@ -215,10 +217,10 @@ def _check_version(version):
     return "v" + str(version)
 
 
-def _check_subprocess_call(command, message=None, verbose=True, **proc_kwargs):
+def _check_subprocess_call(command, message=None, verbose=False, **proc_kwargs):
     if message:
-        print(message)
-    print("Executing: {0}".format(" ".join(command)))
+        LOGGER.debug(message)
+    LOGGER.info("Executing: {0}".format(" ".join(command)))
 
     return subprocess.check_call(
         command,
@@ -246,7 +248,7 @@ def _wget(url, path):
 def _check_for_installed_version(version):
     path = get_solc_folder().joinpath("solc-" + version)
     if path.exists():
-        print("solc {} already installed at: {}".format(version, path))
+        LOGGER.info("solc {} already installed at: {}".format(version, path))
         return False
     return path
 
@@ -274,7 +276,7 @@ def _install_solc_windows(version):
     install_folder = _check_for_installed_version(version)
     if install_folder:
         temp_path = _get_temp_folder()
-        print("Downloading solc {} from {}".format(version, download))
+        LOGGER.info("Downloading solc {} from {}".format(version, download))
         request = requests.get(download)
         with zipfile.ZipFile(BytesIO(request.content)) as zf:
             zf.extractall(str(temp_path))
@@ -331,7 +333,7 @@ if __name__ == "__main__":
     try:
         version = sys.argv[1]
     except IndexError:
-        print("Invocation error.  Should be invoked as `./install_solc.py <release-tag>`")
+        LOGGER.error("Invocation error.  Should be invoked as `./install_solc.py <release-tag>`")
         sys.exit(1)
 
     install_solc(version)
