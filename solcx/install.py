@@ -13,6 +13,7 @@ import stat
 import subprocess
 import sys
 import tarfile
+import tempfile
 import zipfile
 import logging
 
@@ -254,7 +255,7 @@ def _check_for_installed_version(version):
 
 
 def _get_temp_folder():
-    path = Path(__file__).parent.joinpath('temp')
+    path = Path(tempfile.gettempdir()).joinpath('py-solc-x-tmp')
     if path.exists():
         shutil.rmtree(str(path))
     path.mkdir()
