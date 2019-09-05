@@ -1,3 +1,10 @@
+0.6.0
+-----
+
+ - Use logger instead of print statements
+ - Update dependencies, fix deprecation warnings
+ - Use requests package for downloads on all platforms
+
 0.5.0
 -----
 
