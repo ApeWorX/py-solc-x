@@ -55,7 +55,7 @@ def get_solc_version(**kwargs):
 
 
 def solc_supports_standard_json_interface(**kwargs):
-    return get_solc_version() in semantic_version.Spec('>=0.4.11')
+    return get_solc_version() in semantic_version.SimpleSpec('>=0.4.11')
 
 
 def _parse_compiler_output(stdoutdata):
