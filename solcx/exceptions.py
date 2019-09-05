@@ -44,3 +44,7 @@ class ContractsNotFound(SolcError):
 
 class SolcNotInstalled(Exception):
     pass
+
+
+class DownloadError(Exception):
+    pass
