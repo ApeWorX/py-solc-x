@@ -13,10 +13,14 @@ import stat
 import subprocess
 import sys
 import tarfile
+import tempfile
 import zipfile
 import logging
 
-from .exceptions import SolcNotInstalled
+from .exceptions import (
+    DownloadError,
+    SolcNotInstalled,
+)
 
 DOWNLOAD_BASE = "https://github.com/ethereum/solidity/releases/download/{}/{}"
 ALL_RELEASES = "https://api.github.com/repos/ethereum/solidity/releases"
@@ -233,18 +237,6 @@ def _chmod_plus_x(executable_path):
     executable_path.chmod(executable_path.stat().st_mode | stat.S_IEXEC)
 
 
-def _wget(url, path):
-    try:
-        _check_subprocess_call(
-            ["wget", url, "-O", str(path)],
-            "Downloading solc from {}".format(url)
-        )
-    except subprocess.CalledProcessError:
-        if path.exists():
-            path.unlink()
-        raise
-
-
 def _check_for_installed_version(version):
     path = get_solc_folder().joinpath("solc-" + version)
     if path.exists():
@@ -254,20 +246,33 @@ def _check_for_installed_version(version):
 
 
 def _get_temp_folder():
-    path = Path(__file__).parent.joinpath('temp')
+    path = Path(tempfile.gettempdir()).joinpath('py-solc-x-tmp')
     if path.exists():
         shutil.rmtree(str(path))
     path.mkdir()
     return path
 
 
+def _download_solc(url):
+    response = requests.get(url)
+    if response.status_code != 200:
+        raise DownloadError(
+            "Received status code {} when attempting to download from {}".format(
+                response.status_code,
+                url
+            )
+        )
+    return response.content
+
+
 def _install_solc_linux(version):
     download = DOWNLOAD_BASE.format(version, "solc-static-linux")
     binary_path = _check_for_installed_version(version)
     if binary_path:
-        temp_path = _get_temp_folder().joinpath("solc-binary")
-        _wget(download, temp_path)
-        temp_path.rename(binary_path)
+        LOGGER.info("Downloading solc {} from {}".format(version, download))
+        content = _download_solc(download)
+        with open(binary_path, 'wb') as fp:
+            fp.write(content)
         _chmod_plus_x(binary_path)
 
 
@@ -276,46 +281,44 @@ def _install_solc_windows(version):
     install_folder = _check_for_installed_version(version)
     if install_folder:
         temp_path = _get_temp_folder()
-        LOGGER.info("Downloading solc {} from {}".format(version, download))
-        request = requests.get(download)
-        with zipfile.ZipFile(BytesIO(request.content)) as zf:
+        content = _download_solc(download)
+        with zipfile.ZipFile(BytesIO(content)) as zf:
             zf.extractall(str(temp_path))
         install_folder = get_solc_folder().joinpath("solc-" + version)
         temp_path.rename(install_folder)
 
 
-def _install_solc_osx(version, allow):
-    if version.startswith("v0.4") and not allow:
+def _install_solc_osx(version, allow_osx):
+    if version.startswith("v0.4") and not allow_osx:
         raise ValueError(
             "Py-solc-x cannot build solc versions 0.4.x on OSX. If you install solc 0.4.x "
             "using brew and reload solcx, the installed version will be available. "
             "See https://github.com/ethereum/homebrew-ethereum for installation instructions.\n\n"
             "To ignore this error, include 'allow_osx=True' when calling solcx.install_solc()"
         )
-    temp_path = _get_temp_folder().joinpath("solc-source.tar.gz".format(version))
-    source_folder = _get_temp_folder().joinpath("solidity_" + version[1:])
+    temp_path = _get_temp_folder()
     download = DOWNLOAD_BASE.format(version, "solidity_{}.tar.gz".format(version[1:]))
     binary_path = _check_for_installed_version(version)
     if not binary_path:
         return
 
-    _wget(download, temp_path)
-    with tarfile.open(str(temp_path), "r") as tar:
-        tar.extractall(str(_get_temp_folder()))
+    content = _download_solc(download)
+    with tarfile.open(fileobj=BytesIO(content)) as tar:
+        tar.extractall(temp_path)
+    temp_path = temp_path.joinpath('solidity_{}'.format(version[1:]))
 
     _check_subprocess_call(
-        ["sh", str(source_folder.joinpath('scripts/install_deps.sh'))],
+        ["sh", str(temp_path.joinpath('scripts/install_deps.sh'))],
         message="Running dependency installation script `install_deps.sh` @ {}".format(temp_path)
     )
 
     original_path = os.getcwd()
-    source_folder.joinpath('build').mkdir(exist_ok=True)
-    os.chdir(str(source_folder.joinpath('build').resolve()))
+    temp_path.joinpath('build').mkdir(exist_ok=True)
+    os.chdir(str(temp_path.joinpath('build').resolve()))
     try:
         for cmd in (["cmake", ".."], ["make"]):
             _check_subprocess_call(cmd, message="Running {}".format(cmd[0]))
-        os.chdir(original_path)
-        source_folder.joinpath('build/solc/solc').rename(binary_path)
+        temp_path.joinpath('build/solc/solc').rename(binary_path)
     except subprocess.CalledProcessError as e:
         raise OSError(
             "{} returned non-zero exit status {}".format(cmd[0], e.returncode) +
@@ -324,7 +327,6 @@ def _install_solc_osx(version, allow):
         )
     finally:
         os.chdir(original_path)
-        shutil.rmtree(str(temp_path.parent))
 
     _chmod_plus_x(binary_path)
 

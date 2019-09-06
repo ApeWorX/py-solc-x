@@ -172,11 +172,11 @@ You can use this like:
 >>> compile_files([source_file_path], import_remappings=["zeppeling=/my-zeppelin-checkout-folder"])
 ```
 
-[More information about solc import aliasing](http://solidity.readthedocs.io/en/develop/layout-of-source-files.html#paths) 
+[More information about solc import aliasing](http://solidity.readthedocs.io/en/latest/layout-of-source-files.html#paths)
 
 ## Development
 
-This project was recently forked from [py-solc](https://github.com/ethereum/py-solc) and should be considered a beta. Comments, questions, criticisms and pull requests are welcomed.
+This project was forked from [py-solc](https://github.com/ethereum/py-solc) and should be considered a beta. Comments, questions, criticisms and pull requests are welcomed.
 
 ### Tests
 
