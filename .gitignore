@@ -21,6 +21,7 @@ develop-eggs
 lib
 lib64
 venv
+env
 
 # Installer logs
 pip-log.txt
@@ -62,3 +63,4 @@ node_modules
 
 # other
 .vscode
+.idea
