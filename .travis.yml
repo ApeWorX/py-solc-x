@@ -2,7 +2,7 @@
 matrix:
   include:
     - name: "Python 3.7.1 on Xenial Linux"
-      language: python  
+      language: python
       python: 3.7           # this works for Linux but is ignored on macOS or Windows
       dist: xenial          # required for Python >= 3.7
       sudo: true
@@ -25,12 +25,12 @@ matrix:
         - pip install -r requirements-dev.txt
       script: python -m pytest tests --cov=solcx
       after_success: python -m coveralls
-    - name: "Python 3.7.3 on Windows"
+    - name: "Python 3.7.4 on Windows"
       os: windows           # Windows 10.0.17134 N/A Build 17134
       language: shell       # 'language: python' is an error on Travis CI Windows
       # python: 3.7         # 'python:' is ignored on Travis CI Windows
       install:
-        - choco install python  # this install takes at least 1 min 30 sec
+        - choco install python --version=3.7.4  # this install takes at least 1 min 30 sec
         - python -m pip install --upgrade pip
         - pip3 install -r requirements-dev.txt
       env: PATH=/c/Python37:/c/Python37/Scripts:$PATH
