@@ -307,10 +307,13 @@ def _install_solc_osx(version, allow_osx):
         tar.extractall(temp_path)
     temp_path = temp_path.joinpath('solidity_{}'.format(version[1:]))
 
-    _check_subprocess_call(
-        ["sh", str(temp_path.joinpath('scripts/install_deps.sh'))],
-        message="Running dependency installation script `install_deps.sh` @ {}".format(temp_path)
-    )
+    try:
+        _check_subprocess_call(
+            ["sh", str(temp_path.joinpath('scripts/install_deps.sh'))],
+            message="Running dependency installation script `install_deps.sh`"
+        )
+    except subprocess.CalledProcessError as e:
+        LOGGER.warning(e, exc_info=True)
 
     original_path = os.getcwd()
     temp_path.joinpath('build').mkdir(exist_ok=True)
