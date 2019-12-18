@@ -321,9 +321,11 @@ def _install_solc_osx(version, allow_osx):
         temp_path.joinpath('build/solc/solc').rename(binary_path)
     except subprocess.CalledProcessError as e:
         raise OSError(
-            "{} returned non-zero exit status {}".format(cmd[0], e.returncode) +
-            " while attempting to build solc from the source. This is likely " +
-            "due to a missing or incorrect version of an external dependency."
+            "{} returned non-zero exit status {} while attempting to build solc from the source. "
+            "This is likely due to a missing or incorrect version of an external dependency.\n\n"
+            "You may be able to solve this by installing the specific version using brew: "
+            "https://solidity.readthedocs.io/en/v0.6.0/installing-solidity.html#binary-packages"
+            "".format(cmd[0], e.returncode)
         )
     finally:
         os.chdir(original_path)
