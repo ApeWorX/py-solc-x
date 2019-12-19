@@ -23,7 +23,7 @@ from .exceptions import (
 )
 
 DOWNLOAD_BASE = "https://github.com/ethereum/solidity/releases/download/{}/{}"
-ALL_RELEASES = "https://api.github.com/repos/ethereum/solidity/releases"
+ALL_RELEASES = "https://api.github.com/repos/ethereum/solidity/releases?per_page=100"
 
 MINIMAL_SOLC_VERSION = "v0.4.11"
 VERSION_REGEX = {
