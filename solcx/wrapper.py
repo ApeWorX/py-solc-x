@@ -104,12 +104,7 @@ def solc_wrapper(solc_binary=None,
     if source_files is not None:
         command.extend(source_files)
 
-    #
     # Output configuration
-    #
-    if ast:
-        command.append('--ast')
-
     if ast_json:
         command.append('--ast-json')
 
@@ -140,15 +135,18 @@ def solc_wrapper(solc_binary=None,
     if devdoc:
         command.append('--devdoc')
 
-    if stdin is not None:
-        # solc seems to expects utf-8 from stdin:
-        # see Scanner class in Solidity source
-        stdin = force_bytes(stdin, 'utf8')
-
     if evm_version:
         command.extend(('--evm-version', evm_version))
 
-    # only supported by 0.4.x versions
+    # unsupported by >=0.6.0
+    if ast:
+        if solc_minor >= 6:
+            raise AttributeError(
+                "solc 0.{}.x does not support the --ast flag".format(solc_minor)
+            )
+        command.append('--ast')
+
+    # unsupported by >=0.5.0
     if clone_bin:
         if solc_minor >= 5:
             raise AttributeError(
@@ -169,6 +167,11 @@ def solc_wrapper(solc_binary=None,
         solc_minor >= 5
     ):
         command.append('-')
+
+    if stdin is not None:
+        # solc seems to expects utf-8 from stdin:
+        # see Scanner class in Solidity source
+        stdin = force_bytes(stdin, 'utf8')
 
     proc = subprocess.Popen(command,
                             stdin=subprocess.PIPE,
