@@ -2,6 +2,10 @@ from __future__ import absolute_import
 
 import subprocess
 
+from semantic_version import (
+    Version,
+)
+
 from .exceptions import (
     SolcError,
 )
@@ -50,6 +54,7 @@ def solc_wrapper(solc_binary=None,
         solc_binary = get_executable()
 
     command = [solc_binary]
+    solc_minor = Version(solc_binary.rsplit('-v', maxsplit=1)[1]).minor
 
     if help:
         command.append('--help')
@@ -77,7 +82,7 @@ def solc_wrapper(solc_binary=None,
         command.extend(('--output-dir', output_dir))
 
     if combined_json:
-        if "v0.5" in command[0]:
+        if solc_minor >= 5:
             combined_json = combined_json.replace(',clone-bin', '')
         command.extend(('--combined-json', combined_json))
 
@@ -145,19 +150,23 @@ def solc_wrapper(solc_binary=None,
 
     # only supported by 0.4.x versions
     if clone_bin:
-        if "v0.5" in command[0]:
-            raise AttributeError(f"solc 0.5.x does not support the --clone-bin flag")
+        if solc_minor >= 5:
+            raise AttributeError(
+                "solc 0.{}.x does not support the --clone-bin flag".format(solc_minor)
+            )
         command.append('--clone-bin')
 
     if formal:
-        if "v0.5" in command[0]:
-            raise AttributeError(f"solc 0.5.x does not support the --formal flag")
+        if solc_minor >= 5:
+            raise AttributeError(
+                "solc 0.{}.x does not support the --formal flag".format(solc_minor)
+            )
         command.append('--formal')
 
     if (
         not standard_json and
         not source_files and
-        "v0.5" in command[0]
+        solc_minor >= 5
     ):
         command.append('-')
 
