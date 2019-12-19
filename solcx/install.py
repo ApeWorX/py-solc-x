@@ -23,7 +23,7 @@ from .exceptions import (
 )
 
 DOWNLOAD_BASE = "https://github.com/ethereum/solidity/releases/download/{}/{}"
-ALL_RELEASES = "https://api.github.com/repos/ethereum/solidity/releases"
+ALL_RELEASES = "https://api.github.com/repos/ethereum/solidity/releases?per_page=100"
 
 MINIMAL_SOLC_VERSION = "v0.4.11"
 VERSION_REGEX = {
@@ -307,10 +307,13 @@ def _install_solc_osx(version, allow_osx):
         tar.extractall(temp_path)
     temp_path = temp_path.joinpath('solidity_{}'.format(version[1:]))
 
-    _check_subprocess_call(
-        ["sh", str(temp_path.joinpath('scripts/install_deps.sh'))],
-        message="Running dependency installation script `install_deps.sh` @ {}".format(temp_path)
-    )
+    try:
+        _check_subprocess_call(
+            ["sh", str(temp_path.joinpath('scripts/install_deps.sh'))],
+            message="Running dependency installation script `install_deps.sh`"
+        )
+    except subprocess.CalledProcessError as e:
+        LOGGER.warning(e, exc_info=True)
 
     original_path = os.getcwd()
     temp_path.joinpath('build').mkdir(exist_ok=True)
@@ -321,9 +324,11 @@ def _install_solc_osx(version, allow_osx):
         temp_path.joinpath('build/solc/solc').rename(binary_path)
     except subprocess.CalledProcessError as e:
         raise OSError(
-            "{} returned non-zero exit status {}".format(cmd[0], e.returncode) +
-            " while attempting to build solc from the source. This is likely " +
-            "due to a missing or incorrect version of an external dependency."
+            "{} returned non-zero exit status {} while attempting to build solc from the source. "
+            "This is likely due to a missing or incorrect version of an external dependency.\n\n"
+            "You may be able to solve this by installing the specific version using brew: "
+            "https://solidity.readthedocs.io/en/v0.6.0/installing-solidity.html#binary-packages"
+            "".format(cmd[0], e.returncode)
         )
     finally:
         os.chdir(original_path)

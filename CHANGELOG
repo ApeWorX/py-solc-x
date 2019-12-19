@@ -1,3 +1,10 @@
+0.6.1
+-----
+
+ - Fix compatibility issues with Solidity 0.6.0
+ - When installing on OSX, log a warning instead of raising if dependency installation fails
+ - Ensure old versions are still visible in solcx.get_available_solc_versions
+
 0.6.0
 -----
 

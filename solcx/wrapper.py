@@ -2,6 +2,10 @@ from __future__ import absolute_import
 
 import subprocess
 
+from semantic_version import (
+    Version,
+)
+
 from .exceptions import (
     SolcError,
 )
@@ -51,6 +55,8 @@ def solc_wrapper(solc_binary=None,
 
     command = [solc_binary]
 
+    solc_minor = Version(solc_binary.rsplit('-v')[-1].split("\\")[0]).minor
+
     if help:
         command.append('--help')
 
@@ -77,7 +83,7 @@ def solc_wrapper(solc_binary=None,
         command.extend(('--output-dir', output_dir))
 
     if combined_json:
-        if "v0.5" in command[0]:
+        if solc_minor >= 5:
             combined_json = combined_json.replace(',clone-bin', '')
         command.extend(('--combined-json', combined_json))
 
@@ -99,12 +105,7 @@ def solc_wrapper(solc_binary=None,
     if source_files is not None:
         command.extend(source_files)
 
-    #
     # Output configuration
-    #
-    if ast:
-        command.append('--ast')
-
     if ast_json:
         command.append('--ast-json')
 
@@ -135,31 +136,43 @@ def solc_wrapper(solc_binary=None,
     if devdoc:
         command.append('--devdoc')
 
-    if stdin is not None:
-        # solc seems to expects utf-8 from stdin:
-        # see Scanner class in Solidity source
-        stdin = force_bytes(stdin, 'utf8')
-
     if evm_version:
         command.extend(('--evm-version', evm_version))
 
-    # only supported by 0.4.x versions
+    # unsupported by >=0.6.0
+    if ast:
+        if solc_minor >= 6:
+            raise AttributeError(
+                "solc 0.{}.x does not support the --ast flag".format(solc_minor)
+            )
+        command.append('--ast')
+
+    # unsupported by >=0.5.0
     if clone_bin:
-        if "v0.5" in command[0]:
-            raise AttributeError(f"solc 0.5.x does not support the --clone-bin flag")
+        if solc_minor >= 5:
+            raise AttributeError(
+                "solc 0.{}.x does not support the --clone-bin flag".format(solc_minor)
+            )
         command.append('--clone-bin')
 
     if formal:
-        if "v0.5" in command[0]:
-            raise AttributeError(f"solc 0.5.x does not support the --formal flag")
+        if solc_minor >= 5:
+            raise AttributeError(
+                "solc 0.{}.x does not support the --formal flag".format(solc_minor)
+            )
         command.append('--formal')
 
     if (
         not standard_json and
         not source_files and
-        "v0.5" in command[0]
+        solc_minor >= 5
     ):
         command.append('-')
+
+    if stdin is not None:
+        # solc seems to expects utf-8 from stdin:
+        # see Scanner class in Solidity source
+        stdin = force_bytes(stdin, 'utf8')
 
     proc = subprocess.Popen(command,
                             stdin=subprocess.PIPE,

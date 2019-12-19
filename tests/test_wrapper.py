@@ -41,25 +41,28 @@ def test_help(popen):
 
 def test_boolean_kwargs(popen, foo_source):
     kwargs = [
-        'version', 'optimize', 'gas', 'ast', 'ast_json', 'asm', 'asm_json',
-        'opcodes', 'bin', 'bin_runtime', 'abi', 'hashes', 'userdoc', 'devdoc', 'standard_json'
+        'version', 'optimize', 'gas', 'ast_json', 'asm', 'asm_json', 'opcodes',
+        'bin', 'bin_runtime', 'abi', 'hashes', 'userdoc', 'devdoc', 'standard_json'
     ]
     for value in kwargs:
         popen.expect(value)
         solcx.wrapper.solc_wrapper(stdin=foo_source, **{value: True})
 
 
-def test_solc4_only_kwargs(popen):
-    kwargs = ['clone_bin', 'formal']
-    if "0.5" in solcx.get_solc_version_string():
-        for value in kwargs:
-            popen.expect(value)
-            with pytest.raises(AttributeError):
-                solcx.wrapper.solc_wrapper(**{value: True})
-        return
-    for value in kwargs:
+def test_removed_kwargs(popen, foo_source):
+    solc_minor_version = solcx.get_solc_version().minor
+    kwargs = [
+        ('ast', 6),
+        ('clone_bin', 5),
+        ('formal', 5)
+    ]
+    for value, minor in kwargs:
         popen.expect(value)
-        solcx.wrapper.solc_wrapper(**{value: True})
+        if solc_minor_version >= minor:
+            with pytest.raises(AttributeError):
+                solcx.wrapper.solc_wrapper(stdin=foo_source, **{value: True})
+        else:
+            solcx.wrapper.solc_wrapper(stdin=foo_source, **{value: True})
 
 
 def test_value_kwargs(popen, foo_source):

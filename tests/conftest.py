@@ -42,7 +42,7 @@ def foo_source():
     yield """pragma solidity >=0.4.11;
 
 contract Foo {
-    function return13() public returns (uint) {
+    function return13() public returns (uint a) {
         return 13;
     }
 }
