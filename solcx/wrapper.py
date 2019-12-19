@@ -54,7 +54,8 @@ def solc_wrapper(solc_binary=None,
         solc_binary = get_executable()
 
     command = [solc_binary]
-    solc_minor = Version(solc_binary.rsplit('-v', maxsplit=1)[1]).minor
+
+    solc_minor = Version(solc_binary.rsplit('-v')[-1].split("\\")[0]).minor
 
     if help:
         command.append('--help')
