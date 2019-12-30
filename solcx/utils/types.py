@@ -1,34 +1,21 @@
-import sys
 import numbers
 from collections import abc
 
 
-if sys.version_info.major == 2:
-    integer_types = (int, long)  # noqa: F821
-    bytes_types = (bytes, bytearray)
-    text_types = (unicode,)  # noqa: F821
-    string_types = (basestring, bytearray)  # noqa: F821
-else:
-    integer_types = (int,)
-    bytes_types = (bytes, bytearray)
-    text_types = (str,)
-    string_types = (bytes, str, bytearray)
-
-
 def is_integer(value):
-    return isinstance(value, integer_types) and not isinstance(value, bool)
+    return isinstance(value, int) and not isinstance(value, bool)
 
 
 def is_bytes(value):
-    return isinstance(value, bytes_types)
+    return isinstance(value, (bytes, bytearray))
 
 
 def is_text(value):
-    return isinstance(value, text_types)
+    return isinstance(value, str)
 
 
 def is_string(value):
-    return isinstance(value, string_types)
+    return isinstance(value, (bytes, str, bytearray))
 
 
 def is_boolean(value):
