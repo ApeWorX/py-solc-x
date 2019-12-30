@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 
 import pytest
+import shutil
 import sys
 
 import solcx
@@ -35,6 +36,17 @@ def all_versions(request):
         solcx.set_solc_version(version)
     else:
         request.applymarker('skip')
+
+
+# run tests with no installed versions of solc
+@pytest.fixture
+def nosolc():
+    path = solcx.install.get_solc_folder()
+    temp_path = path.parent.joinpath('.temp')
+    path.rename(temp_path)
+    yield
+    shutil.rmtree(path)
+    temp_path.rename(path)
 
 
 @pytest.fixture()
