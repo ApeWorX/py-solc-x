@@ -21,6 +21,9 @@ from .exceptions import (
     DownloadError,
     SolcNotInstalled,
 )
+from .utils.lock import (
+    get_process_lock
+)
 
 DOWNLOAD_BASE = "https://github.com/ethereum/solidity/releases/download/{}/{}"
 ALL_RELEASES = "https://api.github.com/repos/ethereum/solidity/releases?per_page=100"
@@ -197,21 +200,31 @@ def get_installed_solc_versions():
 
 def install_solc(version, allow_osx=False):
     version = _check_version(version)
-    platform = _get_platform()
-    if platform == 'linux':
-        _install_solc_linux(version)
-    elif platform == 'darwin':
-        _install_solc_osx(version, allow_osx)
-    elif platform == 'win32':
-        _install_solc_windows(version)
-    binary_path = get_executable(version)
-    _check_subprocess_call(
-        [binary_path, '--version'],
-        message="Checking installed executable version @ {}".format(binary_path)
-    )
-    if not solc_version:
-        set_solc_version(version)
-    LOGGER.info("solc {} successfully installed at: {}".format(version, binary_path))
+    lock = get_process_lock(version)
+    if not lock.acquire(False):
+        lock.wait()
+        if not _check_for_installed_version(version):
+            return
+        return install_solc(version, allow_osx)
+
+    try:
+        platform = _get_platform()
+        if platform == 'linux':
+            _install_solc_linux(version)
+        elif platform == 'darwin':
+            _install_solc_osx(version, allow_osx)
+        elif platform == 'win32':
+            _install_solc_windows(version)
+        binary_path = get_executable(version)
+        _check_subprocess_call(
+            [binary_path, '--version'],
+            message="Checking installed executable version @ {}".format(binary_path)
+        )
+        if not solc_version:
+            set_solc_version(version)
+        LOGGER.info("solc {} successfully installed at: {}".format(version, binary_path))
+    finally:
+        lock.release()
 
 
 def _check_version(version):
