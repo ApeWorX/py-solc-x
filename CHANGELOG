@@ -1,3 +1,9 @@
+0.7.0 (unreleased)
+-----
+
+ - Store solc binaries at $HOME/.solcx
+ - Add locks for thread and multiprocessing safety
+
 0.6.1
 -----
 
