@@ -48,7 +48,7 @@ def _get_platform():
 
 
 def get_solc_folder():
-    path = Path(__file__).parent.joinpath('bin')
+    path = Path.home().joinpath('.solcx')
     path.mkdir(exist_ok=True)
     return path
 
