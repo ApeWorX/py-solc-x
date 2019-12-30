@@ -46,6 +46,7 @@ class UnixLock(_ProcessLock):
         try:
             fcntl.flock(self._lock_file, BLOCKING if blocking else NON_BLOCKING)
         except BlockingIOError:
+            self._lock.release()
             return False
         return True
 
@@ -57,18 +58,19 @@ class UnixLock(_ProcessLock):
 class WindowsLock(_ProcessLock):
 
     def acquire(self, blocking):
-        fd = os.open(self._lock_path, OPEN_MODE)
         if not self._lock.acquire(blocking):
             return False
         while True:
             try:
+                fd = os.open(self._lock_path, OPEN_MODE)
                 msvcrt.locking(fd, msvcrt.LK_LOCK if blocking else msvcrt.LK_NBLCK, 1)
+                self._fd = fd
                 return True
             except OSError:
                 if not blocking:
+                    self._lock.release()
                     return False
 
     def release(self):
-        fd = os.open(self._lock_path, OPEN_MODE)
-        msvcrt.locking(fd, msvcrt.LK_UNLCK)
+        msvcrt.locking(self._fd, msvcrt.LK_UNLCK, 1)
         self._lock.release()

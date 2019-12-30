@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 
-import threading
 import multiprocessing as mp
+import threading
 
 import solcx
 
@@ -31,8 +31,9 @@ def test_threadlock(nosolc):
         t.join()
 
 
-def test_processlock():
-    threads = [mp.Process(target=solcx.install_solc, args=('0.5.0',)) for i in range(4)]
+def test_processlock(nosolc):
+    mp.set_start_method('spawn')
+    threads = [mp.Process(target=solcx.install_solc, args=('0.5.0',),) for i in range(4)]
     for t in threads:
         t.start()
     solcx.install_solc('0.5.0')

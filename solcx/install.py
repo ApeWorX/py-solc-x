@@ -199,7 +199,9 @@ def get_installed_solc_versions():
 
 
 def install_solc(version, allow_osx=False):
+    platform = _get_platform()
     version = _check_version(version)
+
     lock = get_process_lock(version)
     if not lock.acquire(False):
         lock.wait()
@@ -208,7 +210,6 @@ def install_solc(version, allow_osx=False):
         return install_solc(version, allow_osx)
 
     try:
-        platform = _get_platform()
         if platform == 'linux':
             _install_solc_linux(version)
         elif platform == 'darwin':
