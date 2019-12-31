@@ -32,8 +32,9 @@ def test_threadlock(nosolc):
 
 
 def test_processlock(nosolc):
-    mp.set_start_method('spawn')
-    threads = [mp.Process(target=solcx.install_solc, args=('0.5.0',),) for i in range(4)]
+    # have to use a context here to prevent a conflict with tqdm
+    ctx = mp.get_context('spawn')
+    threads = [ctx.Process(target=solcx.install_solc, args=('0.5.0',),) for i in range(4)]
     for t in threads:
         t.start()
     solcx.install_solc('0.5.0')

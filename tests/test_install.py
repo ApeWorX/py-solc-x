@@ -44,3 +44,7 @@ def test_install_osx():
         solcx.install_solc('0.4.25')
     solcx.install_solc('0.4.25', allow_osx=True)
     solcx.install_solc('0.5.4')
+
+
+def test_progress_bar(nosolc):
+    solcx.install_solc('0.6.0', show_progress=True)

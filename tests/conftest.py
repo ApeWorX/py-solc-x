@@ -45,7 +45,8 @@ def nosolc():
     temp_path = path.parent.joinpath('.temp')
     path.rename(temp_path)
     yield
-    shutil.rmtree(path)
+    if path.exists():
+        shutil.rmtree(path)
     temp_path.rename(path)
 
 
