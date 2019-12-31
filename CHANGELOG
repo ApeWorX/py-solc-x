@@ -3,6 +3,7 @@
 
  - Store solc binaries at $HOME/.solcx
  - Add locks for thread and multiprocessing safety
+ - Show progress bar during installation if `tqdm` is installed
 
 0.6.1
 -----

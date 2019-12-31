@@ -29,7 +29,7 @@ pip install py-solc-x
 
 ## Installing the `solc` Executable
 
-The first time py-solc-x is imported it will automatically check for an installed version of solc on your system. If none is found, you must manually install via `solcx.install_solc`
+The first time py-solc-x is imported it will automatically check for an installed version of solc on your system. If none is found, you must manually install via `solcx.install_solc`:
 
 ```python
 >>> from solcx import install_solc
@@ -39,7 +39,7 @@ The first time py-solc-x is imported it will automatically check for an installe
 Or via the command line:
 
 ```bash
-$ python -m solcx.install v0.4.25
+python -m solcx.install v0.4.25
 ```
 
 Py-solc-x defaults to the most recent installed version set as the active one. To check or modify the active version:
@@ -185,7 +185,7 @@ Py-solc-x is tested on Linux and Windows with solc versions ``>=0.4.11``.
 To run the test suite:
 
 ```bash
-$ pytest tests/
+pytest tests/
 ```
 
 ## License
