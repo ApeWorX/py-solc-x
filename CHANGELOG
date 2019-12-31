@@ -1,4 +1,4 @@
-0.7.0 (unreleased)
+0.7.0
 -----
 
  - Store solc binaries at $HOME/.solcx
