@@ -300,7 +300,7 @@ def _download_solc(url, show_progress):
 
 def _install_solc_linux(version, show_progress):
     download = DOWNLOAD_BASE.format(version, "solc-static-linux")
-    binary_path = _check_for_installed_version(version, show_progress)
+    binary_path = _check_for_installed_version(version)
     if binary_path:
         LOGGER.info("Downloading solc {} from {}".format(version, download))
         content = _download_solc(download, show_progress)
