@@ -2,14 +2,32 @@
 
 import pytest
 import shutil
-import sys
+
+from requests import ConnectionError
 
 import solcx
 
-if sys.platform == "darwin":
-    VERSIONS = solcx.get_installed_solc_versions()
-else:
-    VERSIONS = solcx.get_available_solc_versions()
+
+def pytest_addoption(parser):
+    parser.addoption(
+        "--no-install",
+        action="store_true",
+        help="Only run solcx tests against already installed solc versions"
+    )
+
+
+def pytest_configure(config):
+    global VERSIONS
+    if config.getoption('--no-install'):
+        VERSIONS = solcx.get_installed_solc_versions()
+        return
+    try:
+        VERSIONS = solcx.get_available_solc_versions()
+    except ConnectionError:
+        raise pytest.UsageError(
+            "ConnectionError while attempting to get solc versions.\n"
+            "Use the --no-install flag to only run tests against already installed versions."
+        )
 
 
 # auto-parametrize the all_versions fixture with all target solc versions

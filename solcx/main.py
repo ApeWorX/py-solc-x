@@ -61,15 +61,15 @@ def solc_supports_standard_json_interface(**kwargs):
 def _parse_compiler_output(stdoutdata):
     output = json.loads(stdoutdata)
 
-    if "contracts" not in output:
-        return {}
+    contracts = output.get('contracts', {})
+    sources = output.get('sources', {})
 
-    contracts = output['contracts']
-    sources = output['sources']
-
-    for source, data in contracts.items():
-        data['abi'] = json.loads(data['abi'])
-        data['ast'] = sources[source.rsplit(':', maxsplit=1)[0]]['AST']
+    for path_str, data in contracts.items():
+        if 'abi' in data:
+            data['abi'] = json.loads(data['abi'])
+        key = path_str.rsplit(':', maxsplit=1)[0]
+        if 'AST' in sources.get(key, {}):
+            data['ast'] = sources[key]['AST']
 
     return contracts
 

@@ -30,7 +30,7 @@ def popen(monkeypatch):
 
 
 @pytest.fixture(autouse=True)
-def all_(all_versions):
+def setup(all_versions):
     pass
 
 

@@ -188,6 +188,8 @@ To run the test suite:
 pytest tests/
 ```
 
+By default, the test suite installs all available solc versions for your OS. If you only wish to test against already installed versions, include the `--no-install` flag.
+
 ## License
 
 This project is licensed under the [MIT license](LICENSE).
