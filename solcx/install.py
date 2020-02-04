@@ -266,7 +266,7 @@ def _check_for_installed_version(version):
 
 
 def _get_temp_folder():
-    path = Path(tempfile.gettempdir()).joinpath('py-solc-x-tmp')
+    path = Path(tempfile.gettempdir()).joinpath('solcx-tmp-{}'.format(os.getpid()))
     if path.exists():
         shutil.rmtree(str(path))
     path.mkdir()
