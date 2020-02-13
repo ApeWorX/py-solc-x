@@ -1,6 +1,7 @@
 """
 Install solc
 """
+import argparse
 from base64 import b64encode
 from io import BytesIO
 import os
@@ -370,10 +371,8 @@ def _install_solc_osx(version, allow_osx, show_progress):
 
 
 if __name__ == "__main__":
-    try:
-        version = sys.argv[1]
-    except IndexError:
-        LOGGER.error("Invocation error.  Should be invoked as `./install_solc.py <release-tag>`")
-        sys.exit(1)
-
-    install_solc(version)
+    argument_parser = argparse.ArgumentParser()
+    argument_parser.add_argument('version')
+    argument_parser.add_argument('--solcx-binary-path', default=None)
+    args = argument_parser.parse_args()
+    install_solc(args.version, args.solcx_binary_path)
