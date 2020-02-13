@@ -43,6 +43,8 @@ VERSION_REGEX = {
 }
 LOGGER = logging.getLogger("solcx")
 
+SOLCX_BINARY_PATH_VARIABLE = "SOLCX_BINARY_PATH"
+
 solc_version = None
 
 
@@ -57,10 +59,15 @@ def _get_platform():
     )
 
 
-def get_solc_folder():
-    path = Path.home().joinpath('.solcx')
-    path.mkdir(exist_ok=True)
-    return path
+def get_solc_folder(solcx_binary_path=None):
+    if os.getenv(SOLCX_BINARY_PATH_VARIABLE):
+        return Path(os.getenv(SOLCX_BINARY_PATH_VARIABLE))
+    elif solcx_binary_path is not None:
+        return Path(solcx_binary_path)
+    else:
+        path = Path.home().joinpath('.solcx')
+        path.mkdir(exist_ok=True)
+        return path
 
 
 def _import_version(path):
@@ -68,7 +75,7 @@ def _import_version(path):
     return "v" + version[version.index("Version: ")+9:version.index('+')]
 
 
-def import_installed_solc():
+def import_installed_solc(solcx_binary_path=None):
     platform = _get_platform()
     if platform == 'linux':
         # on Linux, copy active version of solc
@@ -89,7 +96,7 @@ def import_installed_solc():
             assert version not in get_installed_solc_versions()
         except Exception:
             continue
-        copy_path = str(get_solc_folder().joinpath("solc-" + version))
+        copy_path = str(get_solc_folder(solcx_binary_path=solcx_binary_path).joinpath("solc-" + version))
         shutil.copy(path, copy_path)
         try:
             # confirm that solc still works after being copied
@@ -98,7 +105,7 @@ def import_installed_solc():
             os.unlink(copy_path)
 
 
-def get_executable(version=None):
+def get_executable(version=None, solcx_binary_path=None):
     if not version:
         version = solc_version
     if not version:
@@ -106,7 +113,7 @@ def get_executable(version=None):
             "Solc is not installed. Call solcx.get_available_solc_versions()"
             " to view for available versions and solcx.install_solc() to install."
         )
-    solc_bin = get_solc_folder().joinpath("solc-" + version)
+    solc_bin = get_solc_folder(solcx_binary_path=solcx_binary_path).joinpath("solc-" + version)
     if sys.platform == "win32":
         solc_bin = solc_bin.joinpath("solc.exe")
     if not solc_bin.exists():
@@ -117,9 +124,9 @@ def get_executable(version=None):
     return str(solc_bin)
 
 
-def set_solc_version(version, silent=False):
+def set_solc_version(version, silent=False, solcx_binary_path=None):
     version = _check_version(version)
-    get_executable(version)
+    get_executable(version, solcx_binary_path)
     global solc_version
     solc_version = version
     if not silent:
@@ -201,11 +208,11 @@ def _select_pragma_version(pragma_string, version_list):
         return str(version)
 
 
-def get_installed_solc_versions():
-    return sorted(i.name[5:] for i in get_solc_folder().glob('solc-v*'))
+def get_installed_solc_versions(solcx_binary_path=None):
+    return sorted(i.name[5:] for i in get_solc_folder(solcx_binary_path=solcx_binary_path).glob('solc-v*'))
 
 
-def install_solc(version, allow_osx=False, show_progress=False):
+def install_solc(version, allow_osx=False, show_progress=False, solcx_binary_path=None):
     platform = _get_platform()
     version = _check_version(version)
 
@@ -218,12 +225,12 @@ def install_solc(version, allow_osx=False, show_progress=False):
 
     try:
         if platform == 'linux':
-            _install_solc_linux(version, show_progress)
+            _install_solc_linux(version, show_progress, solcx_binary_path)
         elif platform == 'darwin':
-            _install_solc_osx(version, allow_osx, show_progress)
+            _install_solc_osx(version, allow_osx, show_progress, solcx_binary_path)
         elif platform == 'win32':
-            _install_solc_windows(version, show_progress)
-        binary_path = get_executable(version)
+            _install_solc_windows(version, show_progress, solcx_binary_path)
+        binary_path = get_executable(version, solcx_binary_path)
         _check_subprocess_call(
             [binary_path, '--version'],
             message="Checking installed executable version @ {}".format(binary_path)
@@ -258,8 +265,8 @@ def _chmod_plus_x(executable_path):
     executable_path.chmod(executable_path.stat().st_mode | stat.S_IEXEC)
 
 
-def _check_for_installed_version(version):
-    path = get_solc_folder().joinpath("solc-" + version)
+def _check_for_installed_version(version, solcx_binary_path=None):
+    path = get_solc_folder(solcx_binary_path=solcx_binary_path).joinpath("solc-" + version)
     if path.exists():
         LOGGER.info("solc {} already installed at: {}".format(version, path))
         return False
@@ -299,9 +306,9 @@ def _download_solc(url, show_progress):
     return content
 
 
-def _install_solc_linux(version, show_progress):
+def _install_solc_linux(version, show_progress, solcx_binary_path=None):
     download = DOWNLOAD_BASE.format(version, "solc-static-linux")
-    binary_path = _check_for_installed_version(version)
+    binary_path = _check_for_installed_version(version, solcx_binary_path=solcx_binary_path)
     if binary_path:
         LOGGER.info("Downloading solc {} from {}".format(version, download))
         content = _download_solc(download, show_progress)
@@ -310,7 +317,7 @@ def _install_solc_linux(version, show_progress):
         _chmod_plus_x(binary_path)
 
 
-def _install_solc_windows(version, show_progress):
+def _install_solc_windows(version, show_progress, solcx_binary_path=None):
     download = DOWNLOAD_BASE.format(version, "solidity-windows.zip")
     install_folder = _check_for_installed_version(version)
     if install_folder:
@@ -318,11 +325,11 @@ def _install_solc_windows(version, show_progress):
         content = _download_solc(download, show_progress)
         with zipfile.ZipFile(BytesIO(content)) as zf:
             zf.extractall(str(temp_path))
-        install_folder = get_solc_folder().joinpath("solc-" + version)
+        install_folder = get_solc_folder(solcx_binary_path=solcx_binary_path).joinpath("solc-" + version)
         temp_path.rename(install_folder)
 
 
-def _install_solc_osx(version, allow_osx, show_progress):
+def _install_solc_osx(version, allow_osx, show_progress, solcx_binary_path):
     if version.startswith("v0.4") and not allow_osx:
         raise ValueError(
             "Py-solc-x cannot build solc versions 0.4.x on OSX. If you install solc 0.4.x "
@@ -375,4 +382,4 @@ if __name__ == "__main__":
     argument_parser.add_argument('version')
     argument_parser.add_argument('--solcx-binary-path', default=None)
     args = argument_parser.parse_args()
-    install_solc(args.version, args.solcx_binary_path)
+    install_solc(args.version, solcx_binary_path=args.solcx_binary_path)
