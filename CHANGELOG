@@ -1,3 +1,8 @@
+Unreleased
+----------
+
+ - Include `which` when importing installed versions on OSX
+
 0.7.2
 -----
 
