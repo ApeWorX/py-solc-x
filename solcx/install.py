@@ -69,19 +69,19 @@ def _import_version(path):
 
 def import_installed_solc():
     platform = _get_platform()
-    if platform == 'linux':
-        # on Linux, copy active version of solc
-        path_list = [
-            subprocess.run(['which', 'solc'], stdout=subprocess.PIPE).stdout.decode().strip()
-        ]
-        if not path_list[0]:
-            return
-    elif platform == 'darwin':
-        # on OSX, copy all versions of solc from cellar
-        path_list = [str(i) for i in Path('/usr/local/Cellar').glob('solidity*/**/solc')]
-    else:
-        # on Windows, do nothing
+    if platform == "win32":
         return
+
+    # copy active version of solc
+    path_list = []
+    which = subprocess.run(['which', 'solc'], stdout=subprocess.PIPE).stdout.decode().strip()
+    if which:
+        path_list.append(which)
+
+    # on OSX, also copy all versions of solc from cellar
+    if platform == "darwin":
+        path_list = [str(i) for i in Path('/usr/local/Cellar').glob('solidity*/**/solc')]
+
     for path in path_list:
         try:
             version = _import_version(path)
