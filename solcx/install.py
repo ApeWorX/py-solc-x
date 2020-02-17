@@ -96,7 +96,8 @@ def import_installed_solc(solcx_binary_path=None):
             assert version not in get_installed_solc_versions()
         except Exception:
             continue
-        copy_path = str(get_solc_folder(solcx_binary_path=solcx_binary_path).joinpath("solc-" + version))
+        copy_path = str(get_solc_folder(solcx_binary_path=solcx_binary_path)
+                        .joinpath("solc-" + version))
         shutil.copy(path, copy_path)
         try:
             # confirm that solc still works after being copied
@@ -209,7 +210,8 @@ def _select_pragma_version(pragma_string, version_list):
 
 
 def get_installed_solc_versions(solcx_binary_path=None):
-    return sorted(i.name[5:] for i in get_solc_folder(solcx_binary_path=solcx_binary_path).glob('solc-v*'))
+    return sorted(i.name[5:] for i in get_solc_folder(solcx_binary_path=solcx_binary_path)
+                  .glob('solc-v*'))
 
 
 def install_solc(version, allow_osx=False, show_progress=False, solcx_binary_path=None):
@@ -325,7 +327,8 @@ def _install_solc_windows(version, show_progress, solcx_binary_path=None):
         content = _download_solc(download, show_progress)
         with zipfile.ZipFile(BytesIO(content)) as zf:
             zf.extractall(str(temp_path))
-        install_folder = get_solc_folder(solcx_binary_path=solcx_binary_path).joinpath("solc-" + version)
+        install_folder = get_solc_folder(solcx_binary_path=solcx_binary_path)\
+            .joinpath("solc-" + version)
         temp_path.rename(install_folder)
 
 
