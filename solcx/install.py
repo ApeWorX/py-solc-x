@@ -154,7 +154,7 @@ def set_solc_version_pragma(pragma_string, silent=False, check_new=False):
             LOGGER.info("Newer compatible solc version exists: {}".format(latest))
 
 
-def install_solc_pragma(pragma_string, install=True, show_progress=False):
+def install_solc_pragma(pragma_string, install=True, show_progress=False, solcx_binary_path=None):
     version = _select_pragma_version(
         pragma_string,
         [Version(i[1:]) for i in get_available_solc_versions()]
@@ -162,7 +162,7 @@ def install_solc_pragma(pragma_string, install=True, show_progress=False):
     if not version:
         raise ValueError("Compatible solc version does not exist")
     if install:
-        install_solc(version, show_progress=show_progress)
+        install_solc(version, show_progress=show_progress, solcx_binary_path=solcx_binary_path)
     return version
 
 
