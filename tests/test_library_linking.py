@@ -30,27 +30,26 @@ addr2 = "0xdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef"
 
 @pytest.fixture
 def bytecode():
-    yield solcx.compile_source(source)['<stdin>:LinkTester']['bin']
+    yield solcx.compile_source(source)["<stdin>:LinkTester"]["bin"]
 
 
 def test_partial_link(all_versions, bytecode):
-    assert '_' in bytecode
+    assert "_" in bytecode
     assert addr1[2:] not in bytecode
-    output = solcx.link_code(bytecode, {'<stdin>:UnlinkedLib': addr1})
+    output = solcx.link_code(bytecode, {"<stdin>:UnlinkedLib": addr1})
     assert output != bytecode
-    assert '_' in output
+    assert "_" in output
     assert addr1[2:] in output
 
 
 def test_full_link(all_versions, bytecode):
-    assert '_' in bytecode
+    assert "_" in bytecode
     assert addr1[2:] not in bytecode
     assert addr2[2:] not in bytecode
     output = solcx.link_code(
-        bytecode,
-        {'<stdin>:UnlinkedLib': addr1, '<stdin>:OtherUnlinkedLib': addr2}
+        bytecode, {"<stdin>:UnlinkedLib": addr1, "<stdin>:OtherUnlinkedLib": addr2}
     )
     assert output != bytecode
-    assert '_' not in output
+    assert "_" not in output
     assert addr1[2:] in output
     assert addr2[2:] in output
