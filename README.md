@@ -42,6 +42,10 @@ Or via the command line:
 python -m solcx.install v0.4.25
 ```
 
+By default, `solc` versions are installed at `~/.solcx/`. If you wish to use a different directory you can specify it with the `SOLCX_BINARY_PATH` environment variable.
+
+## Setting the `solc` Version
+
 Py-solc-x defaults to the most recent installed version set as the active one. To check or modify the active version:
 
 ```python
