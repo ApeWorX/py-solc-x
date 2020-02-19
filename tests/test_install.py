@@ -48,3 +48,30 @@ def test_install_osx():
 
 def test_progress_bar(nosolc):
     solcx.install_solc('0.6.0', show_progress=True)
+
+
+def test_environment_var_path(monkeypatch, tmp_path):
+    install_folder = solcx.get_solc_folder()
+    monkeypatch.setenv('SOLCX_BINARY_PATH', tmp_path.as_posix())
+    assert solcx.get_solc_folder() != install_folder
+
+    monkeypatch.undo()
+    assert solcx.get_solc_folder() == install_folder
+
+
+def test_environment_var_versions(monkeypatch, tmp_path):
+    versions = solcx.get_installed_solc_versions()
+    monkeypatch.setenv('SOLCX_BINARY_PATH', tmp_path.as_posix())
+    assert solcx.get_installed_solc_versions() != versions
+
+    monkeypatch.undo()
+    assert solcx.get_installed_solc_versions() == versions
+
+
+def test_environment_var_install(monkeypatch, tmp_path):
+    assert not tmp_path.joinpath('solc-v0.6.0').exists()
+
+    monkeypatch.setenv('SOLCX_BINARY_PATH', tmp_path.as_posix())
+
+    solcx.install_solc('0.6.0')
+    assert tmp_path.joinpath('solc-v0.6.0').exists()
