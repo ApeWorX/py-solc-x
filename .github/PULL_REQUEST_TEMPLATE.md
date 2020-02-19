@@ -1,11 +1,14 @@
-### What was wrong / missing?
+### What I did
 
+Related issue: #
 
+### How I did it
 
-### How was it fixed / added?
+### How to verify it
 
+### Checklist
 
-
-#### Cute Animal Picture
-
-> put a cute animal picture here.
+- [ ] I have confirmed that my PR passes all linting checks
+- [ ] I have included test cases
+- [ ] I have updated the documentation (README.md)
+- [ ] I have added an entry to the changelog
