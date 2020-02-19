@@ -1,6 +1,7 @@
-Unreleased
-----------
+0.8.0
+-----
 
+ - Allow user-specified installation directory via `SOLCX_BINARY_PATH` environment variable
  - Include `which` when importing installed versions on OSX
 
 0.7.2
