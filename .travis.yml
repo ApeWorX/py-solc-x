@@ -1,5 +1,5 @@
 # Based on https://github.com/cclauss/Travis-CI-Python-on-three-OSes
-matrix:
+jobs:
   include:
     - name: "Python 3.7.4 on Windows"
       os: windows           # Windows 10.0.17134 N/A Build 17134
@@ -11,11 +11,10 @@ matrix:
       env: PATH=/c/Python37:/c/Python37/Scripts:$PATH
       script: python -m pytest tests --cov=solcx
       after_success: python -m coveralls
-    - name: "Python 3.8.0 on Xenial Linux"
+    - name: "Python 3.8 on Bionic Linux"
       language: python
       python: 3.8
-      dist: xenial
-      sudo: true
+      dist: bionic
       install:
         - sudo add-apt-repository -y ppa:ethereum/ethereum
         - sudo apt-get update
@@ -23,11 +22,10 @@ matrix:
         - pip install -r requirements-dev.txt
       script: python -m pytest tests --cov=solcx
       after_success: python -m coveralls
-    - name: "Python 3.7.1 on Xenial Linux"
+    - name: "Python 3.7 on Bionic Linux"
       language: python
       python: 3.7
-      dist: xenial
-      sudo: true
+      dist: bionic
       install:
         - sudo add-apt-repository -y ppa:ethereum/ethereum
         - sudo apt-get update
@@ -38,11 +36,10 @@ matrix:
         - flake8 solcx/ tests/ --max-line-length=100
         - python -m pytest tests --cov=solcx
       after_success: python -m coveralls
-    - name: "Python 3.6.8 on Xenial Linux"
+    - name: "Python 3.6 on Bionic Linux"
       language: python
       python: 3.6
-      dist: xenial
-      sudo: true
+      dist: bionic
       install:
         - sudo add-apt-repository -y ppa:ethereum/ethereum
         - sudo apt-get update
