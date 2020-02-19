@@ -7,9 +7,9 @@ jobs:
       install:
         - choco install python --version=3.7.4
         - python -m pip install --upgrade pip
-        - pip3 install -r requirements-dev.txt
+        - pip3 install tox==3.14.2
       env: PATH=/c/Python37:/c/Python37/Scripts:$PATH
-      script: python -m pytest tests --cov=solcx
+      script: tox -e tests
       after_success: python -m coveralls
     - name: "Python 3.8 on Bionic Linux"
       language: python
@@ -19,8 +19,8 @@ jobs:
         - sudo add-apt-repository -y ppa:ethereum/ethereum
         - sudo apt-get update
         - sudo apt-get install -y solc
-        - pip install -r requirements-dev.txt
-      script: python -m pytest tests --cov=solcx
+        - pip install tox==3.14.2
+      script: tox -e tests
       after_success: python -m coveralls
     - name: "Python 3.7 on Bionic Linux"
       language: python
@@ -30,11 +30,8 @@ jobs:
         - sudo add-apt-repository -y ppa:ethereum/ethereum
         - sudo apt-get update
         - sudo apt-get install -y solc
-        - pip install -r requirements-dev.txt
-        - pip install flake8
-      script:
-        - flake8 solcx/ tests/ --max-line-length=100
-        - python -m pytest tests --cov=solcx
+        - pip install tox==3.14.2
+      script: tox -e lint,tests
       after_success: python -m coveralls
     - name: "Python 3.6 on Bionic Linux"
       language: python
@@ -44,8 +41,8 @@ jobs:
         - sudo add-apt-repository -y ppa:ethereum/ethereum
         - sudo apt-get update
         - sudo apt-get install -y solc
-        - pip install -r requirements-dev.txt
-      script: python -m pytest tests --cov=solcx
+        - pip install tox==3.14.2
+      script: tox -e tests
       after_success: python -m coveralls
 
 env:
