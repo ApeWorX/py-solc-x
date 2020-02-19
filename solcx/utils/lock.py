@@ -1,14 +1,16 @@
 import os
-from pathlib import Path
 import sys
 import tempfile
 import threading
+from pathlib import Path
 
 if sys.platform == "win32":
     import msvcrt
+
     OPEN_MODE = os.O_RDWR | os.O_CREAT | os.O_TRUNC
 else:
     import fcntl
+
     NON_BLOCKING = fcntl.LOCK_EX | fcntl.LOCK_NB
     BLOCKING = fcntl.LOCK_EX
 
@@ -27,11 +29,10 @@ def get_process_lock(lock_id):
 
 
 class _ProcessLock:
-
     def __init__(self, lock_id):
         self._lock = threading.Lock()
-        self._lock_path = Path(tempfile.gettempdir()).joinpath(f'.solcx-lock-{lock_id}')
-        self._lock_file = self._lock_path.open('w')
+        self._lock_path = Path(tempfile.gettempdir()).joinpath(f".solcx-lock-{lock_id}")
+        self._lock_file = self._lock_path.open("w")
 
     def wait(self):
         self.acquire(True)
@@ -39,7 +40,6 @@ class _ProcessLock:
 
 
 class UnixLock(_ProcessLock):
-
     def acquire(self, blocking):
         if not self._lock.acquire(blocking):
             return False
@@ -56,7 +56,6 @@ class UnixLock(_ProcessLock):
 
 
 class WindowsLock(_ProcessLock):
-
     def acquire(self, blocking):
         if not self._lock.acquire(blocking):
             return False

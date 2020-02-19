@@ -1,8 +1,8 @@
 #!/usr/bin/python3
 
-import pytest
 import shutil
 
+import pytest
 from requests import ConnectionError
 
 import solcx
@@ -12,13 +12,13 @@ def pytest_addoption(parser):
     parser.addoption(
         "--no-install",
         action="store_true",
-        help="Only run solcx tests against already installed solc versions"
+        help="Only run solcx tests against already installed solc versions",
     )
 
 
 def pytest_configure(config):
     global VERSIONS
-    if config.getoption('--no-install'):
+    if config.getoption("--no-install"):
         VERSIONS = solcx.get_installed_solc_versions()
         return
     try:
@@ -32,14 +32,16 @@ def pytest_configure(config):
 
 # auto-parametrize the all_versions fixture with all target solc versions
 def pytest_generate_tests(metafunc):
-    if 'all_versions' in metafunc.fixturenames:
-        metafunc.parametrize('all_versions', VERSIONS, indirect=True)
+    if "all_versions" in metafunc.fixturenames:
+        metafunc.parametrize("all_versions", VERSIONS, indirect=True)
 
 
 # * runs a test against all target solc versions
 # * the first test using this fixture attempts to install every version
 # * if an install fails all subsequent tests on that version are skipped
 _installed = {}
+
+
 @pytest.fixture()
 def all_versions(request):
     version = request.param
@@ -53,14 +55,14 @@ def all_versions(request):
     if _installed[version]:
         solcx.set_solc_version(version)
     else:
-        request.applymarker('skip')
+        request.applymarker("skip")
 
 
 # run tests with no installed versions of solc
 @pytest.fixture
 def nosolc():
     path = solcx.install.get_solc_folder()
-    temp_path = path.parent.joinpath('.temp')
+    temp_path = path.parent.joinpath(".temp")
     path.rename(temp_path)
     yield
     if path.exists():
@@ -102,15 +104,15 @@ contract Foo {"""
 
 @pytest.fixture()
 def foo_path(tmp_path, foo_source):
-    source = tmp_path.joinpath('Foo.sol')
-    with source.open('w') as fp:
+    source = tmp_path.joinpath("Foo.sol")
+    with source.open("w") as fp:
         fp.write(foo_source)
     return source.as_posix()
 
 
 @pytest.fixture()
 def bar_path(tmp_path, bar_source):
-    source = tmp_path.joinpath('Bar.sol')
-    with source.open('w') as fp:
+    source = tmp_path.joinpath("Bar.sol")
+    with source.open("w") as fp:
         fp.write(bar_source)
     return source.as_posix()

@@ -1,13 +1,13 @@
 #!/usr/bin/python3
 
 import subprocess
+
 import pytest
 
 import solcx
 
 
 class PopenPatch:
-
     def __init__(self):
         self.proc = subprocess.Popen
         self.args = []
@@ -25,7 +25,7 @@ class PopenPatch:
 @pytest.fixture
 def popen(monkeypatch):
     p = PopenPatch()
-    monkeypatch.setattr('subprocess.Popen', p)
+    monkeypatch.setattr("subprocess.Popen", p)
     yield p
 
 
@@ -35,14 +35,26 @@ def setup(all_versions):
 
 
 def test_help(popen):
-    popen.expect('help')
+    popen.expect("help")
     solcx.wrapper.solc_wrapper(help=True, success_return_code=1)
 
 
 def test_boolean_kwargs(popen, foo_source):
     kwargs = [
-        'version', 'optimize', 'gas', 'ast_json', 'asm', 'asm_json', 'opcodes',
-        'bin', 'bin_runtime', 'abi', 'hashes', 'userdoc', 'devdoc', 'standard_json'
+        "version",
+        "optimize",
+        "gas",
+        "ast_json",
+        "asm",
+        "asm_json",
+        "opcodes",
+        "bin",
+        "bin_runtime",
+        "abi",
+        "hashes",
+        "userdoc",
+        "devdoc",
+        "standard_json",
     ]
     for value in kwargs:
         popen.expect(value)
@@ -51,11 +63,7 @@ def test_boolean_kwargs(popen, foo_source):
 
 def test_removed_kwargs(popen, foo_source):
     solc_minor_version = solcx.get_solc_version().minor
-    kwargs = [
-        ('ast', 6),
-        ('clone_bin', 5),
-        ('formal', 5)
-    ]
+    kwargs = [("ast", 6), ("clone_bin", 5), ("formal", 5)]
     for value, minor in kwargs:
         popen.expect(value)
         if solc_minor_version >= minor:
@@ -67,11 +75,11 @@ def test_removed_kwargs(popen, foo_source):
 
 def test_value_kwargs(popen, foo_source):
     kwargs = [
-        ('optimize_runs', 200),
-        ('libraries', "libraries:0x1234567890123456789012345678901234567890"),
-        ('output_dir', "."),
-        ('combined_json', "abi"),
-        ('allow_paths', ".")
+        ("optimize_runs", 200),
+        ("libraries", "libraries:0x1234567890123456789012345678901234567890"),
+        ("output_dir", "."),
+        ("combined_json", "abi"),
+        ("allow_paths", "."),
     ]
     for value in kwargs:
         popen.expect(value[0])

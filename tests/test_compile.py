@@ -1,26 +1,27 @@
 #!/usr/bin/python3
 
 from pathlib import Path
+
 import pytest
 
 import solcx
-from solcx.main import ALL_OUTPUT_VALUES
 from solcx.exceptions import ContractsNotFound
+from solcx.main import ALL_OUTPUT_VALUES
 
 # interfaces and compact-format do not return anything
 combined_json_values = (
-    'abi',
-    'asm',
-    'ast',
-    'bin',
-    'bin-runtime',
-    'devdoc',
-    'hashes',
-    'metadata',
-    'opcodes',
-    'srcmap',
-    'srcmap-runtime',
-    'userdoc',
+    "abi",
+    "asm",
+    "ast",
+    "bin",
+    "bin-runtime",
+    "devdoc",
+    "hashes",
+    "metadata",
+    "opcodes",
+    "srcmap",
+    "srcmap-runtime",
+    "userdoc",
 )
 
 
@@ -42,7 +43,7 @@ def test_compile_source_empty():
     solcx.compile_source("  ", allow_empty=True)
 
 
-@pytest.mark.parametrize('key', combined_json_values)
+@pytest.mark.parametrize("key", combined_json_values)
 def test_compile_source_output_types(foo_source, key):
     if key == "hashes" and str(solcx.get_solc_version().truncate()) == "0.4.11":
         return
@@ -63,7 +64,7 @@ def test_compile_files_empty():
     solcx.compile_files([], allow_empty=True)
 
 
-@pytest.mark.parametrize('key', combined_json_values)
+@pytest.mark.parametrize("key", combined_json_values)
 def test_compile_files_output_types(foo_path, key):
     if key == "hashes" and str(solcx.get_solc_version().truncate()) == "0.4.11":
         return
@@ -75,7 +76,7 @@ def test_compile_files_import_remapping(foo_path, bar_path):
     path = Path(bar_path).parent.as_posix()
     output = solcx.compile_files([bar_path], import_remappings=[f"contracts={path}"])
     assert output
-    assert f'{bar_path}:Bar' in output
+    assert f"{bar_path}:Bar" in output
 
 
 def _compile_assertions(output, key):
