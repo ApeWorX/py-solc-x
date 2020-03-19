@@ -43,19 +43,19 @@ def test_get_solc_version_string(all_versions):
 def test_set_solc_version_pragma(pragmapatch):
     set_pragma = functools.partial(solcx.set_solc_version_pragma, check_new=True)
     set_pragma("pragma solidity 0.4.11;")
-    assert solcx.install.solc_version == "0.4.11"
+    assert solcx.install.solc_version == "v0.4.11"
     set_pragma("pragma solidity ^0.4.11;")
-    assert solcx.install.solc_version == "0.4.25"
+    assert solcx.install.solc_version == "v0.4.25"
     set_pragma("pragma solidity >=0.4.0<0.4.25;")
-    assert solcx.install.solc_version == "0.4.11"
+    assert solcx.install.solc_version == "v0.4.11"
     set_pragma("pragma solidity >=0.4.2;")
-    assert solcx.install.solc_version == "1.2.3"
+    assert solcx.install.solc_version == "v1.2.3"
     set_pragma("pragma solidity >=0.4.2<0.5.5;")
-    assert solcx.install.solc_version == "0.5.4"
+    assert solcx.install.solc_version == "v0.5.4"
     set_pragma("pragma solidity ^0.4.2 || 0.5.5;")
-    assert solcx.install.solc_version == "0.4.25"
+    assert solcx.install.solc_version == "v0.4.25"
     set_pragma("pragma solidity ^0.4.2 || >=0.5.4<0.7.0;")
-    assert solcx.install.solc_version == "0.5.7"
+    assert solcx.install.solc_version == "v0.5.7"
     with pytest.raises(SolcNotInstalled):
         set_pragma("pragma solidity ^0.7.1;")
 
