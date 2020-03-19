@@ -139,13 +139,14 @@ def set_solc_version_pragma(pragma_string, silent=False, check_new=False):
             "No compatible solc version installed. "
             + "Use solcx.install_solc_version_pragma('{}') to install.".format(version)
         )
+    version = _check_version(version)
     global solc_version
     solc_version = version
     if not silent:
         LOGGER.info("Using solc version {}".format(solc_version))
     if check_new:
         latest = install_solc_pragma(pragma_string, False)
-        if Version(latest) > Version(version):
+        if Version(latest) > Version(version[1:]):
             LOGGER.info("Newer compatible solc version exists: {}".format(latest))
 
 
