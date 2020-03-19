@@ -139,6 +139,7 @@ def set_solc_version_pragma(pragma_string, silent=False, check_new=False):
             "No compatible solc version installed. "
             + "Use solcx.install_solc_version_pragma('{}') to install.".format(version)
         )
+    version = _check_version(version)
     global solc_version
     solc_version = version
     if not silent:
