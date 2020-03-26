@@ -1,3 +1,9 @@
+0.8.1
+-----
+
+ - Bugfix: setting version with pragma
+ - Expand error message on 403 error from Github ABI
+
 0.8.0
 -----
 
