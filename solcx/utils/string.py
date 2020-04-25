@@ -10,7 +10,7 @@ def force_bytes(value, encoding="iso-8859-1"):
     elif is_text(value):
         return codecs.encode(value, encoding)
     else:
-        raise TypeError("Unsupported type: {0}".format(type(value)))
+        raise TypeError(f"Unsupported type: {type(value)}")
 
 
 def force_text(value, encoding="iso-8859-1"):
@@ -19,7 +19,7 @@ def force_text(value, encoding="iso-8859-1"):
     elif is_bytes(value):
         return codecs.decode(value, encoding)
     else:
-        raise TypeError("Unsupported type: {0}".format(type(value)))
+        raise TypeError(f"Unsupported type: {type(value)}")
 
 
 def force_obj_to_bytes(obj):
