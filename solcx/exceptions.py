@@ -26,13 +26,13 @@ class SolcError(Exception):
     def __str__(self):
         return textwrap.dedent(
             f"""
-            {self..message}
+            {self.message}
             > command: `{' '.join(self.command)}`
-            > return code: `{self..return_code}`
+            > return code: `{self.return_code}`
             > stderr:
-            {self..stdout_data}
+            {self.stdout_data}
             > stdout:
-            {self..stderr_data}
+            {self.stderr_data}
             """
         ).strip()
 
