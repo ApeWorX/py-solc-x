@@ -3,7 +3,7 @@
 To start development for py-solc-x you should begin by cloning the repo.
 
 ```bash
-$ git clone https://github.com/iamdefinitelyahuman/py-solc-x.git
+git clone https://github.com/iamdefinitelyahuman/py-solc-x.git
 ```
 
 Next, ensure all dev dependencies have been installed:

@@ -1,0 +1,97 @@
+on: ["push", "pull_request"]
+
+name: py-solc-x workflow
+
+jobs:
+
+  lint:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v1
+
+    - name: Setup Python 3.6
+      uses: actions/setup-python@v1
+      with:
+        python-version: 3.6
+
+    - name: Install Tox
+      run: pip install tox
+
+    - name: Run Tox
+      run: tox -e lint
+
+
+  py36:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v1
+    
+    - name: Setup Python 3.6
+      uses: actions/setup-python@v1
+      with:
+        python-version: 3.6
+    
+    - name: Install Tox
+      run: pip install tox
+
+    - name: Run Tox
+      run: tox -e py36
+
+    - name: Upload coverage to Codecov  
+      uses: codecov/codecov-action@v1
+      with:
+        file: ./coverage.xml
+        fail_ci_if_error: true
+
+
+  py37:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v1
+    
+    - name: Setup Python 3.7
+      uses: actions/setup-python@v1
+      with:
+        python-version: 3.7
+    
+    - name: Install Tox
+      run: pip install tox
+
+    - name: Run Tox
+      run: tox -e py37
+
+    - name: Upload coverage to Codecov  
+      uses: codecov/codecov-action@v1
+      with:
+        file: ./coverage.xml
+        fail_ci_if_error: true
+
+
+  py38:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+
+    steps:
+    - uses: actions/checkout@v1
+    
+    - name: Setup Python 3.8
+      uses: actions/setup-python@v1
+      with:
+        python-version: 3.8
+    
+    - name: Install Tox
+      run: pip install tox
+
+    - name: Run Tox
+      run: tox -e py38
+
+    - name: Upload coverage to Codecov  
+      uses: codecov/codecov-action@v1
+      with:
+        file: ./coverage.xml
+        fail_ci_if_error: true
