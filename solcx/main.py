@@ -84,9 +84,7 @@ def compile_source(source, allow_empty=False, output_values=ALL_OUTPUT_VALUES, *
     if "stdin" in kwargs:
         raise ValueError("The `stdin` keyword is not allowed in the `compile_source` function")
     if "combined_json" in kwargs:
-        raise ValueError(
-            "The `combined_json` keyword is not allowed in the `compile_source` function"
-        )
+        raise ValueError("The `combined_json` keyword is not allowed in the `compile_source` function")
 
     combined_json = ",".join(output_values)
     compiler_kwargs = dict(stdin=source, combined_json=combined_json, **kwargs)
@@ -108,9 +106,7 @@ def compile_source(source, allow_empty=False, output_values=ALL_OUTPUT_VALUES, *
 
 def compile_files(source_files, allow_empty=False, output_values=ALL_OUTPUT_VALUES, **kwargs):
     if "combined_json" in kwargs:
-        raise ValueError(
-            "The `combined_json` keyword is not allowed in the `compile_files` function"
-        )
+        raise ValueError("The `combined_json` keyword is not allowed in the `compile_files` function")
 
     combined_json = ",".join(output_values)
     compiler_kwargs = dict(source_files=source_files, combined_json=combined_json, **kwargs)
