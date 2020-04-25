@@ -1,6 +1,6 @@
 # py-solc-x
 
-[![Pypi Status](https://img.shields.io/pypi/v/py-solc-x.svg)](https://pypi.org/project/py-solc-x/) [![Build Status](https://img.shields.io/travis/com/iamdefinitelyahuman/py-solc-x.svg)](https://travis-ci.com/iamdefinitelyahuman/py-solc-x) [![Coverage Status](https://coveralls.io/repos/github/iamdefinitelyahuman/py-solc-x/badge.svg?branch=master)](https://coveralls.io/github/iamdefinitelyahuman/py-solc-x?branch=master)
+[![Pypi Status](https://img.shields.io/pypi/v/py-solc-x.svg)](https://pypi.org/project/py-solc-x/) [![Build Status](https://img.shields.io/github/workflow/status/iamdefinitelyahuman/py-solc-x/py-solc-x%20workflow)](https://github.com/iamdefinitelyahuman/py-solc-x/actions) [![Coverage Status](https://img.shields.io/codecov/c/github/iamdefinitelyahuman/py-solc-x)](https://codecov.io/gh/iamdefinitelyahuman/py-solc-x)
 
 Python wrapper around the `solc` Solidity compiler with `0.5.x` and `0.6.x` support.
 
