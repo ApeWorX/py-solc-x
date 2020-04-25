@@ -30,6 +30,9 @@ except ImportError:
 
 DOWNLOAD_BASE = "https://github.com/ethereum/solidity/releases/download/{}/{}"
 ALL_RELEASES = "https://api.github.com/repos/ethereum/solidity/releases?per_page=100"
+CURRENT_RELEASE = (
+    "https://solidity.readthedocs.io/en/v0.6.0/installing-solidity.html#binary-packages"
+)
 
 MINIMAL_SOLC_VERSION = "v0.4.11"
 VERSION_REGEX = {
@@ -366,7 +369,7 @@ def _install_solc_osx(version, allow_osx, show_progress, solcx_binary_path):
             f" to build solc from the source. This is likely due to a missing or"
             f" incorrect version of an external dependency.\n\n"
             f"You may be able to solve this by installing the specific version using"
-            f" brew: https://solidity.readthedocs.io/en/v0.6.0/installing-solidity.html#binary-packages"
+            f" brew: {CURRENT_RELEASE}"
         )
     finally:
         os.chdir(original_path)
