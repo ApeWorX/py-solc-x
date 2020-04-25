@@ -3,6 +3,7 @@
 import sys
 
 import pytest
+
 import solcx
 from solcx.exceptions import SolcNotInstalled
 
