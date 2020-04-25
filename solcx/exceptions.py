@@ -29,9 +29,9 @@ class SolcError(Exception):
             {self.message}
             > command: `{' '.join(self.command)}`
             > return code: `{self.return_code}`
-            > stderr:
-            {self.stdout_data}
             > stdout:
+            {self.stdout_data}
+            > stderr:
             {self.stderr_data}
             """
         ).strip()
