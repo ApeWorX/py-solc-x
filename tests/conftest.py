@@ -2,9 +2,9 @@
 
 import shutil
 
-import pytest
 from requests import ConnectionError
 
+import pytest
 import solcx
 
 

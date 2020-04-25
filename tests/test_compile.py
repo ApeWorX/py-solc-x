@@ -3,7 +3,6 @@
 from pathlib import Path
 
 import pytest
-
 import solcx
 from solcx.exceptions import ContractsNotFound
 from solcx.main import ALL_OUTPUT_VALUES

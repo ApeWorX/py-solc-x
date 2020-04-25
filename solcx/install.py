@@ -50,8 +50,7 @@ def _get_platform():
     if sys.platform in ("darwin", "win32"):
         return sys.platform
     raise KeyError(
-        f"Unknown platform: '{sys.platform}' - py-solc-x supports Linux, OSX"
-        f" and Windows"
+        f"Unknown platform: '{sys.platform}' - py-solc-x supports Linux, OSX" f" and Windows"
     )
 
 
@@ -172,8 +171,10 @@ def get_available_solc_versions(headers=None):
 
     data = requests.get(ALL_RELEASES, headers=headers)
     if data.status_code != 200:
-        msg = (f"Status {data.status_code} when getting solc versions from Github:"
-              f" '{data.json()['message']}'")
+        msg = (
+            f"Status {data.status_code} when getting solc versions from Github:"
+            f" '{data.json()['message']}'"
+        )
         if data.status_code == 403:
             msg += (
                 "\n\nIf this issue persists, generate a Github API token and store"
@@ -232,7 +233,7 @@ def install_solc(version, allow_osx=False, show_progress=False, solcx_binary_pat
         binary_path = get_executable(version, solcx_binary_path)
         _check_subprocess_call(
             [binary_path, "--version"],
-            message=f"Checking installed executable version at: {binary_path}"
+            message=f"Checking installed executable version at: {binary_path}",
         )
         if not solc_version:
             set_solc_version(version)
@@ -295,8 +296,7 @@ def _download_solc(url, show_progress):
 
     if response.status_code != 200:
         raise DownloadError(
-            f"Received status code {response.status_url} when attempting to"
-            f" download from {url}"
+            f"Received status code {response.status_url} when attempting to" f" download from {url}"
         )
     return content
 

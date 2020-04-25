@@ -2,9 +2,9 @@
 
 import functools
 
-import pytest
 from semantic_version import Version
 
+import pytest
 import solcx
 from solcx.exceptions import SolcNotInstalled
 
