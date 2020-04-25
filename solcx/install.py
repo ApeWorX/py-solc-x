@@ -362,7 +362,7 @@ def _install_solc_osx(version, allow_osx, show_progress, solcx_binary_path):
         temp_path.joinpath("build/solc/solc").rename(binary_path)
     except subprocess.CalledProcessError as e:
         raise OSError(
-            f"{cmd[0]} returned non-zero exit status {e.returncode} while attempting
+            f"{cmd[0]} returned non-zero exit status {e.returncode} while attempting"
             f" to build solc from the source. This is likely due to a missing or"
             f" incorrect version of an external dependency.\n\n"
             f"You may be able to solve this by installing the specific version using"
