@@ -60,7 +60,7 @@ def _get_platform():
     if sys.platform in ("darwin", "win32"):
         return sys.platform
     raise KeyError(
-        f"Unknown platform: '{sys.platform}' - py-solc-x supports Linux, OSX" f" and Windows"
+        f"Unknown platform: '{sys.platform}' - py-solc-x supports Linux, OSX and Windows"
     )
 
 
@@ -305,7 +305,7 @@ def _download_solc(url, show_progress):
         )
     if response.status_code != 200:
         raise DownloadError(
-            f"Received status code {response.status_url} when attempting to" f" download from {url}"
+            f"Received status code {response.status_url} when attempting to download from {url}"
         )
     if not show_progress:
         return response.content
