@@ -136,22 +136,18 @@ def solc_wrapper(
     # unsupported by >=0.6.0
     if ast:
         if solc_minor >= 6:
-            raise AttributeError("solc 0.{}.x does not support the --ast flag".format(solc_minor))
+            raise AttributeError(f"solc 0.{solc_minor}.x does not support the --ast flag")
         command.append("--ast")
 
     # unsupported by >=0.5.0
     if clone_bin:
         if solc_minor >= 5:
-            raise AttributeError(
-                "solc 0.{}.x does not support the --clone-bin flag".format(solc_minor)
-            )
+            raise AttributeError(f"solc 0.{solc_minor}.x does not support the --clone-bin flag")
         command.append("--clone-bin")
 
     if formal:
         if solc_minor >= 5:
-            raise AttributeError(
-                "solc 0.{}.x does not support the --formal flag".format(solc_minor)
-            )
+            raise AttributeError(f"solc 0.{solc_minor}.x does not support the --formal flag")
         command.append("--formal")
 
     if not standard_json and not source_files and solc_minor >= 5:
