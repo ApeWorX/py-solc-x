@@ -13,7 +13,7 @@ setup(
     include_package_data=True,
     py_modules=["solcx"],
     setup_requires=["setuptools-markdown"],
-    python_requires=">=3.4, <4",
+    python_requires=">=3.6, <4",
     install_requires=[
         "requests>=2.19.0,<3",
         "semantic_version>=2.8.1,<3",
@@ -27,8 +27,6 @@ setup(
         "License :: OSI Approved :: MIT License",
         "Natural Language :: English",
         "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.4",
-        "Programming Language :: Python :: 3.5",
         "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
