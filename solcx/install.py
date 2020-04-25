@@ -30,7 +30,7 @@ except ImportError:
 
 DOWNLOAD_BASE = "https://github.com/ethereum/solidity/releases/download/{}/{}"
 ALL_RELEASES = "https://api.github.com/repos/ethereum/solidity/releases?per_page=100"
-CURRENT_RELEASE = (
+INSTALLATION_DOCS = (
     "https://solidity.readthedocs.io/en/v0.6.0/installing-solidity.html#binary-packages"
 )
 
@@ -53,7 +53,7 @@ def _get_platform():
     if sys.platform in ("darwin", "win32"):
         return sys.platform
     raise KeyError(
-        f"Unknown platform: '{sys.platform}' - py-solc-x supports Linux, OSX" f" and Windows"
+        f"Unknown platform: '{sys.platform}' - py-solc-x supports Linux, OSX and Windows"
     )
 
 
@@ -299,7 +299,7 @@ def _download_solc(url, show_progress):
 
     if response.status_code != 200:
         raise DownloadError(
-            f"Received status code {response.status_url} when attempting to" f" download from {url}"
+            f"Received status code {response.status_url} when attempting to download from {url}"
         )
     return content
 
@@ -369,7 +369,7 @@ def _install_solc_osx(version, allow_osx, show_progress, solcx_binary_path):
             f" to build solc from the source. This is likely due to a missing or"
             f" incorrect version of an external dependency.\n\n"
             f"You may be able to solve this by installing the specific version using"
-            f" brew: {CURRENT_RELEASE}"
+            f" brew: {INSTALLATION_DOCS}"
         )
     finally:
         os.chdir(original_path)
