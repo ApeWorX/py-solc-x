@@ -25,19 +25,15 @@ class SolcError(Exception):
 
     def __str__(self):
         return textwrap.dedent(
-            (
-                """
-        {s.message}
-        > command: `{command}`
-        > return code: `{s.return_code}`
-        > stderr:
-        {s.stdout_data}
-        > stdout:
-        {s.stderr_data}
-        """
-            ).format(
-                s=self, command=" ".join(self.command),
-            )
+            f"""
+            {self.message}
+            > command: `{' '.join(self.command)}`
+            > return code: `{self.return_code}`
+            > stdout:
+            {self.stdout_data}
+            > stderr:
+            {self.stderr_data}
+            """
         ).strip()
 
 
