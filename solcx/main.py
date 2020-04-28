@@ -7,7 +7,6 @@ import re
 import semantic_version
 
 from .exceptions import ContractsNotFound, SolcError
-from .install import get_executable
 from .wrapper import solc_wrapper
 
 VERSION_DEV_DATE_MANGLER_RE = re.compile(r"(\d{4})\.0?(\d{1,2})\.0?(\d{1,2})")

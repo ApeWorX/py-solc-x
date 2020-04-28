@@ -17,6 +17,7 @@ from io import BytesIO
 from pathlib import Path
 
 import requests
+
 from semantic_version import SimpleSpec, Version
 
 from .exceptions import DownloadError, SolcNotInstalled
