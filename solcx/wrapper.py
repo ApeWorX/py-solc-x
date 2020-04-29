@@ -15,7 +15,6 @@ def solc_wrapper(
     stdin=None,
     help=None,
     version=None,
-    add_std=None,
     combined_json=None,
     optimize=None,
     optimize_runs=None,
@@ -62,10 +61,6 @@ def solc_wrapper(
 
     if version:
         command.append("--version")
-
-    # removed in 0.4.21 and does nothing since <0.4.11, should be removed in the future
-    if add_std:
-        command.append("--add-std")
 
     if optimize:
         command.append("--optimize")
