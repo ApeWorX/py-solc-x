@@ -7,19 +7,12 @@ import re
 import semantic_version
 
 from .exceptions import ContractsNotFound, SolcError
-from .install import get_executable
-from .utils.filesystem import is_executable_available
 from .wrapper import solc_wrapper
 
 VERSION_DEV_DATE_MANGLER_RE = re.compile(r"(\d{4})\.0?(\d{1,2})\.0?(\d{1,2})")
 strip_zeroes_from_month_and_day = functools.partial(
     VERSION_DEV_DATE_MANGLER_RE.sub, r"\g<1>.\g<2>.\g<3>"
 )
-
-
-def is_solc_available():
-    solc_binary = get_executable()
-    return is_executable_available(solc_binary)
 
 
 def get_solc_version_string(**kwargs):
@@ -45,10 +38,6 @@ def get_solc_version(**kwargs):
             get_solc_version_string(**kwargs)[len("Version: ") :].replace("++", "pp")
         )
     )
-
-
-def solc_supports_standard_json_interface(**kwargs):
-    return get_solc_version() in semantic_version.SimpleSpec(">=0.4.11")
 
 
 def _parse_compiler_output(stdoutdata):
