@@ -3,9 +3,8 @@
 import shutil
 
 import pytest
-from requests import ConnectionError
-
 import solcx
+from requests import ConnectionError
 
 
 def pytest_addoption(parser):

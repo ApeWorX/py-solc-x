@@ -1,7 +1,6 @@
 #!/usr/bin/python3
 
 import pytest
-
 import solcx
 
 source = """pragma solidity >=0.4.11;

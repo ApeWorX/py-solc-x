@@ -3,9 +3,8 @@
 import functools
 
 import pytest
-from semantic_version import Version
-
 import solcx
+from semantic_version import Version
 from solcx.exceptions import SolcNotInstalled
 
 
