@@ -131,14 +131,15 @@ def import_installed_solc(solcx_binary_path=None):
 
 
 def get_executable(version=None, solcx_binary_path=None):
-    if not version:
-        version = solc_version
-    if not version:
+    if not version and not solc_version:
         raise SolcNotInstalled(
             "Solc is not installed. Call solcx.get_available_solc_versions()"
             " to view for available versions and solcx.install_solc() to install."
         )
-    solc_bin = get_solc_folder(solcx_binary_path=solcx_binary_path).joinpath("solc-" + version)
+    if not version:
+        version = solc_version
+    solc_bin = get_version_location(version, solcx_binary_path)
+
     if sys.platform == "win32":
         solc_bin = solc_bin.joinpath("solc.exe")
     if not solc_bin.exists():
@@ -146,7 +147,7 @@ def get_executable(version=None, solcx_binary_path=None):
             f"solc {version} has not been installed."
             f" Use solcx.install_solc('{version}') to install."
         )
-    return str(solc_bin)
+    return solc_bin
 
 
 def set_solc_version(version, silent=False, solcx_binary_path=None):
