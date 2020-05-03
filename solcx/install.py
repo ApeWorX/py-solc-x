@@ -81,8 +81,9 @@ def is_version_installed(version_location=None, version=None, solcx_binary_path=
 
 
 def _import_version(path):
-    version = subprocess.check_output([path, "--version"]).decode()
-    return "v" + version[version.index("Version: ") + 9 : version.index("+")]
+    version_str = subprocess.check_output([path, '--version']).decode()
+    version = Version(version_str[version_str.index('Version: ') + 9:version_str.index('+')])
+    return version
 
 
 def import_installed_solc(solcx_binary_path=None):
