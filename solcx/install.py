@@ -68,6 +68,21 @@ def get_solc_folder(solcx_binary_path=None):
         return path
 
 
+def get_version_location(version, solcx_binary_path=None):
+    folder_location = get_solc_folder(solcx_binary_path=solcx_binary_path)
+    version_location = folder_location.joinpath(f'solc-v{version}')
+    return version_location
+
+
+def is_version_installed(version_location=None, version=None, solcx_binary_path=None):
+    if version_location is None:
+        version_location = get_version_location(version, solcx_binary_path)
+    if version_location.exists():
+        LOGGER.info(f"solc version already installed at: {version_location}")
+        return True
+    return False
+
+
 def _import_version(path):
     version = subprocess.check_output([path, "--version"]).decode()
     return "v" + version[version.index("Version: ") + 9 : version.index("+")]
