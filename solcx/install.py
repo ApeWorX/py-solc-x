@@ -34,7 +34,8 @@ INSTALLATION_DOCS = (
     "https://solidity.readthedocs.io/en/v0.6.0/installing-solidity.html#binary-packages"
 )
 
-MINIMAL_SOLC_VERSION = "v0.4.11"
+MINIMAL_SOLC_VERSION = SimpleSpec('>=0.4.11')
+
 VERSION_REGEX = {
     "darwin": "solidity_[0-9].[0-9].[0-9]{1,}.tar.gz",
     "linux": "solc-static-linux",
@@ -86,6 +87,14 @@ def is_version_installed(version_location=None, version=None, solcx_binary_path=
 def _import_version(path):
     version_str = subprocess.check_output([path, '--version']).decode()
     version = Version(version_str[version_str.index('Version: ') + 9:version_str.index('+')])
+    return version
+
+
+def _check_version(version):
+    if is_text(version):
+        version = Version(version.replace('v', ''))
+    if version not in MINIMAL_SOLC_VERSION:
+        raise ValueError("py-solc-x does not support solc versions <0.4.11")
     return version
 
 
@@ -259,13 +268,6 @@ def install_solc(version, allow_osx=False, show_progress=False, solcx_binary_pat
         LOGGER.info(f"solc {version} successfully installed at: {binary_path}")
     finally:
         lock.release()
-
-
-def _check_version(version):
-    version = Version(version.lstrip("v"))
-    if version not in SimpleSpec(">=0.4.11"):
-        raise ValueError("py-solc-x does not support solc versions <0.4.11")
-    return f"v{version}"
 
 
 def _check_subprocess_call(command, message=None, verbose=False, **proc_kwargs):
