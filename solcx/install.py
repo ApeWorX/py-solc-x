@@ -35,7 +35,7 @@ INSTALLATION_DOCS = (
     "https://solidity.readthedocs.io/en/v0.6.0/installing-solidity.html#binary-packages"
 )
 
-MINIMAL_SOLC_VERSION = SimpleSpec('>=0.4.11')
+MINIMAL_SOLC_VERSION = SimpleSpec(">=0.4.11")
 
 VERSION_REGEX = {
     "darwin": "solidity_[0-9].[0-9].[0-9]{1,}.tar.gz",
@@ -72,7 +72,7 @@ def get_solc_folder(solcx_binary_path=None):
 
 def get_version_location(version, solcx_binary_path=None):
     folder_location = get_solc_folder(solcx_binary_path=solcx_binary_path)
-    version_location = folder_location.joinpath(f'solc-v{version}')
+    version_location = folder_location.joinpath(f"solc-v{version}")
     return version_location
 
 
@@ -86,14 +86,14 @@ def is_version_installed(version_location=None, version=None, solcx_binary_path=
 
 
 def _import_version(path):
-    version_str = subprocess.check_output([path, '--version']).decode()
-    version = Version(version_str[version_str.index('Version: ') + 9:version_str.index('+')])
+    version_str = subprocess.check_output([path, "--version"]).decode()
+    version = Version(version_str[version_str.index("Version: ") + 9 : version_str.index("+")])
     return version
 
 
 def _check_version(version):
     if is_text(version):
-        version = Version(version.replace('v', ''))
+        version = Version(version.replace("v", ""))
     if version not in MINIMAL_SOLC_VERSION:
         raise ValueError("py-solc-x does not support solc versions <0.4.11")
     return version
@@ -120,9 +120,7 @@ def import_installed_solc(solcx_binary_path=None):
             assert version not in get_installed_solc_versions()
         except Exception:
             continue
-        copy_path = str(
-            get_solc_folder(solcx_binary_path=solcx_binary_path).joinpath("solc-" + version)
-        )
+        copy_path = str(get_version_location(version, solcx_binary_path))
         shutil.copy(path, copy_path)
         try:
             # confirm that solc still works after being copied
@@ -212,7 +210,7 @@ def get_available_solc_versions(headers=None):
 
     for release in data.json():
         asset = next((i for i in release["assets"] if re.match(pattern, i["name"])), False)
-        version = Version(release["tag_name"].replace('v', ''))
+        version = Version(release["tag_name"].replace("v", ""))
         if asset:
             versions.append(version)
         if version not in MINIMAL_SOLC_VERSION:
@@ -327,7 +325,7 @@ def _install_solc_linux(version, show_progress, solcx_binary_path=None):
     content = _download_solc(download, show_progress)
     version_location = get_version_location(version, solcx_binary_path)
     with open(version_location, "wb") as fp:
-            fp.write(content)
+        fp.write(content)
     _chmod_plus_x(version_location)
 
 
