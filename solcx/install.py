@@ -240,17 +240,16 @@ def get_installed_solc_versions(solcx_binary_path=None):
 
 
 def install_solc(version, allow_osx=False, show_progress=False, solcx_binary_path=None):
-    platform = _get_platform()
     version = _check_version(version)
+    assert not is_version_installed(version=version, solcx_binary_path=solcx_binary_path)
 
     lock = get_process_lock(version)
     if not lock.acquire(False):
         lock.wait()
-        if not _check_for_installed_version(version):
-            return
-        return install_solc(version, allow_osx)
+        return install_solc(version, allow_osx, show_progress, solcx_binary_path)
 
     try:
+        platform = _get_platform()
         if platform == "linux":
             _install_solc_linux(version, show_progress, solcx_binary_path)
         elif platform == "darwin":
@@ -323,47 +322,40 @@ def _download_solc(url, show_progress):
 
 def _install_solc_linux(version, show_progress, solcx_binary_path=None):
     download = DOWNLOAD_BASE.format(version, "solc-static-linux")
-    binary_path = _check_for_installed_version(version, solcx_binary_path=solcx_binary_path)
-    if binary_path:
-        LOGGER.info(f"Downloading solc {version} from {download}")
-        content = _download_solc(download, show_progress)
-        with open(binary_path, "wb") as fp:
+    LOGGER.info(f"Downloading solc {version} from {download}")
+    content = _download_solc(download, show_progress)
+    version_location = get_version_location(version, solcx_binary_path)
+    with open(version_location, "wb") as fp:
             fp.write(content)
-        _chmod_plus_x(binary_path)
+    _chmod_plus_x(version_location)
 
 
 def _install_solc_windows(version, show_progress, solcx_binary_path=None):
     download = DOWNLOAD_BASE.format(version, "solidity-windows.zip")
-    install_folder = _check_for_installed_version(version)
-    if install_folder:
-        temp_path = _get_temp_folder()
-        content = _download_solc(download, show_progress)
-        with zipfile.ZipFile(BytesIO(content)) as zf:
-            zf.extractall(str(temp_path))
-        install_folder = get_solc_folder(solcx_binary_path=solcx_binary_path).joinpath(
-            "solc-" + version
-        )
-        temp_path.rename(install_folder)
+    LOGGER.info(f"Downloading solc {version} from {download}")
+    content = _download_solc(download, show_progress)
+    temp_path = _get_temp_folder()
+    with zipfile.ZipFile(BytesIO(content)) as zf:
+        zf.extractall(str(temp_path))
+    version_location = get_version_location(version, solcx_binary_path)
+    temp_path.rename(version_location)
 
 
 def _install_solc_osx(version, allow_osx, show_progress, solcx_binary_path):
-    if version.startswith("v0.4") and not allow_osx:
+    if version.major == 0 and version.minor == 4 and not allow_osx:
         raise ValueError(
             "Py-solc-x cannot build solc versions 0.4.x on OSX. If you install solc 0.4.x "
             "using brew and reload solcx, the installed version will be available. "
             "See https://github.com/ethereum/homebrew-ethereum for installation instructions.\n\n"
             "To ignore this error, include 'allow_osx=True' when calling solcx.install_solc()"
         )
-    temp_path = _get_temp_folder()
-    download = DOWNLOAD_BASE.format(version, f"solidity_{version[1:]}.tar.gz")
-    binary_path = _check_for_installed_version(version)
-    if not binary_path:
-        return
-
+    download = DOWNLOAD_BASE.format(version, f"solidity_{version}.tar.gz")
+    LOGGER.info(f"Downloading solc {version} from {download}")
     content = _download_solc(download, show_progress)
+    temp_path = _get_temp_folder()
     with tarfile.open(fileobj=BytesIO(content)) as tar:
         tar.extractall(temp_path)
-    temp_path = temp_path.joinpath(f"solidity_{version[1:]}")
+    temp_path = temp_path.joinpath(f"solidity_{version}")
 
     try:
         _check_subprocess_call(
@@ -379,7 +371,8 @@ def _install_solc_osx(version, allow_osx, show_progress, solcx_binary_path):
     try:
         for cmd in (["cmake", ".."], ["make"]):
             _check_subprocess_call(cmd, message=f"Running {cmd[0]}")
-        temp_path.joinpath("build/solc/solc").rename(binary_path)
+        version_location = get_version_location(version, solcx_binary_path)
+        temp_path.joinpath("build/solc/solc").rename(version_location)
     except subprocess.CalledProcessError as e:
         raise OSError(
             f"{cmd[0]} returned non-zero exit status {e.returncode} while attempting"
@@ -391,7 +384,7 @@ def _install_solc_osx(version, allow_osx, show_progress, solcx_binary_path):
     finally:
         os.chdir(original_path)
 
-    _chmod_plus_x(binary_path)
+    _chmod_plus_x(version_location)
 
 
 if __name__ == "__main__":
