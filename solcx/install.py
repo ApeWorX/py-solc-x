@@ -130,18 +130,17 @@ def import_installed_solc(solcx_binary_path=None):
 def get_executable(version=None, solcx_binary_path=None):
     if not version and not solc_version:
         raise SolcNotInstalled(
-            "Solc is not installed. Call solcx.get_available_solc_versions()"
-            " to view for available versions and solcx.install_solc() to install."
+            f"Solc is not installed. Call solcx.get_available_solc_versions()"
+            f" to view for available versions and solcx.install_solc() to install."
         )
     if not version:
         version = solc_version
     solc_bin = get_version_location(version, solcx_binary_path)
-
     if sys.platform == "win32":
         solc_bin = solc_bin.joinpath("solc.exe")
     if not solc_bin.exists():
         raise SolcNotInstalled(
-            f"solc {version} has not been installed."
+            f"Solc {version} has not been installed."
             f" Use solcx.install_solc('{version}') to install."
         )
     return solc_bin
@@ -157,9 +156,8 @@ def set_solc_version(version, silent=False, solcx_binary_path=None):
 
 
 def set_solc_version_pragma(pragma_string, silent=False, check_new=False):
-    version = _select_pragma_version(
-        pragma_string, [Version(i[1:]) for i in get_installed_solc_versions()]
-    )
+    version_list = get_installed_solc_versions()
+    version = _select_pragma_version(pragma_string, version_list)
     if not version:
         raise SolcNotInstalled(
             f"No compatible solc version installed."
@@ -172,14 +170,13 @@ def set_solc_version_pragma(pragma_string, silent=False, check_new=False):
         LOGGER.info(f"Using solc version {solc_version}")
     if check_new:
         latest = install_solc_pragma(pragma_string, False)
-        if Version(latest) > Version(version[1:]):
+        if latest > version:
             LOGGER.info(f"Newer compatible solc version exists: {latest}")
 
 
 def install_solc_pragma(pragma_string, install=True, show_progress=False, solcx_binary_path=None):
-    version = _select_pragma_version(
-        pragma_string, [Version(i[1:]) for i in get_available_solc_versions()]
-    )
+    version_list = get_available_solc_versions()
+    version = _select_pragma_version(pragma_string, version_list)
     if not version:
         raise ValueError("Compatible solc version does not exist")
     if install:
@@ -211,9 +208,10 @@ def get_available_solc_versions(headers=None):
 
     for release in data.json():
         asset = next((i for i in release["assets"] if re.match(pattern, i["name"])), False)
+        version = Version(release["tag_name"].replace('v', ''))
         if asset:
-            versions.append(release["tag_name"])
-        if release["tag_name"] == MINIMAL_SOLC_VERSION:
+            versions.append(version)
+        if version not in MINIMAL_SOLC_VERSION:
             break
     return versions
 
