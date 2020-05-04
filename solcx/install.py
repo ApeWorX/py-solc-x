@@ -21,6 +21,7 @@ from semantic_version import SimpleSpec, Version
 
 from .exceptions import DownloadError, SolcNotInstalled
 from .utils.lock import get_process_lock
+from .utils.types import is_text
 
 try:
     from tqdm import tqdm
