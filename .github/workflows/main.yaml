@@ -1,4 +1,9 @@
-on: ["push", "pull_request"]
+on:
+  push:
+  pull_request:
+  schedule:
+    # run this workflow every Monday at 1PM UTC
+    - cron: "* 13 * * 1"
 
 name: py-solc-x workflow
 
@@ -27,19 +32,19 @@ jobs:
 
     steps:
     - uses: actions/checkout@v1
-    
+
     - name: Setup Python 3.6
       uses: actions/setup-python@v1
       with:
         python-version: 3.6
-    
+
     - name: Install Tox
       run: pip install tox
 
     - name: Run Tox
       run: tox -e py36
 
-    - name: Upload coverage to Codecov  
+    - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v1
       with:
         file: ./coverage.xml
@@ -51,19 +56,19 @@ jobs:
 
     steps:
     - uses: actions/checkout@v1
-    
+
     - name: Setup Python 3.7
       uses: actions/setup-python@v1
       with:
         python-version: 3.7
-    
+
     - name: Install Tox
       run: pip install tox
 
     - name: Run Tox
       run: tox -e py37
 
-    - name: Upload coverage to Codecov  
+    - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v1
       with:
         file: ./coverage.xml
@@ -78,19 +83,19 @@ jobs:
 
     steps:
     - uses: actions/checkout@v1
-    
+
     - name: Setup Python 3.8
       uses: actions/setup-python@v1
       with:
         python-version: 3.8
-    
+
     - name: Install Tox
       run: pip install tox
 
     - name: Run Tox
       run: tox -e py38
 
-    - name: Upload coverage to Codecov  
+    - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v1
       with:
         file: ./coverage.xml
