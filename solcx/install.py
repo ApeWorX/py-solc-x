@@ -279,26 +279,30 @@ def _get_temp_folder():
 
 
 def _download_solc(url, show_progress):
-    if not show_progress:
-        response = requests.get(url)
-        content = response.content
-    else:
-        response = requests.get(url, stream=True)
-        total_size = int(response.headers.get("content-length", 0))
-        progress_bar = tqdm(total=total_size, unit="iB", unit_scale=True)
-        content = bytes()
-
-        for data in response.iter_content(1024, decode_unicode=True):
-            progress_bar.update(len(data))
-            content += data
-        progress_bar.close()
-
+    response = requests.get(url, stream=show_progress)
+    if response.status_code == 404:
+        raise DownloadError(
+            "404 error when attempting to download from {} - are you sure this"
+            " version of solidity is available?".format(url)
+        )
     if response.status_code != 200:
         raise DownloadError(
             "Received status code {} when attempting to download from {}".format(
                 response.status_code, url
             )
         )
+    if not show_progress:
+        return response.content
+
+    total_size = int(response.headers.get("content-length", 0))
+    progress_bar = tqdm(total=total_size, unit="iB", unit_scale=True)
+    content = bytes()
+
+    for data in response.iter_content(1024, decode_unicode=True):
+        progress_bar.update(len(data))
+        content += data
+    progress_bar.close()
+
     return content
 
 
