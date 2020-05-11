@@ -1,11 +1,11 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
+
 from setuptools import find_packages, setup
 
 setup(
     name="py-solc-x",
-    version="0.8.1",
-    description="""Python wrapper around the solc binary with 0.5.x and 0.6.x support""",
+    version="0.8.2",  # don't change this manually, use bumpversion instead
+    description="Python wrapper around the solc binary with 0.5.x and 0.6.x support",
     long_description_markdown_filename="README.md",
     author="Ben Hauser (forked from py-solc by Piper Merriam)",
     author_email="ben@hauser.id",
@@ -14,7 +14,10 @@ setup(
     py_modules=["solcx"],
     setup_requires=["setuptools-markdown"],
     python_requires=">=3.4, <4",
-    install_requires=["semantic_version>=2.8.1,<3", "requests>=2.19.0,<3"],
+    install_requires=[
+        "requests>=2.19.0,<3",
+        "semantic_version>=2.8.1,<3",
+    ],
     license="MIT",
     zip_safe=False,
     keywords="ethereum solidity solc",

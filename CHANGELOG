@@ -1,3 +1,9 @@
+0.8.2
+-----
+
+ - Bugfix: `TypeError` when download fails using progress bar
+ - Improve error message on failed OSX installation
+
 0.8.1
 -----
 
