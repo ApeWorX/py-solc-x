@@ -4,7 +4,7 @@
 
 Python wrapper around the `solc` Solidity compiler with `0.5.x` and `0.6.x` support.
 
-Forked from [py-solc](https://github.com/ethereum/py-solc).
+Forked from [`py-solc`](https://github.com/ethereum/py-solc).
 
 ## Dependencies
 
@@ -17,7 +17,7 @@ Py-solc-x can install the following solc versions:
 * Linux and Windows: `>=0.4.11`
 * OSX: `>=0.5.0`
 
-`0.4.x` versions are available on OSX if they have been [installed via brew](https://github.com/ethereum/homebrew-ethereum), but cannot be installed directly by py-solc-x.
+See [Installing Solidity on OSX](https://github.com/iamdefinitelyahuman/py-solc-x/wiki/Installing-Solidity-on-OSX) for information on how to use `0.4.x` versions with OSX.
 
 ## Quickstart
 
@@ -180,7 +180,7 @@ You can use this like:
 
 ## Development
 
-This project was forked from [py-solc](https://github.com/ethereum/py-solc) and should be considered a beta. Comments, questions, criticisms and pull requests are welcomed.
+This project was forked from [`py-solc`](https://github.com/ethereum/py-solc) and should be considered a beta. Comments, questions, criticisms and pull requests are welcomed.
 
 ### Tests
 
@@ -192,7 +192,7 @@ To run the test suite:
 pytest tests/
 ```
 
-By default, the test suite installs all available solc versions for your OS. If you only wish to test against already installed versions, include the `--no-install` flag.
+By default, the test suite installs all available `solc` versions for your OS. If you only wish to test against already installed versions, include the `--no-install` flag.
 
 ## License
 
