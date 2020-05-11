@@ -334,10 +334,10 @@ def _install_solc_windows(version, show_progress, solcx_binary_path=None):
 def _install_solc_osx(version, allow_osx, show_progress, solcx_binary_path):
     if version.startswith("v0.4") and not allow_osx:
         raise ValueError(
-            "Py-solc-x cannot build solc versions 0.4.x on OSX. If you install solc 0.4.x "
-            "using brew and reload solcx, the installed version will be available. "
-            "See https://github.com/ethereum/homebrew-ethereum for installation instructions.\n\n"
-            "To ignore this error, include 'allow_osx=True' when calling solcx.install_solc()"
+            "Installing solc {0} on OSX often fails. For suggested installation options:\n"
+            "https://github.com/iamdefinitelyahuman/py-solc-x/wiki/Installing-Solidity-on-OSX\n\n"
+            "To ignore this warning and attempt to install: "
+            "solcx.install_solc('{0}', allow_osx=True)".format(version)
         )
     temp_path = _get_temp_folder()
     download = DOWNLOAD_BASE.format(version, "solidity_{}.tar.gz".format(version[1:]))
@@ -367,10 +367,10 @@ def _install_solc_osx(version, allow_osx, show_progress, solcx_binary_path):
         temp_path.joinpath("build/solc/solc").rename(binary_path)
     except subprocess.CalledProcessError as e:
         raise OSError(
-            "{} returned non-zero exit status {} while attempting to build solc from the source. "
-            "This is likely due to a missing or incorrect version of an external dependency.\n\n"
-            "You may be able to solve this by installing the specific version using brew: "
-            "https://solidity.readthedocs.io/en/v0.6.0/installing-solidity.html#binary-packages"
+            "{} returned non-zero exit status {} while attempting to build solc from the source.\n"
+            "This is likely due to a missing or incorrect version of a build dependency.\n\n"
+            "For suggested installation options: "
+            "https://github.com/iamdefinitelyahuman/py-solc-x/wiki/Installing-Solidity-on-OSX"
             "".format(cmd[0], e.returncode)
         )
     finally:
