@@ -5,7 +5,7 @@ import sys
 import pytest
 
 import solcx
-from solcx.exceptions import SolcNotInstalled
+from solcx.exceptions import DownloadError, SolcNotInstalled
 
 
 @pytest.fixture(autouse=True)
@@ -45,6 +45,11 @@ def test_install_osx():
         solcx.install_solc("0.4.25")
     solcx.install_solc("0.4.25", allow_osx=True)
     solcx.install_solc("0.5.4")
+
+
+def test_install_unknown_version():
+    with pytest.raises(DownloadError):
+        solcx.install_solc("0.4.99")
 
 
 def test_progress_bar(nosolc):
