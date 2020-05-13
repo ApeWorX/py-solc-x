@@ -236,7 +236,7 @@ def get_installed_solc_versions(solcx_binary_path=None):
 
 def install_solc(version, allow_osx=False, show_progress=False, solcx_binary_path=None):
     version = _check_version(version)
-    assert not is_version_installed(version=version, solcx_binary_path=solcx_binary_path)
+    is_version_installed(version=version, solcx_binary_path=solcx_binary_path)
 
     lock = get_process_lock(version)
     if not lock.acquire(False):
@@ -293,6 +293,7 @@ def _get_temp_folder():
     return path
 
 
+<<<<<<< HEAD
 def _download_solc(url, show_progress):
     response = requests.get(url, stream=show_progress)
     if response.status_code == 404:
@@ -300,9 +301,26 @@ def _download_solc(url, show_progress):
             "404 error when attempting to download from {} - are you sure this"
             " version of solidity is available?".format(url)
         )
+=======
+def _download_solc(url, show_progress=False):
+    if not show_progress:
+        response = requests.get(url)
+        content = response.content
+    else:
+        response = requests.get(url, stream=True)
+        total_size = int(response.headers.get("content-length", 0))
+        progress_bar = tqdm(total=total_size, unit="iB", unit_scale=True)
+        content = bytes()
+
+        for data in response.iter_content(1024, decode_unicode=True):
+            progress_bar.update(len(data))
+            content += data
+        progress_bar.close()
+
+>>>>>>> fbd7212... Add required keyword args to _download_solc()
     if response.status_code != 200:
         raise DownloadError(
-            f"Received status code {response.status_url} when attempting to download from {url}"
+            f"Received status code {response.status_code} when attempting to download from {url}"
         )
     if not show_progress:
         return response.content
