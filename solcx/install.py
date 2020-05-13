@@ -172,16 +172,6 @@ def set_solc_version_pragma(pragma_string, silent=False, check_new=False):
             LOGGER.info(f"Newer compatible solc version exists: {latest}")
 
 
-def install_solc_pragma(pragma_string, install=True, show_progress=False, solcx_binary_path=None):
-    version_list = get_available_solc_versions()
-    version = _select_pragma_version(pragma_string, version_list)
-    if not version:
-        raise ValueError("Compatible solc version does not exist")
-    if install:
-        install_solc(version, show_progress=show_progress, solcx_binary_path=solcx_binary_path)
-    return version
-
-
 def get_available_solc_versions(headers=None):
     versions = []
     pattern = VERSION_REGEX[_get_platform()]
@@ -244,10 +234,6 @@ def _check_subprocess_call(command, message=None, verbose=False, **proc_kwargs):
     )
 
 
-def _chmod_plus_x(executable_path):
-    executable_path.chmod(executable_path.stat().st_mode | stat.S_IEXEC)
-
-
 def _check_for_installed_version(version, solcx_binary_path=None):
     path = get_solc_folder(solcx_binary_path=solcx_binary_path).joinpath("solc-" + version)
     if path.exists():
@@ -264,11 +250,11 @@ def _get_temp_folder():
     return path
 
 
-# ---------------------------------------------------------------------------
-# ---------------------------------------------------------------------------
-'''
+# ----------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
+"""
 The following functions download and install solc to your OS
-'''
+"""
 
 
 def install_solc(version, allow_osx=False, show_progress=False, solcx_binary_path=None):
@@ -299,6 +285,16 @@ def install_solc(version, allow_osx=False, show_progress=False, solcx_binary_pat
     finally:
         lock.release()
 
+
+def install_solc_pragma(pragma_string, install=True, show_progress=False, solcx_binary_path=None):
+    version_list = get_available_solc_versions()
+    version = _select_pragma_version(pragma_string, version_list)
+    if not version:
+        raise ValueError("Compatible solc version does not exist")
+    if install:
+        install_solc(version, show_progress=show_progress, solcx_binary_path=solcx_binary_path)
+    return version
+    
 
 def _download_solc(url, show_progress=False):
     if not show_progress:
@@ -332,6 +328,10 @@ def _download_solc(url, show_progress=False):
     progress_bar.close()
 
     return content
+
+
+def _chmod_plus_x(executable_path):
+    executable_path.chmod(executable_path.stat().st_mode | stat.S_IEXEC)
 
 
 def _install_solc_linux(version, show_progress, solcx_binary_path=None):
