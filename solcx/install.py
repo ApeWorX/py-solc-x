@@ -234,14 +234,6 @@ def _check_subprocess_call(command, message=None, verbose=False, **proc_kwargs):
     )
 
 
-def _check_for_installed_version(version, solcx_binary_path=None):
-    path = get_solc_folder(solcx_binary_path=solcx_binary_path).joinpath("solc-" + version)
-    if path.exists():
-        LOGGER.info(f"solc {version} already installed at: {path}")
-        return False
-    return path
-
-
 def _get_temp_folder():
     path = Path(tempfile.gettempdir()).joinpath(f"solcx-tmp-{os.getpid()}")
     if path.exists():
@@ -294,7 +286,7 @@ def install_solc_pragma(pragma_string, install=True, show_progress=False, solcx_
     if install:
         install_solc(version, show_progress=show_progress, solcx_binary_path=solcx_binary_path)
     return version
-    
+
 
 def _download_solc(url, show_progress=False):
     if not show_progress:
