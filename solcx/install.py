@@ -234,35 +234,6 @@ def get_installed_solc_versions(solcx_binary_path=None):
     )
 
 
-def install_solc(version, allow_osx=False, show_progress=False, solcx_binary_path=None):
-    version = _check_version(version)
-    is_version_installed(version=version, solcx_binary_path=solcx_binary_path)
-
-    lock = get_process_lock(version)
-    if not lock.acquire(False):
-        lock.wait()
-        return install_solc(version, allow_osx, show_progress, solcx_binary_path)
-
-    try:
-        platform = _get_platform()
-        if platform == "linux":
-            _install_solc_linux(version, show_progress, solcx_binary_path)
-        elif platform == "darwin":
-            _install_solc_osx(version, allow_osx, show_progress, solcx_binary_path)
-        elif platform == "win32":
-            _install_solc_windows(version, show_progress, solcx_binary_path)
-        binary_path = get_executable(version, solcx_binary_path)
-        _check_subprocess_call(
-            [binary_path, "--version"],
-            message=f"Checking installed executable version at: {binary_path}",
-        )
-        if not solc_version:
-            set_solc_version(version)
-        LOGGER.info(f"solc {version} successfully installed at: {binary_path}")
-    finally:
-        lock.release()
-
-
 def _check_subprocess_call(command, message=None, verbose=False, **proc_kwargs):
     if message:
         LOGGER.debug(message)
@@ -293,15 +264,42 @@ def _get_temp_folder():
     return path
 
 
-<<<<<<< HEAD
-def _download_solc(url, show_progress):
-    response = requests.get(url, stream=show_progress)
-    if response.status_code == 404:
-        raise DownloadError(
-            "404 error when attempting to download from {} - are you sure this"
-            " version of solidity is available?".format(url)
+# ---------------------------------------------------------------------------
+# ---------------------------------------------------------------------------
+'''
+The following functions download and install solc to your OS
+'''
+
+
+def install_solc(version, allow_osx=False, show_progress=False, solcx_binary_path=None):
+    version = _check_version(version)
+    is_version_installed(version=version, solcx_binary_path=solcx_binary_path)
+
+    lock = get_process_lock(version)
+    if not lock.acquire(False):
+        lock.wait()
+        return install_solc(version, allow_osx, show_progress, solcx_binary_path)
+
+    try:
+        platform = _get_platform()
+        if platform == "linux":
+            _install_solc_linux(version, show_progress, solcx_binary_path)
+        elif platform == "darwin":
+            _install_solc_osx(version, allow_osx, show_progress, solcx_binary_path)
+        elif platform == "win32":
+            _install_solc_windows(version, show_progress, solcx_binary_path)
+        binary_path = get_executable(version, solcx_binary_path)
+        _check_subprocess_call(
+            [binary_path, "--version"],
+            message=f"Checking installed executable version at: {binary_path}",
         )
-=======
+        if not solc_version:
+            set_solc_version(version)
+        LOGGER.info(f"solc {version} successfully installed at: {binary_path}")
+    finally:
+        lock.release()
+
+
 def _download_solc(url, show_progress=False):
     if not show_progress:
         response = requests.get(url)
@@ -317,7 +315,6 @@ def _download_solc(url, show_progress=False):
             content += data
         progress_bar.close()
 
->>>>>>> fbd7212... Add required keyword args to _download_solc()
     if response.status_code != 200:
         raise DownloadError(
             f"Received status code {response.status_code} when attempting to download from {url}"
@@ -401,7 +398,13 @@ def _install_solc_osx(version, allow_osx, show_progress, solcx_binary_path):
     finally:
         os.chdir(original_path)
 
+    version_location
+
     _chmod_plus_x(version_location)
+
+
+# ---------------------------------------------------------------------------
+# ---------------------------------------------------------------------------
 
 
 if __name__ == "__main__":
