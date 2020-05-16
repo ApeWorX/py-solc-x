@@ -21,6 +21,7 @@ from semantic_version import SimpleSpec, Version
 
 from .exceptions import DownloadError, SolcNotInstalled
 from .utils.lock import get_process_lock
+from .utils.types import is_text
 
 try:
     from tqdm import tqdm
@@ -28,7 +29,7 @@ except ImportError:
     tqdm = None
 
 
-DOWNLOAD_BASE = "https://github.com/ethereum/solidity/releases/download/{}/{}"
+DOWNLOAD_BASE = "https://github.com/ethereum/solidity/releases/download/v{}/{}"
 ALL_RELEASES = "https://api.github.com/repos/ethereum/solidity/releases?per_page=100"
 
 MINIMAL_SOLC_VERSION = SimpleSpec(">=0.4.11")
@@ -227,7 +228,9 @@ def get_installed_solc_versions(solcx_binary_path=None):
 def _check_subprocess_call(command, message=None, verbose=False, **proc_kwargs):
     if message:
         LOGGER.debug(message)
-    LOGGER.info(f"Executing: {' '.join(command)}")
+
+    command_str = " ".join(map(str, command))
+    LOGGER.info(f"Executing:  {command_str}")
 
     return subprocess.check_call(
         command, stderr=subprocess.STDOUT if verbose else subprocess.DEVNULL, **proc_kwargs
