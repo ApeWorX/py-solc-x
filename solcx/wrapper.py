@@ -1,11 +1,10 @@
 from __future__ import absolute_import
 
+import os
 import subprocess
 
-from semantic_version import Version
-
 from .exceptions import SolcError
-from .install import get_executable
+from .install import _check_version, get_executable
 from .utils.string import coerce_return_to_text, force_bytes
 
 
@@ -46,9 +45,10 @@ def solc_wrapper(
     if solc_binary is None:
         solc_binary = get_executable()
 
-    command = [solc_binary]
+    filename = os.path.split(solc_binary)[-1]
+    version = _check_version(filename.replace("solc-", ""))
 
-    solc_minor = Version(solc_binary.rsplit("-v")[-1].split("\\")[0]).minor
+    command = [solc_binary]
 
     if help:
         command.append("--help")
@@ -72,7 +72,7 @@ def solc_wrapper(
         command.extend(("--output-dir", output_dir))
 
     if combined_json:
-        if solc_minor >= 5:
+        if version.minor >= 5:
             combined_json = combined_json.replace(",clone-bin", "")
         command.extend(("--combined-json", combined_json))
 
@@ -130,22 +130,22 @@ def solc_wrapper(
 
     # unsupported by >=0.6.0
     if ast:
-        if solc_minor >= 6:
-            raise AttributeError(f"solc 0.{solc_minor}.x does not support the --ast flag")
+        if version.minor >= 6:
+            raise AttributeError(f"solc 0.{version.minor}.x does not support the --ast flag")
         command.append("--ast")
 
     # unsupported by >=0.5.0
     if clone_bin:
-        if solc_minor >= 5:
-            raise AttributeError(f"solc 0.{solc_minor}.x does not support the --clone-bin flag")
+        if version.minor >= 5:
+            raise AttributeError(f"solc 0.{version.minor}.x does not support the --clone-bin flag")
         command.append("--clone-bin")
 
     if formal:
-        if solc_minor >= 5:
-            raise AttributeError(f"solc 0.{solc_minor}.x does not support the --formal flag")
+        if version.minor >= 5:
+            raise AttributeError(f"solc 0.{version.minor}.x does not support the --formal flag")
         command.append("--formal")
 
-    if not standard_json and not source_files and solc_minor >= 5:
+    if not standard_json and not source_files and version.minor >= 5:
         command.append("-")
 
     if stdin is not None:

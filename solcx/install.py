@@ -21,7 +21,6 @@ from semantic_version import SimpleSpec, Version
 
 from .exceptions import DownloadError, SolcNotInstalled
 from .utils.lock import get_process_lock
-from .utils.types import is_text
 
 try:
     from tqdm import tqdm
@@ -89,8 +88,8 @@ def _import_version(path):
 
 
 def _check_version(version):
-    if is_text(version):
-        version = Version(version.replace("v", ""))
+    if type(version) != "semantic_version.base.Version":
+        version = Version(str(version).replace("v", "").replace(".exe", ""))
     if version not in MINIMAL_SOLC_VERSION:
         raise ValueError("py-solc-x does not support solc versions <0.4.11")
     return version
