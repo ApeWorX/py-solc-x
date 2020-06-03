@@ -46,7 +46,7 @@ def solc_wrapper(
         solc_binary = get_executable()
 
     filename = os.path.split(solc_binary)[-1]
-    version = _check_version(filename.replace("solc-", ""))
+    version_obj = _check_version(filename.replace("solc-", ""))
 
     command = [solc_binary]
 
@@ -72,7 +72,7 @@ def solc_wrapper(
         command.extend(("--output-dir", output_dir))
 
     if combined_json:
-        if version.minor >= 5:
+        if version_obj.minor >= 5:
             combined_json = combined_json.replace(",clone-bin", "")
         command.extend(("--combined-json", combined_json))
 
@@ -130,22 +130,24 @@ def solc_wrapper(
 
     # unsupported by >=0.6.0
     if ast:
-        if version.minor >= 6:
-            raise AttributeError(f"solc 0.{version.minor}.x does not support the --ast flag")
+        if version_obj.minor >= 6:
+            raise AttributeError(f"solc 0.{version_obj.minor}.x does not support the --ast flag")
         command.append("--ast")
 
     # unsupported by >=0.5.0
     if clone_bin:
-        if version.minor >= 5:
-            raise AttributeError(f"solc 0.{version.minor}.x does not support the --clone-bin flag")
+        if version_obj.minor >= 5:
+            raise AttributeError(
+                f"solc 0.{version_obj.minor}.x does not support the --clone-bin flag"
+            )
         command.append("--clone-bin")
 
     if formal:
-        if version.minor >= 5:
-            raise AttributeError(f"solc 0.{version.minor}.x does not support the --formal flag")
+        if version_obj.minor >= 5:
+            raise AttributeError(f"solc 0.{version_obj.minor}.x does not support the --formal flag")
         command.append("--formal")
 
-    if not standard_json and not source_files and version.minor >= 5:
+    if not standard_json and not source_files and version_obj.minor >= 5:
         command.append("-")
 
     if stdin is not None:
