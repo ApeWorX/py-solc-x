@@ -1,7 +1,8 @@
 from __future__ import absolute_import
 
-import os
 import subprocess
+import sys
+from pathlib import Path
 
 from .exceptions import SolcError
 from .install import _check_version, get_executable
@@ -45,9 +46,14 @@ def solc_wrapper(
     if solc_binary is None:
         solc_binary = get_executable()
 
-    filename = os.path.split(solc_binary)[-1]
-    version_obj = _check_version(filename.replace("solc-", ""))
+    # Since Windows has a nested .exe file, we use the parent folder as the filename
+    if sys.platform == "win32":
+        filename = Path(solc_binary).parts[-2]
+    else:
+        filename = Path(solc_binary).parts[-1]
+    version_obj = _check_version(filename)
 
+    # Build the CLI command
     command = [solc_binary]
 
     if help:

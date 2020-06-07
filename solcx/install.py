@@ -31,6 +31,7 @@ except ImportError:
 DOWNLOAD_BASE = "https://github.com/ethereum/solidity/releases/download/v{}/{}"
 ALL_RELEASES = "https://api.github.com/repos/ethereum/solidity/releases?per_page=100"
 
+
 MINIMAL_SOLC_VERSION = SimpleSpec(">=0.4.11")
 
 VERSION_REGEX = {
@@ -67,7 +68,7 @@ def get_solc_folder(solcx_binary_path=None):
 
 
 def get_version_location(version, solcx_binary_path=None):
-    folder_location = get_solc_folder(solcx_binary_path=solcx_binary_path)
+    folder_location = get_solc_folder(solcx_binary_path)
     version_location = folder_location.joinpath(f"solc-v{version}")
     return version_location
 
@@ -88,8 +89,8 @@ def _import_version(path):
 
 
 def _check_version(version):
-    if type(version) != "semantic_version.base.Version":
-        version = Version(str(version).replace("v", "").replace(".exe", ""))
+    if not isinstance(version, Version):
+        version = Version(str(version).replace("solc-", "").replace("v", ""))
     if version not in MINIMAL_SOLC_VERSION:
         raise ValueError("py-solc-x does not support solc versions <0.4.11")
     return version
@@ -220,7 +221,7 @@ def _select_pragma_version(pragma_string, version_list):
 
 def get_installed_solc_versions(solcx_binary_path=None):
     return sorted(
-        i.name[5:] for i in get_solc_folder(solcx_binary_path=solcx_binary_path).glob("solc-v*")
+        _check_version(v.name) for v in get_solc_folder(solcx_binary_path).glob("solc-v*")
     )
 
 
@@ -253,7 +254,9 @@ The following functions download and install solc to your OS
 
 def install_solc(version, allow_osx=False, show_progress=False, solcx_binary_path=None):
     version = _check_version(version)
-    is_version_installed(version=version, solcx_binary_path=solcx_binary_path)
+    installed = is_version_installed(version=version, solcx_binary_path=solcx_binary_path)
+    if not installed:
+        return
 
     lock = get_process_lock(version)
     if not lock.acquire(False):
