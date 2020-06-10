@@ -42,7 +42,7 @@ def solc_wrapper(
     allow_paths=None,
     base_path=None,
     standard_json=None,
-    success_return_code=0,
+    success_return_code=None,
     evm_version=None,
 ):
     if solc_binary is None:
@@ -55,6 +55,10 @@ def solc_wrapper(
 
     if help:
         command.append("--help")
+        if success_return_code is None:
+            success_return_code = 1
+    elif success_return_code is None:
+        success_return_code = 0
 
     if version:
         command.append("--version")
