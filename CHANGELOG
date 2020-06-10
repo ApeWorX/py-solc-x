@@ -1,3 +1,10 @@
+0.9.0
+-----
+
+ - Add `base_path` as a possible wrapper kwarg
+ - Bugfix: handle `stderr` output when calling `which`
+ - Bugfix: expect return code 1 when using `--help`
+
 0.8.2
 -----
 
