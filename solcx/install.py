@@ -77,7 +77,11 @@ def import_installed_solc(solcx_binary_path=None):
 
     # copy active version of solc
     path_list = []
-    which = subprocess.run(["which", "solc"], stdout=subprocess.PIPE).stdout.decode().strip()
+    which = (
+        subprocess.run(["which", "solc"], stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
+        .stdout.decode()
+        .strip()
+    )
     if which:
         path_list.append(which)
 
