@@ -3,6 +3,7 @@
 import subprocess
 
 import pytest
+from semantic_version import Version
 
 import solcx
 
@@ -84,3 +85,12 @@ def test_value_kwargs(popen, foo_source):
     for value in kwargs:
         popen.expect(value[0])
         solcx.wrapper.solc_wrapper(stdin=foo_source, **{value[0]: value[1]})
+
+
+@pytest.mark.parametrize("kwarg,min_version", [({"base_path": "."}, "0.6.9")])
+def test_added_kwargs(popen, foo_source, kwarg, min_version):
+    if solcx.get_solc_version().truncate() >= Version(min_version):
+        solcx.wrapper.solc_wrapper(stdin=foo_source, **kwarg)
+    else:
+        with pytest.raises(AttributeError):
+            solcx.wrapper.solc_wrapper(stdin=foo_source, **kwarg)
