@@ -40,6 +40,7 @@ def solc_wrapper(
     devdoc=None,
     formal=None,
     allow_paths=None,
+    base_path=None,
     standard_json=None,
     success_return_code=0,
     evm_version=None,
@@ -49,7 +50,8 @@ def solc_wrapper(
 
     command = [solc_binary]
 
-    solc_minor = Version(solc_binary.rsplit("-v")[-1].split("\\")[0]).minor
+    solc_version = Version(solc_binary.rsplit("-v")[-1].split("\\")[0])
+    solc_minor = solc_version.minor
 
     if help:
         command.append("--help")
@@ -132,6 +134,14 @@ def solc_wrapper(
 
     if evm_version:
         command.extend(("--evm-version", evm_version))
+
+    # unsupported by <0.6.9
+    if base_path:
+        if solc_version <= Version("0.6.8"):
+            raise AttributeError(
+                "solc {} does not support the --base-path flag".format(solc_version)
+            )
+        command.extend(("--base-path", base_path))
 
     # unsupported by >=0.6.0
     if ast:
