@@ -4,7 +4,7 @@ from setuptools import find_packages, setup
 
 setup(
     name="py-solc-x",
-    version="0.8.2",  # don't change this manually, use bumpversion instead
+    version="0.9.0",  # don't change this manually, use bumpversion instead
     description="Python wrapper around the solc binary with 0.5.x and 0.6.x support",
     long_description_markdown_filename="README.md",
     author="Ben Hauser (forked from py-solc by Piper Merriam)",
