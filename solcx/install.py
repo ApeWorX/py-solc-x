@@ -4,6 +4,7 @@ Install solc
 import argparse
 import logging
 import os
+import platform
 import re
 import shutil
 import stat
@@ -42,6 +43,15 @@ LOGGER = logging.getLogger("solcx")
 SOLCX_BINARY_PATH_VARIABLE = "SOLCX_BINARY_PATH"
 
 solc_version = None
+
+
+def _get_arch():
+    if platform.machine().startswith("arm"):
+        return "arm"
+    if platform.machine().startswith("x86"):
+        return "x86"
+    else:
+        return platform.machine()
 
 
 def _get_platform():
@@ -216,6 +226,7 @@ def get_installed_solc_versions(solcx_binary_path=None):
 
 
 def install_solc(version, allow_osx=False, show_progress=False, solcx_binary_path=None):
+    arch = _get_arch()
     platform = _get_platform()
     version = _check_version(version)
 
@@ -227,7 +238,9 @@ def install_solc(version, allow_osx=False, show_progress=False, solcx_binary_pat
         return install_solc(version, allow_osx)
 
     try:
-        if platform == "linux":
+        if arch == "arm":
+            _install_solc_arm(version, show_progress, solcx_binary_path)
+        elif platform == "linux":
             _install_solc_linux(version, show_progress, solcx_binary_path)
         elif platform == "darwin":
             _install_solc_osx(version, allow_osx, show_progress, solcx_binary_path)
@@ -240,7 +253,7 @@ def install_solc(version, allow_osx=False, show_progress=False, solcx_binary_pat
         )
         if not solc_version:
             set_solc_version(version)
-        LOGGER.info("solc {} successfully installed at: {}".format(version, binary_path))
+            LOGGER.info("solc {} successfully installed at: {}".format(version, binary_path))
     finally:
         lock.release()
 
@@ -335,6 +348,10 @@ def _install_solc_windows(version, show_progress, solcx_binary_path=None):
         temp_path.rename(install_folder)
 
 
+def _install_solc_arm(version, show_progress, solcx_binary_path):
+    _compile_solc(version, show_progress, solcx_binary_path)
+
+
 def _install_solc_osx(version, allow_osx, show_progress, solcx_binary_path):
     if version.startswith("v0.4") and not allow_osx:
         raise ValueError(
@@ -343,6 +360,11 @@ def _install_solc_osx(version, allow_osx, show_progress, solcx_binary_path):
             "To ignore this warning and attempt to install: "
             "solcx.install_solc('{0}', allow_osx=True)".format(version)
         )
+    else:
+        _compile_solc(version, show_progress, solcx_binary_path)
+
+
+def _compile_solc(version, show_progress, solcx_binary_path):
     temp_path = _get_temp_folder()
     download = DOWNLOAD_BASE.format(version, "solidity_{}.tar.gz".format(version[1:]))
     binary_path = _check_for_installed_version(version)
