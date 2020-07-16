@@ -168,7 +168,8 @@ def solc_wrapper(
             )
         command.append("--formal")
 
-    if not standard_json and not source_files and solc_minor >= 5:
+    if not standard_json and not source_files:
+        # indicates that solc should read from stdin
         command.append("-")
 
     if stdin is not None:
