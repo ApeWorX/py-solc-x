@@ -30,6 +30,16 @@ def setup(all_versions):
     pass
 
 
+def _compile_assertions(output, key):
+    assert output
+    assert key in output
+    for value in ALL_OUTPUT_VALUES:
+        if value == "clone-bin" and solcx.get_solc_version().minor >= 5:
+            assert value not in output[key]
+        else:
+            assert value in output[key]
+
+
 def test_compile_source(foo_source):
     output = solcx.compile_source(foo_source)
     _compile_assertions(output, "<stdin>:Foo")
@@ -72,18 +82,15 @@ def test_compile_files_output_types(foo_path, key):
     assert key in output[f"{foo_path}:Foo"]
 
 
+def test_compile_source_import_remapping(foo_path, bar_source):
+    path = Path(foo_path).parent.as_posix()
+    output = solcx.compile_source(bar_source, import_remappings=[f"contracts={path}"])
+
+    assert set(output) == {f"{foo_path}:Foo", "<stdin>:Bar"}
+
+
 def test_compile_files_import_remapping(foo_path, bar_path):
     path = Path(bar_path).parent.as_posix()
     output = solcx.compile_files([bar_path], import_remappings=[f"contracts={path}"])
-    assert output
-    assert f"{bar_path}:Bar" in output
 
-
-def _compile_assertions(output, key):
-    assert output
-    assert key in output
-    for value in ALL_OUTPUT_VALUES:
-        if value == "clone-bin" and solcx.get_solc_version().minor >= 5:
-            assert value not in output[key]
-        else:
-            assert value in output[key]
+    assert set(output) == {f"{bar_path}:Bar", f"{foo_path}:Foo"}
