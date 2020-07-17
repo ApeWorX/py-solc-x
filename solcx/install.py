@@ -46,7 +46,7 @@ solc_version = None
 
 
 def _get_arch():
-    if platform.machine().startswith("arm"):
+    if platform.machine().startswith("arm") or platform.machine() == "aarch64":
         return "arm"
     if platform.machine().startswith("x86"):
         return "x86"
