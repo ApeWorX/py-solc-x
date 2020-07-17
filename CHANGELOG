@@ -1,7 +1,8 @@
-unreleased
-----------
+0.10.1
+------
 
-  - Support ARM 64 bit architecture (`aarch64`) #86
+ - Support ARM 64 bit architecture (`aarch64`) #86
+ - Bugfix: always include `-` for calls using stdin
 
 0.10.0
 ------
