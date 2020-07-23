@@ -30,7 +30,7 @@ except ImportError:
     tqdm = None
 
 
-DOWNLOAD_BASE = "https://github.com/ethereum/solidity/releases/download/{}/{}"
+DOWNLOAD_BASE = "https://github.com/ethereum/solidity/releases/download/v{}/{}"
 ALL_RELEASES = "https://api.github.com/repos/ethereum/solidity/releases?per_page=100"
 
 MINIMAL_SOLC_VERSION = "v0.4.11"
@@ -118,7 +118,7 @@ def import_installed_solc(solcx_binary_path=None):
         except Exception:
             continue
         copy_path = str(
-            get_solc_folder(solcx_binary_path=solcx_binary_path).joinpath("solc-" + version)
+            get_solc_folder(solcx_binary_path=solcx_binary_path).joinpath(f"solc-v{version}")
         )
         shutil.copy(path, copy_path)
         try:
@@ -131,12 +131,14 @@ def import_installed_solc(solcx_binary_path=None):
 def get_executable(version=None, solcx_binary_path=None):
     if not version:
         version = solc_version
+    else:
+        version = _convert_and_validate_version(version)
     if not version:
         raise SolcNotInstalled(
             "Solc is not installed. Call solcx.get_available_solc_versions()"
             " to view for available versions and solcx.install_solc() to install."
         )
-    solc_bin = get_solc_folder(solcx_binary_path=solcx_binary_path).joinpath("solc-" + version)
+    solc_bin = get_solc_folder(solcx_binary_path=solcx_binary_path).joinpath(f"solc-v{version}")
     if sys.platform == "win32":
         solc_bin = solc_bin.joinpath("solc.exe")
     if not solc_bin.exists():
@@ -157,9 +159,7 @@ def set_solc_version(version, silent=False, solcx_binary_path=None):
 
 
 def set_solc_version_pragma(pragma_string, silent=False, check_new=False):
-    version = _select_pragma_version(
-        pragma_string, [Version(i[1:]) for i in get_installed_solc_versions()]
-    )
+    version = _select_pragma_version(pragma_string, get_installed_solc_versions())
     if not version:
         raise SolcNotInstalled(
             f"No compatible solc version installed."
@@ -172,7 +172,7 @@ def set_solc_version_pragma(pragma_string, silent=False, check_new=False):
         LOGGER.info(f"Using solc version {solc_version}")
     if check_new:
         latest = install_solc_pragma(pragma_string, False)
-        if Version(latest) > Version(version[1:]):
+        if latest > version:
             LOGGER.info(f"Newer compatible solc version exists: {latest}")
 
 
@@ -233,7 +233,7 @@ def _select_pragma_version(pragma_string: str, version_list: List[Version]) -> O
 
 def get_installed_solc_versions(solcx_binary_path=None) -> List[Version]:
     install_path = get_solc_folder(solcx_binary_path=solcx_binary_path)
-    return sorted([Version(i.name[5:]) for i in install_path.glob("solc-v*")], reverse=True)
+    return sorted([Version(i.name[6:]) for i in install_path.glob("solc-v*")], reverse=True)
 
 
 def install_solc(
@@ -355,7 +355,7 @@ def _install_solc_windows(
         with zipfile.ZipFile(BytesIO(content)) as zf:
             zf.extractall(str(temp_path))
         install_folder = get_solc_folder(solcx_binary_path=solcx_binary_path).joinpath(
-            "solc-" + version
+            f"solc-v{version}"
         )
         temp_path.rename(install_folder)
 
@@ -369,7 +369,7 @@ def _install_solc_arm(
 def _install_solc_osx(
     version: Version, allow_osx: bool, show_progress: bool, solcx_binary_path: Optional[str]
 ) -> None:
-    if version.startswith("v0.4") and not allow_osx:
+    if version < Version("0.5.0") and not allow_osx:
         raise ValueError(
             "Installing solc {0} on OSX often fails. For suggested installation options:\n"
             "https://github.com/iamdefinitelyahuman/py-solc-x/wiki/Installing-Solidity-on-OSX\n\n"
