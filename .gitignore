@@ -65,3 +65,4 @@ node_modules
 # other
 .vscode
 .idea
+.mypy_cache/

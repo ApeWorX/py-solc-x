@@ -3,6 +3,7 @@ import sys
 import tempfile
 import threading
 from pathlib import Path
+from typing import Dict
 
 if sys.platform == "win32":
     import msvcrt
@@ -14,7 +15,7 @@ else:
     NON_BLOCKING = fcntl.LOCK_EX | fcntl.LOCK_NB
     BLOCKING = fcntl.LOCK_EX
 
-_locks = {}
+_locks: Dict = {}
 _base_lock = threading.Lock()
 
 
