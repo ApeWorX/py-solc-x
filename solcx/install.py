@@ -16,6 +16,7 @@ import zipfile
 from base64 import b64encode
 from io import BytesIO
 from pathlib import Path
+from typing import Dict, List, Optional
 
 import requests
 from semantic_version import SimpleSpec, Version
@@ -165,9 +166,7 @@ def set_solc_version_pragma(pragma_string, silent=False, check_new=False):
 
 
 def install_solc_pragma(pragma_string, install=True, show_progress=False, solcx_binary_path=None):
-    version = _select_pragma_version(
-        pragma_string, [Version(i[1:]) for i in get_available_solc_versions()]
-    )
+    version = _select_pragma_version(pragma_string, get_available_solc_versions())
     if not version:
         raise ValueError("Compatible solc version does not exist")
     if install:
@@ -175,12 +174,12 @@ def install_solc_pragma(pragma_string, install=True, show_progress=False, solcx_
     return version
 
 
-def get_available_solc_versions(headers=None):
-    versions = []
+def get_available_solc_versions(headers: Optional[Dict] = None) -> List[Version]:
+    version_list = []
     pattern = VERSION_REGEX[_get_platform()]
 
-    if not headers and os.getenv("GITHUB_TOKEN"):
-        auth = b64encode(os.getenv("GITHUB_TOKEN").encode()).decode()
+    if headers is None and os.getenv("GITHUB_TOKEN") is not None:
+        auth = b64encode(os.environ["GITHUB_TOKEN"].encode()).decode()
         headers = {"Authorization": f"Basic {auth}"}
 
     data = requests.get(ALL_RELEASES, headers=headers)
@@ -200,13 +199,14 @@ def get_available_solc_versions(headers=None):
     for release in data.json():
         asset = next((i for i in release["assets"] if re.match(pattern, i["name"])), False)
         if asset:
-            versions.append(release["tag_name"])
+            version = Version.coerce(release["tag_name"].lstrip("v"))
+            version_list.append(version)
         if release["tag_name"] == MINIMAL_SOLC_VERSION:
             break
-    return versions
+    return sorted(version_list, reverse=True)
 
 
-def _select_pragma_version(pragma_string, version_list):
+def _select_pragma_version(pragma_string: str, version_list: List[Version]) -> Optional[Version]:
     comparator_set_range = pragma_string.replace(" ", "").split("||")
     comparator_regex = re.compile(r"(([<>]?=?|\^)\d+\.\d+\.\d+)+")
     version = None
@@ -216,8 +216,8 @@ def _select_pragma_version(pragma_string, version_list):
         selected = spec.select(version_list)
         if selected and (not version or version < selected):
             version = selected
-    if version:
-        return str(version)
+
+    return version
 
 
 def get_installed_solc_versions(solcx_binary_path=None):
