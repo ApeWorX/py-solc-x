@@ -26,11 +26,6 @@ def test_get_solc_version(all_versions):
     assert isinstance(v, Version)
 
 
-def test_get_solc_version_string(all_versions):
-    v = solcx.get_solc_version_string()
-    assert isinstance(v, str)
-
-
 def test_set_solc_version_pragma(pragmapatch):
     set_pragma = functools.partial(solcx.set_solc_version_pragma, check_new=True)
     set_pragma("pragma solidity 0.4.11;")

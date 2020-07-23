@@ -4,7 +4,7 @@ import functools
 import json
 import re
 
-import semantic_version
+from semantic_version import Version
 
 from .exceptions import ContractsNotFound, SolcError
 from .wrapper import solc_wrapper
@@ -15,11 +15,9 @@ strip_zeroes_from_month_and_day = functools.partial(
 )
 
 
-def get_solc_version_string(**kwargs):
-    kwargs["version"] = True
-    stdoutdata, stderrdata, command, proc = solc_wrapper(**kwargs)
-    _, _, version_string = stdoutdata.partition("\n")
-    if not version_string or not version_string.startswith("Version: "):
+def get_solc_version() -> Version:
+    stdoutdata, stderrdata, command, proc = solc_wrapper(version=True)
+    if "Version: " not in stdoutdata:
         raise SolcError(
             command=command,
             return_code=proc.returncode,
@@ -28,16 +26,9 @@ def get_solc_version_string(**kwargs):
             stderr_data=stderrdata,
             message="Unable to extract version string from command output",
         )
-    return version_string.rstrip()
-
-
-def get_solc_version(**kwargs):
-    # semantic_version as of 2017-5-5 expects only one + to be used in string
-    return semantic_version.Version(
-        strip_zeroes_from_month_and_day(
-            get_solc_version_string(**kwargs)[len("Version: ") :].replace("++", "pp")
-        )
-    )
+    version_string = stdoutdata.split("Version: ", maxsplit=1)[1]
+    version_string = version_string.replace("++", "pp").strip()
+    return Version(strip_zeroes_from_month_and_day(version_string))
 
 
 def _parse_compiler_output(stdoutdata):
@@ -160,7 +151,7 @@ def link_code(unlinked_bytecode, libraries):
         (":".join((lib_name, lib_address)) for lib_name, lib_address in libraries.items())
     )
     stdoutdata, stderrdata, _, _ = solc_wrapper(
-        stdin=unlinked_bytecode, link=True, libraries=libraries_arg,
+        stdin=unlinked_bytecode, link=True, libraries=libraries_arg
     )
 
     return stdoutdata.replace("Linking completed.", "").strip()
