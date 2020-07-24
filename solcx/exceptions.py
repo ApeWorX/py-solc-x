@@ -1,13 +1,5 @@
 import textwrap
 
-from .utils.string import force_text
-
-
-def force_text_maybe(value, encoding="iso-8859-1"):
-    if value is not None:
-        return force_text(value)
-
-
 DEFAULT_MESSAGE = "An error occurred during execution"
 
 
@@ -19,9 +11,9 @@ class SolcError(Exception):
             self.message = message
         self.command = command
         self.return_code = return_code
-        self.stdin_data = force_text_maybe(stdin_data, "utf8")
-        self.stderr_data = force_text_maybe(stderr_data, "utf8")
-        self.stdout_data = force_text_maybe(stdout_data, "utf8")
+        self.stdin_data = stdin_data
+        self.stderr_data = stderr_data
+        self.stdout_data = stdout_data
 
     def __str__(self):
         return textwrap.dedent(
