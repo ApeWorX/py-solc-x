@@ -6,10 +6,8 @@ from semantic_version import Version
 
 from .exceptions import SolcError
 from .install import get_executable
-from .utils.string import coerce_return_to_text, force_bytes
 
 
-@coerce_return_to_text
 def solc_wrapper(
     solc_binary=None,
     stdin=None,
@@ -164,12 +162,14 @@ def solc_wrapper(
         command.append("-")
 
     if stdin is not None:
-        # solc seems to expects utf-8 from stdin:
-        # see Scanner class in Solidity source
-        stdin = force_bytes(stdin, "utf8")
+        stdin = str(stdin)
 
     proc = subprocess.Popen(
-        command, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE
+        command,
+        stdin=subprocess.PIPE,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        encoding="utf8",
     )
 
     stdoutdata, stderrdata = proc.communicate(stdin)
