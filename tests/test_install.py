@@ -41,9 +41,7 @@ def test_unknown_platform():
 @pytest.mark.skipif("sys.platform == 'win32'")
 def test_install_osx():
     sys.platform = "darwin"
-    with pytest.raises(ValueError):
-        solcx.install_solc("0.4.25")
-    solcx.install_solc("0.4.25", allow_osx=True)
+
     solcx.install_solc("0.5.4")
 
 
