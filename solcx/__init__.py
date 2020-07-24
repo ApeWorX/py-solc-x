@@ -15,7 +15,6 @@ from .main import (  # noqa: F401
     compile_source,
     compile_standard,
     get_solc_version,
-    get_solc_version_string,
     link_code,
 )
 

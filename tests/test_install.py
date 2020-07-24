@@ -19,7 +19,7 @@ def isolation():
 
 def test_not_installed():
     solcx.install.get_executable()
-    with pytest.raises(SolcNotInstalled):
+    with pytest.raises(ValueError):
         solcx.install.get_executable("v0.4.0")
     solcx.install.solc_version = None
     with pytest.raises(SolcNotInstalled):
@@ -27,9 +27,9 @@ def test_not_installed():
 
 
 def test_unsupported_version():
-    solcx.install._check_version("0.4.11")
+    solcx.install._convert_and_validate_version("0.4.11")
     with pytest.raises(ValueError):
-        solcx.install._check_version("0.4.10")
+        solcx.install._convert_and_validate_version("0.4.10")
 
 
 def test_unknown_platform():
