@@ -5,6 +5,9 @@ on:
     # run this workflow every Monday at 1PM UTC
     - cron: "* 13 * * 1"
 
+env:
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
 name: py-solc-x workflow
 
 jobs:
