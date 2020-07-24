@@ -46,7 +46,7 @@ SOLCX_BINARY_PATH_VARIABLE = "SOLCX_BINARY_PATH"
 solc_version = None
 
 
-def _get_arch():
+def _get_arch() -> str:
     if platform.machine().startswith("arm") or platform.machine() == "aarch64":
         return "arm"
     if platform.machine().startswith("x86"):
@@ -55,7 +55,7 @@ def _get_arch():
         return platform.machine()
 
 
-def _get_platform():
+def _get_platform() -> str:
     if sys.platform.startswith("linux"):
         return "linux"
     if sys.platform in ("darwin", "win32"):
@@ -92,7 +92,7 @@ def _get_import_version(path: str) -> Version:
     return Version.coerce(stdout_data)
 
 
-def import_installed_solc(solcx_binary_path=None):
+def import_installed_solc(solcx_binary_path: Optional[str] = None) -> None:
     platform = _get_platform()
     if platform == "win32":
         return
@@ -126,7 +126,9 @@ def import_installed_solc(solcx_binary_path=None):
             os.unlink(copy_path)
 
 
-def get_executable(version=None, solcx_binary_path=None):
+def get_executable(
+    version: Union[str, Version] = None, solcx_binary_path: Optional[str] = None
+) -> str:
     if not version:
         version = solc_version
     else:
@@ -147,7 +149,9 @@ def get_executable(version=None, solcx_binary_path=None):
     return str(solc_bin)
 
 
-def set_solc_version(version, silent=False, solcx_binary_path=None):
+def set_solc_version(
+    version: Union[str, Version], silent: bool = False, solcx_binary_path: Optional[str] = None
+) -> None:
     version = _convert_and_validate_version(version)
     get_executable(version, solcx_binary_path)
     global solc_version
@@ -174,7 +178,12 @@ def set_solc_version_pragma(pragma_string, silent=False, check_new=False):
             LOGGER.info(f"Newer compatible solc version exists: {latest}")
 
 
-def install_solc_pragma(pragma_string, install=True, show_progress=False, solcx_binary_path=None):
+def install_solc_pragma(
+    pragma_string: str,
+    install: bool = True,
+    show_progress: bool = False,
+    solcx_binary_path: Optional[str] = None,
+) -> Version:
     version = _select_pragma_version(pragma_string, get_available_solc_versions())
     if not version:
         raise ValueError("Compatible solc version does not exist")
@@ -229,7 +238,7 @@ def _select_pragma_version(pragma_string: str, version_list: List[Version]) -> O
     return version
 
 
-def get_installed_solc_versions(solcx_binary_path=None) -> List[Version]:
+def get_installed_solc_versions(solcx_binary_path: Optional[str] = None) -> List[Version]:
     install_path = get_solc_folder(solcx_binary_path)
     return sorted([Version(i.name[6:]) for i in install_path.glob("solc-v*")], reverse=True)
 
