@@ -1,4 +1,4 @@
-import textwrap
+from typing import Optional
 
 DEFAULT_MESSAGE = "An error occurred during execution"
 
@@ -6,7 +6,15 @@ DEFAULT_MESSAGE = "An error occurred during execution"
 class SolcError(Exception):
     message = DEFAULT_MESSAGE
 
-    def __init__(self, command, return_code, stdin_data, stdout_data, stderr_data, message=None):
+    def __init__(
+        self,
+        command: str,
+        return_code: int,
+        stdin_data: Optional[str],
+        stdout_data: str,
+        stderr_data: str,
+        message: Optional[str] = None,
+    ) -> None:
         if message is not None:
             self.message = message
         self.command = command
@@ -15,17 +23,15 @@ class SolcError(Exception):
         self.stderr_data = stderr_data
         self.stdout_data = stdout_data
 
-    def __str__(self):
-        return textwrap.dedent(
-            f"""
-            {self.message}
-            > command: `{' '.join(self.command)}`
-            > return code: `{self.return_code}`
-            > stdout:
-            {self.stdout_data}
-            > stderr:
-            {self.stderr_data}
-            """
+    def __str__(self) -> str:
+        return (
+            f"{self.message}"
+            f"\n> command: `{' '.join(self.command)}`"
+            f"\n> return code: `{self.return_code}`"
+            "\n> stdout:"
+            f"\n{self.stdout_data}"
+            "\n> stderr:"
+            f"\n{self.stderr_data}"
         ).strip()
 
 
