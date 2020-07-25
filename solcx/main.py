@@ -1,5 +1,3 @@
-from __future__ import absolute_import
-
 import functools
 import json
 import re
@@ -31,7 +29,13 @@ def get_solc_version() -> Version:
     return Version(strip_zeroes_from_month_and_day(version_string))
 
 
-def _parse_compiler_output(stdoutdata):
+def _get_combined_json_outputs() -> str:
+    help_str = solc_wrapper(help=True)[0].split("\n")
+    combined_json_args = next(i for i in help_str if i.startswith("  --combined-json"))
+    return combined_json_args.split(" ")[-1]
+
+
+def _parse_compiler_output(stdoutdata) -> dict:
     output = json.loads(stdoutdata)
 
     contracts = output.get("contracts", {})
@@ -47,29 +51,47 @@ def _parse_compiler_output(stdoutdata):
     return contracts
 
 
-ALL_OUTPUT_VALUES = (
-    "abi",
-    "asm",
-    "ast",
-    "bin",
-    "bin-runtime",
-    "clone-bin",
-    "devdoc",
-    "opcodes",
-    "userdoc",
-)
+def compile_source(
+    source: str,
+    output_values: list = None,
+    import_remappings: list = None,
+    base_path: str = None,
+    allow_paths: list = None,
+    output_dir: str = None,
+    overwrite: bool = False,
+    evm_version: str = None,
+    revert_strings: bool = False,
+    metadata_hash: str = None,
+    metadata_literal: bool = False,
+    optimize: bool = False,
+    optimize_runs: int = None,
+    no_optimize_yul: bool = False,
+    yul_optimizations: int = None,
+    allow_empty: bool = False,
+) -> dict:
 
+    if output_values is None:
+        combined_json = _get_combined_json_outputs()
+    else:
+        combined_json = ",".join(output_values)
 
-def compile_source(source, allow_empty=False, output_values=ALL_OUTPUT_VALUES, **kwargs):
-    if "stdin" in kwargs:
-        raise ValueError("The `stdin` keyword is not allowed in the `compile_source` function")
-    if "combined_json" in kwargs:
-        raise ValueError(
-            "The `combined_json` keyword is not allowed in the `compile_source` function"
-        )
-
-    combined_json = ",".join(output_values)
-    compiler_kwargs = dict(stdin=source, combined_json=combined_json, **kwargs)
+    compiler_kwargs = dict(
+        stdin=source,
+        combined_json=combined_json,
+        import_remappings=import_remappings,
+        base_path=base_path,
+        allow_paths=allow_paths,
+        output_dir=output_dir,
+        overwrite=overwrite,
+        evm_version=evm_version,
+        revert_strings=revert_strings,
+        metadata_hash=metadata_hash,
+        metadata_literal=metadata_literal,
+        optimize=optimize,
+        optimize_runs=optimize_runs,
+        no_optimize_yul=no_optimize_yul,
+        yul_optimizations=yul_optimizations,
+    )
 
     stdoutdata, stderrdata, command, proc = solc_wrapper(**compiler_kwargs)
 
@@ -86,14 +108,46 @@ def compile_source(source, allow_empty=False, output_values=ALL_OUTPUT_VALUES, *
     return contracts
 
 
-def compile_files(source_files, allow_empty=False, output_values=ALL_OUTPUT_VALUES, **kwargs):
-    if "combined_json" in kwargs:
-        raise ValueError(
-            "The `combined_json` keyword is not allowed in the `compile_files` function"
-        )
+def compile_files(
+    source_files: str,
+    output_values: list = None,
+    import_remappings: list = None,
+    base_path: str = None,
+    allow_paths: list = None,
+    output_dir: str = None,
+    overwrite: bool = False,
+    evm_version: str = None,
+    revert_strings: bool = False,
+    metadata_hash: str = None,
+    metadata_literal: bool = False,
+    optimize: bool = False,
+    optimize_runs: int = None,
+    no_optimize_yul: bool = False,
+    yul_optimizations: int = None,
+    allow_empty: bool = False,
+) -> dict:
+    if output_values is None:
+        combined_json = _get_combined_json_outputs()
+    else:
+        combined_json = ",".join(output_values)
 
-    combined_json = ",".join(output_values)
-    compiler_kwargs = dict(source_files=source_files, combined_json=combined_json, **kwargs)
+    compiler_kwargs = dict(
+        source_files=source_files,
+        combined_json=combined_json,
+        import_remappings=import_remappings,
+        base_path=base_path,
+        allow_paths=allow_paths,
+        output_dir=output_dir,
+        overwrite=overwrite,
+        evm_version=evm_version,
+        revert_strings=revert_strings,
+        metadata_hash=metadata_hash,
+        metadata_literal=metadata_literal,
+        optimize=optimize,
+        optimize_runs=optimize_runs,
+        no_optimize_yul=no_optimize_yul,
+        yul_optimizations=yul_optimizations,
+    )
 
     stdoutdata, stderrdata, command, proc = solc_wrapper(**compiler_kwargs)
 
@@ -110,7 +164,14 @@ def compile_files(source_files, allow_empty=False, output_values=ALL_OUTPUT_VALU
     return contracts
 
 
-def compile_standard(input_data, allow_empty=False, **kwargs):
+def compile_standard(
+    input_data,
+    base_path: str = None,
+    allow_paths: list = None,
+    output_dir: str = None,
+    overwrite: bool = False,
+    allow_empty=False,
+):
     if not input_data.get("sources") and not allow_empty:
         raise ContractsNotFound(
             command=None,
@@ -120,9 +181,16 @@ def compile_standard(input_data, allow_empty=False, **kwargs):
             stderr_data=None,
         )
 
-    stdoutdata, stderrdata, command, proc = solc_wrapper(
-        stdin=json.dumps(input_data), standard_json=True, **kwargs
+    compiler_kwargs = dict(
+        stdin=json.dumps(input_data),
+        standard_json=True,
+        base_path=base_path,
+        allow_paths=allow_paths,
+        output_dir=output_dir,
+        overwrite=overwrite,
     )
+
+    stdoutdata, stderrdata, command, proc = solc_wrapper(**compiler_kwargs)
 
     compiler_output = json.loads(stdoutdata)
     if "errors" in compiler_output:

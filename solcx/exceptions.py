@@ -8,7 +8,7 @@ class SolcError(Exception):
 
     def __init__(
         self,
-        command: str,
+        command: list,
         return_code: int,
         stdin_data: Optional[str],
         stdout_data: str,
