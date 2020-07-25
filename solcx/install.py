@@ -255,8 +255,7 @@ def install_solc(
     version = _convert_and_validate_version(version)
 
     lock = get_process_lock(version)
-    while not lock.acquire(False):
-        lock.wait()
+    lock.acquire(True)
 
     try:
         if _check_for_installed_version(version, solcx_binary_path):
