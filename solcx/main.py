@@ -1,5 +1,3 @@
-from __future__ import absolute_import
-
 import functools
 import json
 import re
@@ -31,7 +29,13 @@ def get_solc_version() -> Version:
     return Version(strip_zeroes_from_month_and_day(version_string))
 
 
-def _parse_compiler_output(stdoutdata):
+def _get_combined_json_outputs() -> str:
+    help_str = solc_wrapper(help=True)[0].split("\n")
+    combined_json_args = next(i for i in help_str if i.startswith("  --combined-json"))
+    return combined_json_args.split(" ")[-1]
+
+
+def _parse_compiler_output(stdoutdata) -> dict:
     output = json.loads(stdoutdata)
 
     contracts = output.get("contracts", {})
@@ -47,20 +51,9 @@ def _parse_compiler_output(stdoutdata):
     return contracts
 
 
-ALL_OUTPUT_VALUES = (
-    "abi",
-    "asm",
-    "ast",
-    "bin",
-    "bin-runtime",
-    "clone-bin",
-    "devdoc",
-    "opcodes",
-    "userdoc",
-)
-
-
-def compile_source(source, allow_empty=False, output_values=ALL_OUTPUT_VALUES, **kwargs):
+def compile_source(
+    source: str, allow_empty: bool = False, output_values: list = None, **kwargs
+) -> dict:
     if "stdin" in kwargs:
         raise ValueError("The `stdin` keyword is not allowed in the `compile_source` function")
     if "combined_json" in kwargs:
@@ -68,7 +61,11 @@ def compile_source(source, allow_empty=False, output_values=ALL_OUTPUT_VALUES, *
             "The `combined_json` keyword is not allowed in the `compile_source` function"
         )
 
-    combined_json = ",".join(output_values)
+    if output_values is None:
+        combined_json = _get_combined_json_outputs()
+    else:
+        combined_json = ",".join(output_values)
+
     compiler_kwargs = dict(stdin=source, combined_json=combined_json, **kwargs)
 
     stdoutdata, stderrdata, command, proc = solc_wrapper(**compiler_kwargs)
@@ -86,13 +83,19 @@ def compile_source(source, allow_empty=False, output_values=ALL_OUTPUT_VALUES, *
     return contracts
 
 
-def compile_files(source_files, allow_empty=False, output_values=ALL_OUTPUT_VALUES, **kwargs):
+def compile_files(
+    source_files: str, allow_empty: bool = False, output_values: list = None, **kwargs
+) -> dict:
     if "combined_json" in kwargs:
         raise ValueError(
             "The `combined_json` keyword is not allowed in the `compile_files` function"
         )
 
-    combined_json = ",".join(output_values)
+    if output_values is None:
+        combined_json = _get_combined_json_outputs()
+    else:
+        combined_json = ",".join(output_values)
+
     compiler_kwargs = dict(source_files=source_files, combined_json=combined_json, **kwargs)
 
     stdoutdata, stderrdata, command, proc = solc_wrapper(**compiler_kwargs)
