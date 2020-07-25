@@ -6,9 +6,8 @@ import pytest
 
 import solcx
 from solcx.exceptions import ContractsNotFound
-from solcx.main import ALL_OUTPUT_VALUES
 
-# interfaces and compact-format do not return anything
+# these values should work for all compatible solc versions
 combined_json_values = (
     "abi",
     "asm",
@@ -16,7 +15,6 @@ combined_json_values = (
     "bin",
     "bin-runtime",
     "devdoc",
-    "hashes",
     "metadata",
     "opcodes",
     "srcmap",
@@ -33,11 +31,8 @@ def setup(all_versions):
 def _compile_assertions(output, key):
     assert output
     assert key in output
-    for value in ALL_OUTPUT_VALUES:
-        if value == "clone-bin" and solcx.get_solc_version().minor >= 5:
-            assert value not in output[key]
-        else:
-            assert value in output[key]
+    for value in combined_json_values:
+        assert value in output[key]
 
 
 def test_compile_source(foo_source):
@@ -55,8 +50,6 @@ def test_compile_source_empty():
 
 @pytest.mark.parametrize("key", combined_json_values)
 def test_compile_source_output_types(foo_source, key):
-    if key == "hashes" and str(solcx.get_solc_version().truncate()) == "0.4.11":
-        return
     output = solcx.compile_source(foo_source, output_values=[key])
     assert key in output["<stdin>:Foo"]
 
@@ -76,8 +69,6 @@ def test_compile_files_empty():
 
 @pytest.mark.parametrize("key", combined_json_values)
 def test_compile_files_output_types(foo_path, key):
-    if key == "hashes" and str(solcx.get_solc_version().truncate()) == "0.4.11":
-        return
     output = solcx.compile_files([foo_path], output_values=[key])
     assert key in output[f"{foo_path}:Foo"]
 
