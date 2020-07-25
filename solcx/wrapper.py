@@ -1,4 +1,5 @@
 import subprocess
+from pathlib import Path
 from typing import Any
 
 from semantic_version import Version
@@ -26,7 +27,7 @@ def solc_wrapper(
         success_return_code = 0
 
     if source_files is not None:
-        command.extend(source_files)
+        command.extend([str(i) for i in source_files])
 
     if import_remappings is not None:
         command.extend(import_remappings)
@@ -38,7 +39,7 @@ def solc_wrapper(
         key = f"--{key.replace('_', '-')}"
         if value is True:
             command.append(key)
-        elif isinstance(value, (int, str)):
+        elif isinstance(value, (int, str, Path)):
             command.extend([key, str(value)])
         elif isinstance(value, (list, tuple)):
             command.extend([key, ",".join(str(i) for i in value)])
