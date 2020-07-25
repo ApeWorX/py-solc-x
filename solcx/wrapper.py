@@ -1,6 +1,5 @@
-from __future__ import absolute_import
-
 import subprocess
+from typing import Any
 
 from semantic_version import Version
 
@@ -9,155 +8,44 @@ from .install import get_executable
 
 
 def solc_wrapper(
-    solc_binary=None,
-    stdin=None,
-    help=None,
-    version=None,
-    combined_json=None,
-    optimize=None,
-    optimize_runs=None,
-    libraries=None,
-    output_dir=None,
-    gas=None,
-    assemble=None,
-    link=None,
-    source_files=None,
-    import_remappings=None,
-    ast=None,
-    ast_json=None,
-    asm=None,
-    asm_json=None,
-    opcodes=None,
-    bin=None,
-    bin_runtime=None,
-    clone_bin=None,
-    abi=None,
-    hashes=None,
-    userdoc=None,
-    devdoc=None,
-    formal=None,
-    allow_paths=None,
-    base_path=None,
-    standard_json=None,
-    success_return_code=None,
-    evm_version=None,
+    solc_binary: str = None,
+    stdin: str = None,
+    source_files: list = None,
+    import_remappings: list = None,
+    success_return_code: int = None,
+    **kwargs: Any,
 ):
     if solc_binary is None:
         solc_binary = get_executable()
 
     command = [solc_binary]
 
-    solc_version = Version(solc_binary.rsplit("-v")[-1].split("\\")[0])
-    solc_minor = solc_version.minor
-
-    if help:
-        command.append("--help")
-        if success_return_code is None:
-            success_return_code = 1
+    if "help" in kwargs:
+        success_return_code = 1
     elif success_return_code is None:
         success_return_code = 0
-
-    if version:
-        command.append("--version")
-
-    if optimize:
-        command.append("--optimize")
-
-    if optimize_runs is not None:
-        command.extend(("--optimize-runs", str(optimize_runs)))
-
-    if link:
-        command.append("--link")
-
-    if libraries is not None:
-        command.extend(("--libraries", libraries))
-
-    if output_dir is not None:
-        command.extend(("--output-dir", output_dir))
-
-    if combined_json:
-        if solc_minor >= 5:
-            combined_json = combined_json.replace(",clone-bin", "")
-        command.extend(("--combined-json", combined_json))
-
-    if gas:
-        command.append("--gas")
-
-    if allow_paths:
-        command.extend(("--allow-paths", allow_paths))
-
-    if standard_json:
-        command.append("--standard-json")
-
-    if assemble:
-        command.append("--assemble")
-
-    if import_remappings is not None:
-        command.extend(import_remappings)
 
     if source_files is not None:
         command.extend(source_files)
 
-    # Output configuration
-    if ast_json:
-        command.append("--ast-json")
+    if import_remappings is not None:
+        command.extend(import_remappings)
 
-    if asm:
-        command.append("--asm")
+    for key, value in kwargs.items():
+        if value is None or value is False:
+            continue
 
-    if asm_json:
-        command.append("--asm-json")
+        key = f"--{key.replace('_', '-')}"
+        if value is True:
+            command.append(key)
+        elif isinstance(value, (int, str)):
+            command.extend([key, str(value)])
+        elif isinstance(value, (list, tuple)):
+            command.extend([key, ",".join(str(i) for i in value)])
+        else:
+            raise TypeError(f"Invalid type for {key}: {type(value)}")
 
-    if opcodes:
-        command.append("--opcodes")
-
-    if bin:
-        command.append("--bin")
-
-    if bin_runtime:
-        command.append("--bin-runtime")
-
-    if abi:
-        command.append("--abi")
-
-    if hashes:
-        command.append("--hashes")
-
-    if userdoc:
-        command.append("--userdoc")
-
-    if devdoc:
-        command.append("--devdoc")
-
-    if evm_version:
-        command.extend(("--evm-version", evm_version))
-
-    # unsupported by <0.6.9
-    if base_path:
-        if solc_version <= Version("0.6.8"):
-            raise AttributeError(
-                "solc {} does not support the --base-path flag".format(solc_version)
-            )
-        command.extend(("--base-path", base_path))
-
-    # unsupported by >=0.6.0
-    if ast:
-        if solc_minor >= 6:
-            raise AttributeError(f"solc 0.{solc_minor}.x does not support the --ast flag")
-        command.append("--ast")
-
-    # unsupported by >=0.5.0
-    if clone_bin:
-        if solc_minor >= 5:
-            raise AttributeError(f"solc 0.{solc_minor}.x does not support the --clone-bin flag")
-        command.append("--clone-bin")
-
-    if formal:
-        if solc_minor >= 5:
-            raise AttributeError(f"solc 0.{solc_minor}.x does not support the --formal flag")
-        command.append("--formal")
-
-    if not standard_json and not source_files:
+    if "standard_json" not in kwargs and not source_files:
         # indicates that solc should read from stdin
         command.append("-")
 
@@ -175,6 +63,17 @@ def solc_wrapper(
     stdoutdata, stderrdata = proc.communicate(stdin)
 
     if proc.returncode != success_return_code:
+        solc_version = Version(solc_binary.rsplit("-v")[-1].split("\\")[0])
+        if stderrdata.startswith("unrecognised option"):
+            # unrecognised option '<FLAG>'
+            flag = stderrdata.split("'")[1]
+            raise AttributeError(f"solc {solc_version} - unsupported flag: {flag}")
+        if stderrdata.startswith("Invalid option"):
+            # Invalid option to <FLAG>: <OPTION>
+            flag, option = stderrdata.split(": ")
+            flag = flag.split(" ")[-1]
+            raise ValueError(f"solc {solc_version} - invalid option for {flag} flag: {option}")
+
         raise SolcError(
             command=command,
             return_code=proc.returncode,
