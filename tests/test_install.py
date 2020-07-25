@@ -50,6 +50,7 @@ def test_install_unknown_version():
         solcx.install_solc("0.4.99")
 
 
+@pytest.mark.skipif("'--no-install' in sys.argv")
 def test_progress_bar(nosolc):
     solcx.install_solc("0.6.0", show_progress=True)
 
@@ -72,6 +73,7 @@ def test_environment_var_versions(monkeypatch, tmp_path):
     assert solcx.get_installed_solc_versions() == versions
 
 
+@pytest.mark.skipif("'--no-install' in sys.argv")
 def test_environment_var_install(monkeypatch, tmp_path):
     assert not tmp_path.joinpath("solc-v0.6.0").exists()
 
