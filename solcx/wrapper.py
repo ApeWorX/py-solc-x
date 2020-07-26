@@ -8,6 +8,17 @@ from .exceptions import SolcError
 from .install import get_executable
 
 
+def _to_string(key: str, value: Any) -> str:
+    if isinstance(value, (int, str)):
+        return str(value)
+    elif isinstance(value, Path):
+        return value.as_posix()
+    elif isinstance(value, (list, tuple)):
+        return ",".join(_to_string(key, i) for i in value)
+    else:
+        raise TypeError(f"Invalid type for {key}: {type(value)}")
+
+
 def solc_wrapper(
     solc_binary: str = None,
     stdin: str = None,
@@ -27,7 +38,7 @@ def solc_wrapper(
         success_return_code = 0
 
     if source_files is not None:
-        command.extend([str(i) for i in source_files])
+        command.extend([_to_string("source_files", i) for i in source_files])
 
     if import_remappings is not None:
         command.extend(import_remappings)
@@ -39,12 +50,8 @@ def solc_wrapper(
         key = f"--{key.replace('_', '-')}"
         if value is True:
             command.append(key)
-        elif isinstance(value, (int, str, Path)):
-            command.extend([key, str(value)])
-        elif isinstance(value, (list, tuple)):
-            command.extend([key, ",".join(str(i) for i in value)])
         else:
-            raise TypeError(f"Invalid type for {key}: {type(value)}")
+            command.extend([key, _to_string(key, value)])
 
     if "standard_json" not in kwargs and not source_files:
         # indicates that solc should read from stdin
