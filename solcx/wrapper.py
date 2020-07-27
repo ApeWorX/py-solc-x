@@ -1,11 +1,17 @@
 import subprocess
 from pathlib import Path
-from typing import Any
+from typing import Any, Union
 
 from semantic_version import Version
 
 from .exceptions import SolcError
 from .install import get_executable
+
+
+def _get_solc_version(solc_binary: Union[Path, str]) -> Version:
+    stdout_data = subprocess.check_output([solc_binary, "--version"], encoding="utf8").strip()
+    stdout_data = stdout_data[stdout_data.index("Version: ") + 9 : stdout_data.index("+")]
+    return Version.coerce(stdout_data)
 
 
 def _to_string(key: str, value: Any) -> str:
@@ -20,16 +26,19 @@ def _to_string(key: str, value: Any) -> str:
 
 
 def solc_wrapper(
-    solc_binary: str = None,
+    solc_binary: Union[Path, str] = None,
     stdin: str = None,
     source_files: list = None,
     import_remappings: list = None,
     success_return_code: int = None,
     **kwargs: Any,
 ):
-    if solc_binary is None:
+    if solc_binary:
+        solc_binary = Path(solc_binary)
+    else:
         solc_binary = get_executable()
 
+    solc_version = _get_solc_version(solc_binary)
     command = [solc_binary]
 
     if "help" in kwargs:
@@ -71,7 +80,6 @@ def solc_wrapper(
     stdoutdata, stderrdata = proc.communicate(stdin)
 
     if proc.returncode != success_return_code:
-        solc_version = Version(solc_binary.rsplit("-v")[-1].split("\\")[0])
         if stderrdata.startswith("unrecognised option"):
             # unrecognised option '<FLAG>'
             flag = stderrdata.split("'")[1]
