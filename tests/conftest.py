@@ -107,7 +107,7 @@ def foo_path(tmp_path, foo_source):
     source = tmp_path.joinpath("Foo.sol")
     with source.open("w") as fp:
         fp.write(foo_source)
-    return source.as_posix()
+    return source
 
 
 @pytest.fixture()
@@ -115,4 +115,4 @@ def bar_path(tmp_path, bar_source):
     source = tmp_path.joinpath("Bar.sol")
     with source.open("w") as fp:
         fp.write(bar_source)
-    return source.as_posix()
+    return source

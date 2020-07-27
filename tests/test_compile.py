@@ -54,11 +54,19 @@ def test_compile_source_output_types(foo_source, key):
     assert key in output["<stdin>:Foo"]
 
 
-def test_compile_files(foo_path):
-    output = solcx.compile_files([foo_path])
-    _compile_assertions(output, f"{foo_path}:Foo")
+def test_compile_files_string(foo_path):
+    output = solcx.compile_files([foo_path.as_posix()])
+    _compile_assertions(output, f"{foo_path.as_posix()}:Foo")
+
+
+def test_compile_files_optimized(foo_path):
     output = solcx.compile_files([foo_path], optimize=True)
-    _compile_assertions(output, f"{foo_path}:Foo")
+    _compile_assertions(output, f"{foo_path.as_posix()}:Foo")
+
+
+def test_compile_files_path_object(foo_path):
+    output = solcx.compile_files([foo_path])
+    _compile_assertions(output, f"{foo_path.as_posix()}:Foo")
 
 
 def test_compile_files_empty():
@@ -70,18 +78,18 @@ def test_compile_files_empty():
 @pytest.mark.parametrize("key", combined_json_values)
 def test_compile_files_output_types(foo_path, key):
     output = solcx.compile_files([foo_path], output_values=[key])
-    assert key in output[f"{foo_path}:Foo"]
+    assert key in output[f"{foo_path.as_posix()}:Foo"]
 
 
 def test_compile_source_import_remapping(foo_path, bar_source):
     path = Path(foo_path).parent.as_posix()
     output = solcx.compile_source(bar_source, import_remappings=[f"contracts={path}"])
 
-    assert set(output) == {f"{foo_path}:Foo", "<stdin>:Bar"}
+    assert set(output) == {f"{foo_path.as_posix()}:Foo", "<stdin>:Bar"}
 
 
 def test_compile_files_import_remapping(foo_path, bar_path):
     path = Path(bar_path).parent.as_posix()
     output = solcx.compile_files([bar_path], import_remappings=[f"contracts={path}"])
 
-    assert set(output) == {f"{bar_path}:Bar", f"{foo_path}:Foo"}
+    assert set(output) == {f"{bar_path.as_posix()}:Bar", f"{foo_path.as_posix()}:Foo"}

@@ -24,7 +24,7 @@ jobs:
         python-version: 3.6
 
     - name: Install Tox
-      run: pip install tox
+      run: pip install tox wheel
 
     - name: Run Tox
       run: tox -e lint
@@ -42,7 +42,7 @@ jobs:
         python-version: 3.6
 
     - name: Install Tox
-      run: pip install tox
+      run: pip install tox wheel
 
     - name: Run Tox
       run: tox -e py36
@@ -66,7 +66,7 @@ jobs:
         python-version: 3.7
 
     - name: Install Tox
-      run: pip install tox
+      run: pip install tox wheel
 
     - name: Run Tox
       run: tox -e py37
@@ -93,7 +93,7 @@ jobs:
         python-version: 3.8
 
     - name: Install Tox
-      run: pip install tox
+      run: pip install tox wheel
 
     - name: Run Tox
       run: tox -e py38

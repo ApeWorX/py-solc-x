@@ -109,7 +109,7 @@ def compile_source(
 
 
 def compile_files(
-    source_files: str,
+    source_files: list,
     output_values: list = None,
     import_remappings: list = None,
     base_path: str = None,

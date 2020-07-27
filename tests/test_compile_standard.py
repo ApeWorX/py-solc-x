@@ -1,7 +1,5 @@
 #!/usr/bin/python3
 
-from pathlib import Path
-
 import pytest
 
 import solcx
@@ -47,8 +45,8 @@ def test_compile_standard_with_dependency(input_json, foo_source, bar_source):
 
 
 def test_compile_standard_with_file_paths(input_json, foo_path):
-    input_json["sources"] = {"contracts/Foo.sol": {"urls": [foo_path]}}
-    result = solcx.compile_standard(input_json, allow_paths=Path(foo_path).parent.as_posix())
+    input_json["sources"] = {"contracts/Foo.sol": {"urls": [str(foo_path)]}}
+    result = solcx.compile_standard(input_json, allow_paths=[foo_path.parent])
 
     _compile_assertions(result, "Foo")
 
