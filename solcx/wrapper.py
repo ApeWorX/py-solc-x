@@ -1,6 +1,6 @@
 import subprocess
 from pathlib import Path
-from typing import Any
+from typing import Any, Union
 
 from semantic_version import Version
 
@@ -20,17 +20,19 @@ def _to_string(key: str, value: Any) -> str:
 
 
 def solc_wrapper(
-    solc_binary: str = None,
+    solc_binary: Union[Path, str] = None,
     stdin: str = None,
     source_files: list = None,
     import_remappings: list = None,
     success_return_code: int = None,
     **kwargs: Any,
 ):
-    if solc_binary is None:
+    if solc_binary:
+        solc_binary = Path(solc_binary)
+    else:
         solc_binary = get_executable()
 
-    command = [solc_binary]
+    command = [solc_binary.as_posix()]
 
     if "help" in kwargs:
         success_return_code = 1
@@ -71,7 +73,7 @@ def solc_wrapper(
     stdoutdata, stderrdata = proc.communicate(stdin)
 
     if proc.returncode != success_return_code:
-        solc_version = Version(solc_binary.rsplit("-v")[-1].split("\\")[0])
+        solc_version = Version(str(solc_binary).rsplit("-v")[-1].split("\\")[0])
         if stderrdata.startswith("unrecognised option"):
             # unrecognised option '<FLAG>'
             flag = stderrdata.split("'")[1]
