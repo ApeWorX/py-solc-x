@@ -8,6 +8,12 @@ from .exceptions import SolcError
 from .install import get_executable
 
 
+def _get_solc_version(solc_binary: Union[Path, str]) -> Version:
+    stdout_data = subprocess.check_output([solc_binary, "--version"], encoding="utf8").strip()
+    stdout_data = stdout_data[stdout_data.index("Version: ") + 9 : stdout_data.index("+")]
+    return Version.coerce(stdout_data)
+
+
 def _to_string(key: str, value: Any) -> str:
     if isinstance(value, (int, str)):
         return str(value)
@@ -32,7 +38,8 @@ def solc_wrapper(
     else:
         solc_binary = get_executable()
 
-    command = [solc_binary.as_posix()]
+    solc_version = _get_solc_version(solc_binary)
+    command = [solc_binary]
 
     if "help" in kwargs:
         success_return_code = 1
@@ -73,7 +80,6 @@ def solc_wrapper(
     stdoutdata, stderrdata = proc.communicate(stdin)
 
     if proc.returncode != success_return_code:
-        solc_version = Version(str(solc_binary).rsplit("-v")[-1].split("\\")[0])
         if stderrdata.startswith("unrecognised option"):
             # unrecognised option '<FLAG>'
             flag = stderrdata.split("'")[1]

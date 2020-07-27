@@ -1,6 +1,4 @@
-import functools
 import json
-import re
 from pathlib import Path
 from typing import Union
 
@@ -8,28 +6,12 @@ from semantic_version import Version
 
 from .exceptions import ContractsNotFound, SolcError
 from .install import get_executable
-from .wrapper import solc_wrapper
-
-VERSION_DEV_DATE_MANGLER_RE = re.compile(r"(\d{4})\.0?(\d{1,2})\.0?(\d{1,2})")
-strip_zeroes_from_month_and_day = functools.partial(
-    VERSION_DEV_DATE_MANGLER_RE.sub, r"\g<1>.\g<2>.\g<3>"
-)
+from .wrapper import _get_solc_version, solc_wrapper
 
 
 def get_solc_version() -> Version:
-    stdoutdata, stderrdata, command, proc = solc_wrapper(version=True)
-    if "Version: " not in stdoutdata:
-        raise SolcError(
-            command=command,
-            return_code=proc.returncode,
-            stdin_data=None,
-            stdout_data=stdoutdata,
-            stderr_data=stderrdata,
-            message="Unable to extract version string from command output",
-        )
-    version_string = stdoutdata.split("Version: ", maxsplit=1)[1]
-    version_string = version_string.replace("++", "pp").strip()
-    return Version(strip_zeroes_from_month_and_day(version_string))
+    solc_binary = get_executable()
+    return _get_solc_version(solc_binary)
 
 
 def _get_combined_json_outputs() -> str:
