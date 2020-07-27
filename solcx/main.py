@@ -1,10 +1,13 @@
 import functools
 import json
 import re
+from pathlib import Path
+from typing import Union
 
 from semantic_version import Version
 
 from .exceptions import ContractsNotFound, SolcError
+from .install import get_executable
 from .wrapper import solc_wrapper
 
 VERSION_DEV_DATE_MANGLER_RE = re.compile(r"(\d{4})\.0?(\d{1,2})\.0?(\d{1,2})")
@@ -67,15 +70,20 @@ def compile_source(
     optimize_runs: int = None,
     no_optimize_yul: bool = False,
     yul_optimizations: int = None,
+    solc_binary: Union[str, Path] = None,
+    solc_version: Version = None,
     allow_empty: bool = False,
 ) -> dict:
-
     if output_values is None:
         combined_json = _get_combined_json_outputs()
     else:
         combined_json = ",".join(output_values)
 
-    compiler_kwargs = dict(
+    if solc_binary is None:
+        solc_binary = get_executable(solc_version)
+
+    stdoutdata, stderrdata, command, proc = solc_wrapper(
+        solc_binary=solc_binary,
         stdin=source,
         combined_json=combined_json,
         import_remappings=import_remappings,
@@ -92,8 +100,6 @@ def compile_source(
         no_optimize_yul=no_optimize_yul,
         yul_optimizations=yul_optimizations,
     )
-
-    stdoutdata, stderrdata, command, proc = solc_wrapper(**compiler_kwargs)
 
     contracts = _parse_compiler_output(stdoutdata)
 
@@ -124,6 +130,8 @@ def compile_files(
     optimize_runs: int = None,
     no_optimize_yul: bool = False,
     yul_optimizations: int = None,
+    solc_binary: Union[str, Path] = None,
+    solc_version: Version = None,
     allow_empty: bool = False,
 ) -> dict:
     if output_values is None:
@@ -131,7 +139,11 @@ def compile_files(
     else:
         combined_json = ",".join(output_values)
 
-    compiler_kwargs = dict(
+    if solc_binary is None:
+        solc_binary = get_executable(solc_version)
+
+    stdoutdata, stderrdata, command, proc = solc_wrapper(
+        solc_binary=solc_binary,
         source_files=source_files,
         combined_json=combined_json,
         import_remappings=import_remappings,
@@ -149,8 +161,6 @@ def compile_files(
         yul_optimizations=yul_optimizations,
     )
 
-    stdoutdata, stderrdata, command, proc = solc_wrapper(**compiler_kwargs)
-
     contracts = _parse_compiler_output(stdoutdata)
 
     if not contracts and not allow_empty:
@@ -165,12 +175,14 @@ def compile_files(
 
 
 def compile_standard(
-    input_data,
+    input_data: dict,
     base_path: str = None,
     allow_paths: list = None,
     output_dir: str = None,
     overwrite: bool = False,
-    allow_empty=False,
+    solc_binary: Union[str, Path] = None,
+    solc_version: Version = None,
+    allow_empty: bool = False,
 ):
     if not input_data.get("sources") and not allow_empty:
         raise ContractsNotFound(
@@ -181,7 +193,11 @@ def compile_standard(
             stderr_data=None,
         )
 
-    compiler_kwargs = dict(
+    if solc_binary is None:
+        solc_binary = get_executable(solc_version)
+
+    stdoutdata, stderrdata, command, proc = solc_wrapper(
+        solc_binary=solc_binary,
         stdin=json.dumps(input_data),
         standard_json=True,
         base_path=base_path,
@@ -189,8 +205,6 @@ def compile_standard(
         output_dir=output_dir,
         overwrite=overwrite,
     )
-
-    stdoutdata, stderrdata, command, proc = solc_wrapper(**compiler_kwargs)
 
     compiler_output = json.loads(stdoutdata)
     if "errors" in compiler_output:
