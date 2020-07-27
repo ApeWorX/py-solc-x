@@ -1,6 +1,6 @@
 import subprocess
 from pathlib import Path
-from typing import Any, Union
+from typing import Any, List, Union
 
 from semantic_version import Version
 
@@ -39,7 +39,7 @@ def solc_wrapper(
         solc_binary = get_executable()
 
     solc_version = _get_solc_version(solc_binary)
-    command = [solc_binary]
+    command: List = [solc_binary]
 
     if "help" in kwargs:
         success_return_code = 1

@@ -105,7 +105,7 @@ def import_installed_solc(solcx_binary_path: Union[Path, str] = None) -> None:
         .strip()
     )
     if which:
-        path_list.append(Path(which))
+        path_list.append(which)
 
     # on OSX, also copy all versions of solc from cellar
     if platform == "darwin":
@@ -247,7 +247,7 @@ def install_solc(
     version: Union[str, Version],
     allow_osx: bool = False,
     show_progress: bool = False,
-    solcx_binary_path: str = None,
+    solcx_binary_path: Union[Path, str] = None,
 ) -> None:
 
     arch = _get_arch()
@@ -339,7 +339,7 @@ def _download_solc(url, show_progress):
 
 
 def _install_solc_linux(
-    version: Version, show_progress: bool, solcx_binary_path: Union[Path, str]
+    version: Version, show_progress: bool, solcx_binary_path: Union[Path, str, None]
 ) -> None:
     download = DOWNLOAD_BASE.format(version, "solc-static-linux")
     install_path = get_solc_folder(solcx_binary_path).joinpath(f"solc-v{version}")
@@ -352,7 +352,7 @@ def _install_solc_linux(
 
 
 def _install_solc_windows(
-    version: Version, show_progress: bool, solcx_binary_path: Union[Path, str]
+    version: Version, show_progress: bool, solcx_binary_path: Union[Path, str, None]
 ) -> None:
     download = DOWNLOAD_BASE.format(version, "solidity-windows.zip")
     install_path = get_solc_folder(solcx_binary_path).joinpath(f"solc-v{version}")
@@ -366,13 +366,16 @@ def _install_solc_windows(
 
 
 def _install_solc_arm(
-    version: Version, show_progress: bool, solcx_binary_path: Union[Path, str]
+    version: Version, show_progress: bool, solcx_binary_path: Union[Path, str, None]
 ) -> None:
     _compile_solc(version, show_progress, solcx_binary_path)
 
 
 def _install_solc_osx(
-    version: Version, allow_osx: bool, show_progress: bool, solcx_binary_path: Union[Path, str]
+    version: Version,
+    allow_osx: bool,
+    show_progress: bool,
+    solcx_binary_path: Union[Path, str, None],
 ) -> None:
     if version < Version("0.5.0") and not allow_osx:
         raise ValueError(
@@ -386,7 +389,7 @@ def _install_solc_osx(
 
 
 def _compile_solc(
-    version: Version, show_progress: bool, solcx_binary_path: Union[Path, str]
+    version: Version, show_progress: bool, solcx_binary_path: Union[Path, str, None]
 ) -> None:
     temp_path = _get_temp_folder()
     download = DOWNLOAD_BASE.format(version, f"solidity_{version}.tar.gz")

@@ -168,7 +168,7 @@ def compile_standard(
 ):
     if not input_data.get("sources") and not allow_empty:
         raise ContractsNotFound(
-            command=None,
+            command=[],
             return_code=None,
             stdin_data=json.dumps(input_data, sort_keys=True, indent=2),
             stdout_data=None,
