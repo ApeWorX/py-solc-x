@@ -128,7 +128,7 @@ def import_installed_solc(solcx_binary_path: Optional[str] = None) -> None:
 
 def get_executable(
     version: Union[str, Version] = None, solcx_binary_path: Optional[str] = None
-) -> str:
+) -> Path:
     if not version:
         version = solc_version
     else:
@@ -146,7 +146,7 @@ def get_executable(
             f"solc {version} has not been installed."
             f" Use solcx.install_solc('{version}') to install."
         )
-    return str(solc_bin)
+    return solc_bin
 
 
 def set_solc_version(
@@ -273,7 +273,7 @@ def install_solc(
             _install_solc_windows(version, show_progress, solcx_binary_path)
         binary_path = get_executable(version, solcx_binary_path)
         _check_subprocess_call(
-            [binary_path, "--version"],
+            [str(binary_path), "--version"],
             message=f"Checking installed executable version at: {binary_path}",
         )
         if not solc_version:
