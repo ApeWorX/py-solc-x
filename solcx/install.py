@@ -16,7 +16,7 @@ import zipfile
 from base64 import b64encode
 from io import BytesIO
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Union
+from typing import Dict, List, Optional, Union
 
 import requests
 from semantic_version import SimpleSpec, Version
@@ -288,18 +288,6 @@ def install_solc(
         lock.release()
 
 
-def _check_subprocess_call(
-    command: List, message: str = None, verbose: bool = False, **proc_kwargs: Any
-) -> int:
-    if message:
-        LOGGER.debug(message)
-    LOGGER.info(f"Executing: {' '.join(command)}")
-
-    return subprocess.check_call(
-        command, stderr=subprocess.STDOUT if verbose else subprocess.DEVNULL, **proc_kwargs
-    )
-
-
 def _check_for_installed_version(
     version: Version, solcx_binary_path: Union[Path, str] = None
 ) -> bool:
@@ -405,19 +393,20 @@ def _compile_solc(
     temp_path = temp_path.joinpath(f"solidity_{version}")
 
     try:
-        _check_subprocess_call(
-            ["sh", str(temp_path.joinpath("scripts/install_deps.sh"))],
-            message="Running dependency installation script `install_deps.sh`",
+        LOGGER.info("Running dependency installation script `install_deps.sh`...")
+        subprocess.check_call(
+            ["sh", temp_path.joinpath("scripts/install_deps.sh")], stderr=subprocess.DEVNULL
         )
-    except subprocess.CalledProcessError as e:
-        LOGGER.warning(e, exc_info=True)
+    except subprocess.CalledProcessError as exc:
+        LOGGER.warning(exc, exc_info=True)
 
     original_path = os.getcwd()
     temp_path.joinpath("build").mkdir(exist_ok=True)
     os.chdir(str(temp_path.joinpath("build").resolve()))
     try:
         for cmd in (["cmake", ".."], ["make"]):
-            _check_subprocess_call(cmd, message=f"Running {cmd[0]}")
+            LOGGER.info(f"Running `{cmd[0]}`...")
+            subprocess.check_call(cmd, stderr=subprocess.DEVNULL)
         temp_path.joinpath("build/solc/solc").rename(install_path)
     except subprocess.CalledProcessError as e:
         raise OSError(
