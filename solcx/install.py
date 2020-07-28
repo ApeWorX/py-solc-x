@@ -51,7 +51,7 @@ LOGGER = logging.getLogger("solcx")
 
 SOLCX_BINARY_PATH_VARIABLE = "SOLCX_BINARY_PATH"
 
-solc_version = None
+_default_solc_binary = None
 
 
 def _get_os_name() -> str:
@@ -121,14 +121,14 @@ def get_executable(
     version: Union[str, Version] = None, solcx_binary_path: Union[Path, str] = None
 ) -> Path:
     if not version:
-        version = solc_version
-    else:
-        version = _convert_and_validate_version(version)
-    if not version:
-        raise SolcNotInstalled(
-            "Solc is not installed. Call solcx.get_available_solc_versions()"
-            " to view for available versions and solcx.install_solc() to install."
-        )
+        if not _default_solc_binary:
+            raise SolcNotInstalled(
+                "Solc is not installed. Call solcx.get_available_solc_versions()"
+                " to view for available versions and solcx.install_solc() to install."
+            )
+        return _default_solc_binary
+
+    version = _convert_and_validate_version(version)
     solc_bin = get_solcx_install_folder(solcx_binary_path).joinpath(f"solc-v{version}")
     if sys.platform == "win32":
         solc_bin = solc_bin.joinpath("solc.exe")
@@ -144,11 +144,10 @@ def set_solc_version(
     version: Union[str, Version], silent: bool = False, solcx_binary_path: Union[Path, str] = None
 ) -> None:
     version = _convert_and_validate_version(version)
-    get_executable(version, solcx_binary_path)
-    global solc_version
-    solc_version = version
+    global _default_solc_binary
+    _default_solc_binary = get_executable(version, solcx_binary_path)
     if not silent:
-        LOGGER.info(f"Using solc version {solc_version}")
+        LOGGER.info(f"Using solc version {version}")
 
 
 def set_solc_version_pragma(
@@ -160,11 +159,7 @@ def set_solc_version_pragma(
             f"No compatible solc version installed."
             f" Use solcx.install_solc_version_pragma('{version}') to install."
         )
-    version = _convert_and_validate_version(version)
-    global solc_version
-    solc_version = version
-    if not silent:
-        LOGGER.info(f"Using solc version {solc_version}")
+    set_solc_version(version, silent)
     if check_new:
         latest = install_solc_pragma(pragma_string, False)
         if latest > version:
@@ -416,7 +411,7 @@ def _validate_installation(version: Version, solcx_binary_path: Union[Path, str,
         )
     if installed_version != version:
         warnings.warn(f"Installed solc version is v{installed_version}", UnexpectedVersionWarning)
-    if not solc_version:
+    if not _default_solc_binary:
         set_solc_version(version)
     LOGGER.info(f"solc {version} successfully installed at: {binary_path}")
 
