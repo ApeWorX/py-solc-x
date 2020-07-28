@@ -36,7 +36,8 @@ ALL_RELEASES = "https://api.github.com/repos/ethereum/solidity/releases?per_page
 
 MINIMAL_SOLC_VERSION = "v0.4.11"
 VERSION_REGEX = {
-    "darwin": "solidity_[0-9].[0-9].[0-9]{1,}.tar.gz",
+    "darwin": "solc-macos",
+    "source": "solidity_[0-9].[0-9].[0-9]{1,}.tar.gz",
     "linux": "solc-static-linux",
     "win32": "solidity-windows.zip",
 }
@@ -189,9 +190,12 @@ def install_solc_pragma(
     return version
 
 
-def get_available_solc_versions(headers: Optional[Dict] = None) -> List[Version]:
+def get_available_solc_versions(
+    headers: Optional[Dict] = None, compilable: bool = False
+) -> List[Version]:
     version_list = []
-    pattern = VERSION_REGEX[_get_platform()]
+    regex_key = "source" if compilable else _get_platform()
+    pattern = VERSION_REGEX[regex_key]
 
     if headers is None and os.getenv("GITHUB_TOKEN") is not None:
         auth = b64encode(os.environ["GITHUB_TOKEN"].encode()).decode()
@@ -262,9 +266,9 @@ def install_solc(
         if arch == "arm":
             _install_solc_arm(version, show_progress, solcx_binary_path)
         elif platform == "linux":
-            _install_solc_linux(version, show_progress, solcx_binary_path)
+            _install_solc_unix(version, "solc-static-linux", show_progress, solcx_binary_path)
         elif platform == "darwin":
-            _install_solc_osx(version, show_progress, solcx_binary_path)
+            _install_solc_unix(version, "solc-macos", show_progress, solcx_binary_path)
         elif platform == "win32":
             _install_solc_windows(version, show_progress, solcx_binary_path)
 
@@ -328,10 +332,10 @@ def _download_solc(url: str, show_progress: bool) -> bytes:
     return content
 
 
-def _install_solc_linux(
-    version: Version, show_progress: bool, solcx_binary_path: Union[Path, str, None]
+def _install_solc_unix(
+    version: Version, filename: str, show_progress: bool, solcx_binary_path: Union[Path, str, None]
 ) -> None:
-    download = DOWNLOAD_BASE.format(version, "solc-static-linux")
+    download = DOWNLOAD_BASE.format(version, filename)
     install_path = get_solcx_install_folder(solcx_binary_path).joinpath(f"solc-v{version}")
 
     LOGGER.info(f"Downloading solc {version} from {download}")
@@ -357,12 +361,6 @@ def _install_solc_windows(
 
 
 def _install_solc_arm(
-    version: Version, show_progress: bool, solcx_binary_path: Union[Path, str, None]
-) -> None:
-    _compile_solc(version, show_progress, solcx_binary_path)
-
-
-def _install_solc_osx(
     version: Version, show_progress: bool, solcx_binary_path: Union[Path, str, None]
 ) -> None:
     _compile_solc(version, show_progress, solcx_binary_path)
