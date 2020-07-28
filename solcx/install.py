@@ -83,23 +83,23 @@ def get_solcx_install_folder(solcx_binary_path: Union[Path, str] = None) -> Path
         return path
 
 
-def import_installed_solc(solcx_binary_path: Union[Path, str] = None) -> None:
-    path_list: List[Path] = []
-    os_name = _get_os_name()
+def _get_which_solc() -> Path:
+    if _get_os_name() == "win32":
+        response = subprocess.check_output(["where.exe", "solc"], encoding="utf8").strip()
+    else:
+        response = subprocess.check_output(["which", "solc"], encoding="utf8").strip()
 
+    return Path(response)
+
+
+def import_installed_solc(solcx_binary_path: Union[Path, str] = None) -> None:
     try:
-        # copy active version of solc
-        if os_name == "win32":
-            response = subprocess.check_output(["where.exe", "solc"], encoding="utf8").strip()
-        else:
-            response = subprocess.check_output(["which", "solc"], encoding="utf8").strip()
-        if response:
-            path_list = [Path(response)]
+        path_list = [_get_which_solc()]
     except (FileNotFoundError, subprocess.CalledProcessError):
-        pass
+        path_list = []
 
     # on OSX, also copy all versions of solc from cellar
-    if os_name == "darwin":
+    if _get_os_name() == "darwin":
         path_list.extend(Path("/usr/local/Cellar").glob("solidity*/**/solc"))
 
     for path in path_list:
@@ -414,6 +414,15 @@ def _validate_installation(version: Version, solcx_binary_path: Union[Path, str,
     if not _default_solc_binary:
         set_solc_version(version)
     LOGGER.info(f"solc {version} successfully installed at: {binary_path}")
+
+
+try:
+    # try to set the result of `which`/`where` as the default
+    _default_solc_binary = _get_which_solc()
+except Exception:
+    # if not available, use the most recent solcx installed version
+    if get_installed_solc_versions():
+        set_solc_version(get_installed_solc_versions()[0], silent=True)
 
 
 if __name__ == "__main__":
