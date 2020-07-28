@@ -33,23 +33,27 @@ def bytecode():
     yield solcx.compile_source(source)["<stdin>:LinkTester"]["bin"]
 
 
-def test_partial_link(all_versions, bytecode):
+def test_unlinked_bytecode(all_versions, bytecode):
     assert "_" in bytecode
     assert addr1[2:] not in bytecode
+    assert addr2[2:] not in bytecode
+
+
+def test_partial_link(all_versions, bytecode):
     output = solcx.link_code(bytecode, {"<stdin>:UnlinkedLib": addr1})
+
     assert output != bytecode
     assert "_" in output
     assert addr1[2:] in output
 
 
 def test_full_link(all_versions, bytecode):
-    assert "_" in bytecode
-    assert addr1[2:] not in bytecode
-    assert addr2[2:] not in bytecode
     output = solcx.link_code(
         bytecode, {"<stdin>:UnlinkedLib": addr1, "<stdin>:OtherUnlinkedLib": addr2}
     )
-    assert output != bytecode
-    assert "_" not in output
+
+    # fully linked bytecode should be able to be interpreted as hex
+    assert int(output, 16)
+
     assert addr1[2:] in output
     assert addr2[2:] in output
