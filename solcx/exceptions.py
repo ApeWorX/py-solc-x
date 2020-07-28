@@ -49,3 +49,7 @@ class SolcNotInstalled(Exception):
 
 class DownloadError(Exception):
     pass
+
+
+class UnexpectedVersionWarning(Warning):
+    pass

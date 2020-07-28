@@ -12,6 +12,7 @@ import subprocess
 import sys
 import tarfile
 import tempfile
+import warnings
 import zipfile
 from base64 import b64encode
 from io import BytesIO
@@ -22,7 +23,12 @@ import requests
 from semantic_version import SimpleSpec, Version
 
 from solcx import wrapper
-from solcx.exceptions import DownloadError, SolcInstallationError, SolcNotInstalled
+from solcx.exceptions import (
+    DownloadError,
+    SolcInstallationError,
+    SolcNotInstalled,
+    UnexpectedVersionWarning,
+)
 from solcx.utils.lock import get_process_lock
 
 try:
@@ -392,10 +398,12 @@ def _validate_installation(version: Version, solcx_binary_path: Union[Path, str,
     except Exception:
         binary_path.unlink()
         raise SolcInstallationError("Downloaded binary returned unexpected output")
-    if installed_version != version:
+    if installed_version.truncate() != version.truncate():
         raise SolcInstallationError(
             f"Attempted to install solc v{version}, but got solc v{installed_version}"
         )
+    if installed_version != version:
+        warnings.warn(f"Installed solc version is v{installed_version}", UnexpectedVersionWarning)
     if not solc_version:
         set_solc_version(version)
     LOGGER.info(f"solc {version} successfully installed at: {binary_path}")
