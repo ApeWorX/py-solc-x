@@ -1,6 +1,4 @@
-from __future__ import absolute_import
-
-from .install import (  # noqa: F401
+from solcx.install import (
     get_available_solc_versions,
     get_installed_solc_versions,
     get_solcx_install_folder,
@@ -10,13 +8,7 @@ from .install import (  # noqa: F401
     set_solc_version,
     set_solc_version_pragma,
 )
-from .main import (  # noqa: F401
-    compile_files,
-    compile_source,
-    compile_standard,
-    get_solc_version,
-    link_code,
-)
+from solcx.main import compile_files, compile_source, compile_standard, get_solc_version, link_code
 
 # check for installed version of solc
 import_installed_solc()
