@@ -76,7 +76,7 @@ def _convert_and_validate_version(version: Union[str, Version]) -> Version:
     return version
 
 
-def get_solc_folder(solcx_binary_path: Union[Path, str] = None) -> Path:
+def get_solcx_install_folder(solcx_binary_path: Union[Path, str] = None) -> Path:
     if os.getenv(SOLCX_BINARY_PATH_VARIABLE):
         return Path(os.environ[SOLCX_BINARY_PATH_VARIABLE])
     elif solcx_binary_path is not None:
@@ -112,7 +112,7 @@ def import_installed_solc(solcx_binary_path: Union[Path, str] = None) -> None:
             assert version not in get_installed_solc_versions()
         except Exception:
             continue
-        copy_path = str(get_solc_folder(solcx_binary_path).joinpath(f"solc-v{version}"))
+        copy_path = str(get_solcx_install_folder(solcx_binary_path).joinpath(f"solc-v{version}"))
         shutil.copy(path, copy_path)
         try:
             # confirm that solc still works after being copied
@@ -133,7 +133,7 @@ def get_executable(
             "Solc is not installed. Call solcx.get_available_solc_versions()"
             " to view for available versions and solcx.install_solc() to install."
         )
-    solc_bin = get_solc_folder(solcx_binary_path).joinpath(f"solc-v{version}")
+    solc_bin = get_solcx_install_folder(solcx_binary_path).joinpath(f"solc-v{version}")
     if sys.platform == "win32":
         solc_bin = solc_bin.joinpath("solc.exe")
     if not solc_bin.exists():
@@ -236,7 +236,7 @@ def _select_pragma_version(pragma_string: str, version_list: List[Version]) -> O
 
 
 def get_installed_solc_versions(solcx_binary_path: Union[Path, str] = None) -> List[Version]:
-    install_path = get_solc_folder(solcx_binary_path)
+    install_path = get_solcx_install_folder(solcx_binary_path)
     return sorted([Version(i.name[6:]) for i in install_path.glob("solc-v*")], reverse=True)
 
 
@@ -256,7 +256,7 @@ def install_solc(
 
     try:
         if _check_for_installed_version(version, solcx_binary_path):
-            path = get_solc_folder(solcx_binary_path).joinpath(f"solc-v{version}")
+            path = get_solcx_install_folder(solcx_binary_path).joinpath(f"solc-v{version}")
             LOGGER.info(f"solc {version} already installed at: {path}")
             return
 
@@ -299,7 +299,7 @@ def _chmod_plus_x(executable_path: Path) -> None:
 def _check_for_installed_version(
     version: Version, solcx_binary_path: Union[Path, str] = None
 ) -> bool:
-    path = get_solc_folder(solcx_binary_path).joinpath(f"solc-v{version}")
+    path = get_solcx_install_folder(solcx_binary_path).joinpath(f"solc-v{version}")
     return path.exists()
 
 
@@ -341,7 +341,7 @@ def _install_solc_linux(
     version: Version, show_progress: bool, solcx_binary_path: Union[Path, str, None]
 ) -> None:
     download = DOWNLOAD_BASE.format(version, "solc-static-linux")
-    install_path = get_solc_folder(solcx_binary_path).joinpath(f"solc-v{version}")
+    install_path = get_solcx_install_folder(solcx_binary_path).joinpath(f"solc-v{version}")
 
     LOGGER.info(f"Downloading solc {version} from {download}")
     content = _download_solc(download, show_progress)
@@ -354,7 +354,7 @@ def _install_solc_windows(
     version: Version, show_progress: bool, solcx_binary_path: Union[Path, str, None]
 ) -> None:
     download = DOWNLOAD_BASE.format(version, "solidity-windows.zip")
-    install_path = get_solc_folder(solcx_binary_path).joinpath(f"solc-v{version}")
+    install_path = get_solcx_install_folder(solcx_binary_path).joinpath(f"solc-v{version}")
 
     temp_path = _get_temp_folder()
     content = _download_solc(download, show_progress)
@@ -392,7 +392,7 @@ def _compile_solc(
 ) -> None:
     temp_path = _get_temp_folder()
     download = DOWNLOAD_BASE.format(version, f"solidity_{version}.tar.gz")
-    install_path = get_solc_folder(solcx_binary_path).joinpath(f"solc-v{version}")
+    install_path = get_solcx_install_folder(solcx_binary_path).joinpath(f"solc-v{version}")
 
     content = _download_solc(download, show_progress)
     with tarfile.open(fileobj=BytesIO(content)) as tar:

@@ -3,7 +3,7 @@ from __future__ import absolute_import
 from .install import (  # noqa: F401
     get_available_solc_versions,
     get_installed_solc_versions,
-    get_solc_folder,
+    get_solcx_install_folder,
     import_installed_solc,
     install_solc,
     install_solc_pragma,
