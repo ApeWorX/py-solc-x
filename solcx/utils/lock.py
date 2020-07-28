@@ -3,7 +3,7 @@ import sys
 import tempfile
 import threading
 from pathlib import Path
-from typing import Dict
+from typing import Any, Dict
 
 if sys.platform == "win32":
     import msvcrt
@@ -34,6 +34,12 @@ class _ProcessLock:
         self._lock = threading.Lock()
         self._lock_path = Path(tempfile.gettempdir()).joinpath(f".solcx-lock-{lock_id}")
         self._lock_file = self._lock_path.open("w")
+
+    def __enter__(self) -> None:
+        self.acquire(True)
+
+    def __exit__(self, *args: Any) -> None:
+        self.release()
 
     def acquire(self, blocking: bool) -> bool:
         raise NotImplementedError("Method not implemented by child class")

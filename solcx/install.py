@@ -254,10 +254,9 @@ def install_solc(
         )
 
     os_name = _get_os_name()
-    lock = get_process_lock(str(version))
-    lock.acquire(True)
+    process_lock = get_process_lock(str(version))
 
-    try:
+    with process_lock:
         if _check_for_installed_version(version, solcx_binary_path):
             path = get_solcx_install_folder(solcx_binary_path).joinpath(f"solc-v{version}")
             LOGGER.info(f"solc {version} already installed at: {path}")
@@ -272,9 +271,6 @@ def install_solc(
 
         _validate_installation(version, solcx_binary_path)
 
-    finally:
-        lock.release()
-
 
 def compile_solc(
     version: Version, show_progress: bool = False, solcx_binary_path: Union[Path, str] = None
@@ -282,44 +278,52 @@ def compile_solc(
     if _get_os_name() == "win32":
         raise OSError("Compiling from source is not supported on Windows systems")
 
-    temp_path = _get_temp_folder()
-    download = DOWNLOAD_BASE.format(version, f"solidity_{version}.tar.gz")
-    install_path = get_solcx_install_folder(solcx_binary_path).joinpath(f"solc-v{version}")
+    process_lock = get_process_lock(str(version))
 
-    content = _download_solc(download, show_progress)
-    with tarfile.open(fileobj=BytesIO(content)) as tar:
-        tar.extractall(temp_path)
-    temp_path = temp_path.joinpath(f"solidity_{version}")
+    with process_lock:
+        if _check_for_installed_version(version, solcx_binary_path):
+            path = get_solcx_install_folder(solcx_binary_path).joinpath(f"solc-v{version}")
+            LOGGER.info(f"solc {version} already installed at: {path}")
+            return
 
-    try:
-        LOGGER.info("Running dependency installation script `install_deps.sh`...")
-        subprocess.check_call(
-            ["sh", temp_path.joinpath("scripts/install_deps.sh")], stderr=subprocess.DEVNULL
-        )
-    except subprocess.CalledProcessError as exc:
-        LOGGER.warning(exc, exc_info=True)
+        temp_path = _get_temp_folder()
+        download = DOWNLOAD_BASE.format(version, f"solidity_{version}.tar.gz")
+        install_path = get_solcx_install_folder(solcx_binary_path).joinpath(f"solc-v{version}")
 
-    original_path = os.getcwd()
-    temp_path.joinpath("build").mkdir(exist_ok=True)
-    os.chdir(str(temp_path.joinpath("build").resolve()))
-    try:
-        for cmd in (["cmake", ".."], ["make"]):
-            LOGGER.info(f"Running `{cmd[0]}`...")
-            subprocess.check_call(cmd, stderr=subprocess.DEVNULL)
-        temp_path.joinpath("build/solc/solc").rename(install_path)
-    except subprocess.CalledProcessError as exc:
-        raise SolcInstallationError(
-            f"{cmd[0]} returned non-zero exit status {exc.returncode}"
-            " while attempting to build solc from the source.\n"
-            "This is likely due to a missing or incorrect version of a build dependency.\n\n"
-            "For suggested installation options: "
-            "https://github.com/iamdefinitelyahuman/py-solc-x/wiki/Installing-Solidity-on-OSX"
-        )
-    finally:
-        os.chdir(original_path)
+        content = _download_solc(download, show_progress)
+        with tarfile.open(fileobj=BytesIO(content)) as tar:
+            tar.extractall(temp_path)
+        temp_path = temp_path.joinpath(f"solidity_{version}")
 
-    install_path.chmod(install_path.stat().st_mode | stat.S_IEXEC)
-    _validate_installation(version, solcx_binary_path)
+        try:
+            LOGGER.info("Running dependency installation script `install_deps.sh`...")
+            subprocess.check_call(
+                ["sh", temp_path.joinpath("scripts/install_deps.sh")], stderr=subprocess.DEVNULL
+            )
+        except subprocess.CalledProcessError as exc:
+            LOGGER.warning(exc, exc_info=True)
+
+        original_path = os.getcwd()
+        temp_path.joinpath("build").mkdir(exist_ok=True)
+        os.chdir(str(temp_path.joinpath("build").resolve()))
+        try:
+            for cmd in (["cmake", ".."], ["make"]):
+                LOGGER.info(f"Running `{cmd[0]}`...")
+                subprocess.check_call(cmd, stderr=subprocess.DEVNULL)
+            temp_path.joinpath("build/solc/solc").rename(install_path)
+        except subprocess.CalledProcessError as exc:
+            raise SolcInstallationError(
+                f"{cmd[0]} returned non-zero exit status {exc.returncode}"
+                " while attempting to build solc from the source.\n"
+                "This is likely due to a missing or incorrect version of a build dependency.\n\n"
+                "For suggested installation options: "
+                "https://github.com/iamdefinitelyahuman/py-solc-x/wiki/Installing-Solidity-on-OSX"
+            )
+        finally:
+            os.chdir(original_path)
+
+        install_path.chmod(install_path.stat().st_mode | stat.S_IEXEC)
+        _validate_installation(version, solcx_binary_path)
 
 
 def _check_for_installed_version(
