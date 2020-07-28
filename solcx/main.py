@@ -210,12 +210,20 @@ def compile_standard(
     return compiler_output
 
 
-def link_code(unlinked_bytecode: str, libraries: Dict) -> str:
-    libraries_arg = ",".join(
-        (":".join((lib_name, lib_address)) for lib_name, lib_address in libraries.items())
-    )
-    stdoutdata, stderrdata, _, _ = solc_wrapper(
-        stdin=unlinked_bytecode, link=True, libraries=libraries_arg
-    )
+def link_code(
+    unlinked_bytecode: str,
+    libraries: Dict,
+    solc_binary: Union[str, Path] = None,
+    solc_version: Version = None,
+) -> str:
+
+    if solc_binary is None:
+        solc_binary = get_executable(solc_version)
+
+    library_list = [f"{name}:{address}" for name, address in libraries.items()]
+
+    stdoutdata = solc_wrapper(
+        solc_binary=solc_binary, stdin=unlinked_bytecode, link=True, libraries=library_list
+    )[0]
 
     return stdoutdata.replace("Linking completed.", "").strip()
