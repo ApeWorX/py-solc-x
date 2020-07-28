@@ -292,10 +292,6 @@ def _check_subprocess_call(
     )
 
 
-def _chmod_plus_x(executable_path: Path) -> None:
-    executable_path.chmod(executable_path.stat().st_mode | stat.S_IEXEC)
-
-
 def _check_for_installed_version(
     version: Version, solcx_binary_path: Union[Path, str] = None
 ) -> bool:
@@ -347,7 +343,8 @@ def _install_solc_linux(
     content = _download_solc(download, show_progress)
     with open(install_path, "wb") as fp:
         fp.write(content)
-    _chmod_plus_x(install_path)
+
+    install_path.chmod(install_path.stat().st_mode | stat.S_IEXEC)
 
 
 def _install_solc_windows(
@@ -425,7 +422,7 @@ def _compile_solc(
     finally:
         os.chdir(original_path)
 
-    _chmod_plus_x(install_path)
+    install_path.chmod(install_path.stat().st_mode | stat.S_IEXEC)
 
 
 if __name__ == "__main__":
