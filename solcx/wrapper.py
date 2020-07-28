@@ -4,8 +4,8 @@ from typing import Any, List, Tuple, Union
 
 from semantic_version import Version
 
-from .exceptions import SolcError
-from .install import get_executable
+from solcx import install
+from solcx.exceptions import SolcError
 
 
 def _get_solc_version(solc_binary: Union[Path, str]) -> Version:
@@ -36,7 +36,7 @@ def solc_wrapper(
     if solc_binary:
         solc_binary = Path(solc_binary)
     else:
-        solc_binary = get_executable()
+        solc_binary = install.get_executable()
 
     solc_version = _get_solc_version(solc_binary)
     command: List = [solc_binary]

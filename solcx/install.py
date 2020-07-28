@@ -21,8 +21,9 @@ from typing import Any, Dict, List, Optional, Union
 import requests
 from semantic_version import SimpleSpec, Version
 
-from .exceptions import DownloadError, SolcNotInstalled
-from .utils.lock import get_process_lock
+from solcx import wrapper
+from solcx.exceptions import DownloadError, SolcNotInstalled
+from solcx.utils.lock import get_process_lock
 
 try:
     from tqdm import tqdm
@@ -86,34 +87,28 @@ def get_solc_folder(solcx_binary_path: Union[Path, str] = None) -> Path:
         return path
 
 
-def _get_import_version(path: str) -> Version:
-    stdout_data = subprocess.check_output([path, "--version"]).decode().strip()
-    stdout_data = stdout_data[stdout_data.index("Version: ") + 9 : stdout_data.index("+")]
-    return Version.coerce(stdout_data)
-
-
 def import_installed_solc(solcx_binary_path: Union[Path, str] = None) -> None:
+    path_list: List[Path] = []
     platform = _get_platform()
-    if platform == "win32":
-        return
 
-    # copy active version of solc
-    path_list = []
-    which = (
-        subprocess.run(["which", "solc"], stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
-        .stdout.decode()
-        .strip()
-    )
-    if which:
-        path_list.append(which)
+    try:
+        # copy active version of solc
+        if platform == "win32":
+            response = subprocess.check_output(["where.exe", "solc"], encoding="utf8").strip()
+        else:
+            response = subprocess.check_output(["which", "solc"], encoding="utf8").strip()
+        if response:
+            path_list = [Path(response)]
+    except (FileNotFoundError, subprocess.CalledProcessError):
+        pass
 
     # on OSX, also copy all versions of solc from cellar
     if platform == "darwin":
-        path_list = [str(i) for i in Path("/usr/local/Cellar").glob("solidity*/**/solc")]
+        path_list.extend(Path("/usr/local/Cellar").glob("solidity*/**/solc"))
 
     for path in path_list:
         try:
-            version = _get_import_version(path)
+            version = wrapper._get_solc_version(path)
             assert version not in get_installed_solc_versions()
         except Exception:
             continue
@@ -121,7 +116,7 @@ def import_installed_solc(solcx_binary_path: Union[Path, str] = None) -> None:
         shutil.copy(path, copy_path)
         try:
             # confirm that solc still works after being copied
-            assert version == _get_import_version(copy_path)
+            assert version == wrapper._get_solc_version(copy_path)
         except Exception:
             os.unlink(copy_path)
 
