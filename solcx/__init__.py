@@ -1,4 +1,5 @@
 from solcx.install import (
+    compile_solc,
     get_available_solc_versions,
     get_installed_solc_versions,
     get_solcx_install_folder,
