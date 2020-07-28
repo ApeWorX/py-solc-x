@@ -242,7 +242,6 @@ def get_installed_solc_versions(solcx_binary_path: Union[Path, str] = None) -> L
 
 def install_solc(
     version: Union[str, Version],
-    allow_osx: bool = False,
     show_progress: bool = False,
     solcx_binary_path: Union[Path, str] = None,
 ) -> None:
@@ -265,7 +264,7 @@ def install_solc(
         elif platform == "linux":
             _install_solc_linux(version, show_progress, solcx_binary_path)
         elif platform == "darwin":
-            _install_solc_osx(version, allow_osx, show_progress, solcx_binary_path)
+            _install_solc_osx(version, show_progress, solcx_binary_path)
         elif platform == "win32":
             _install_solc_windows(version, show_progress, solcx_binary_path)
 
@@ -364,20 +363,9 @@ def _install_solc_arm(
 
 
 def _install_solc_osx(
-    version: Version,
-    allow_osx: bool,
-    show_progress: bool,
-    solcx_binary_path: Union[Path, str, None],
+    version: Version, show_progress: bool, solcx_binary_path: Union[Path, str, None]
 ) -> None:
-    if version < Version("0.5.0") and not allow_osx:
-        raise ValueError(
-            "Installing solc {0} on OSX often fails. For suggested installation options:\n"
-            "https://github.com/iamdefinitelyahuman/py-solc-x/wiki/Installing-Solidity-on-OSX\n\n"
-            "To ignore this warning and attempt to install: "
-            "solcx.install_solc('{0}', allow_osx=True)".format(version)
-        )
-    else:
-        _compile_solc(version, show_progress, solcx_binary_path)
+    _compile_solc(version, show_progress, solcx_binary_path)
 
 
 def _compile_solc(
@@ -408,9 +396,9 @@ def _compile_solc(
             LOGGER.info(f"Running `{cmd[0]}`...")
             subprocess.check_call(cmd, stderr=subprocess.DEVNULL)
         temp_path.joinpath("build/solc/solc").rename(install_path)
-    except subprocess.CalledProcessError as e:
-        raise OSError(
-            f"{cmd[0]} returned non-zero exit status {e.returncode}"
+    except subprocess.CalledProcessError as exc:
+        raise SolcInstallationError(
+            f"{cmd[0]} returned non-zero exit status {exc.returncode}"
             " while attempting to build solc from the source.\n"
             "This is likely due to a missing or incorrect version of a build dependency.\n\n"
             "For suggested installation options: "
