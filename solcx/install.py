@@ -313,13 +313,18 @@ def compile_solc(
                 subprocess.check_call(cmd, stderr=subprocess.DEVNULL)
             temp_path.joinpath("build/solc/solc").rename(install_path)
         except subprocess.CalledProcessError as exc:
-            raise SolcInstallationError(
+            err_msg = (
                 f"{cmd[0]} returned non-zero exit status {exc.returncode}"
                 " while attempting to build solc from the source.\n"
-                "This is likely due to a missing or incorrect version of a build dependency.\n\n"
-                "For suggested installation options: "
-                "https://github.com/iamdefinitelyahuman/py-solc-x/wiki/Installing-Solidity-on-OSX"
+                "This is likely due to a missing or incorrect version of a build dependency."
             )
+            if _get_os_name() == "darwin":
+                err_msg = (
+                    f"{err_msg}\n\nFor suggested installation options: "
+                    "https://github.com/iamdefinitelyahuman/py-solc-x/wiki/Installing-Solidity-on-OSX"  # noqa: E501
+                )
+            raise SolcInstallationError(err_msg)
+
         finally:
             os.chdir(original_path)
 
