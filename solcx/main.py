@@ -4,9 +4,9 @@ from typing import Dict, List, Union
 
 from semantic_version import Version
 
-from .exceptions import ContractsNotFound, SolcError
-from .install import get_executable
-from .wrapper import _get_solc_version, solc_wrapper
+from solcx.exceptions import ContractsNotFound, SolcError
+from solcx.install import get_executable
+from solcx.wrapper import _get_solc_version, solc_wrapper
 
 
 def get_solc_version() -> Version:
