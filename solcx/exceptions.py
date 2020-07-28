@@ -9,10 +9,10 @@ class SolcError(Exception):
     def __init__(
         self,
         command: list,
-        return_code: int,
+        return_code: Optional[int],
         stdin_data: Optional[str],
-        stdout_data: str,
-        stderr_data: str,
+        stdout_data: Optional[str],
+        stderr_data: Optional[str],
         message: Optional[str] = None,
     ) -> None:
         if message is not None:

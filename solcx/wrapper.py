@@ -1,6 +1,6 @@
 import subprocess
 from pathlib import Path
-from typing import Any, Union
+from typing import Any, List, Tuple, Union
 
 from semantic_version import Version
 
@@ -32,14 +32,14 @@ def solc_wrapper(
     import_remappings: list = None,
     success_return_code: int = None,
     **kwargs: Any,
-):
+) -> Tuple[str, str, list, subprocess.Popen]:
     if solc_binary:
         solc_binary = Path(solc_binary)
     else:
         solc_binary = get_executable()
 
     solc_version = _get_solc_version(solc_binary)
-    command = [solc_binary]
+    command: List = [solc_binary]
 
     if "help" in kwargs:
         success_return_code = 1

@@ -1,6 +1,6 @@
 import json
 from pathlib import Path
-from typing import Union
+from typing import Dict, List, Union
 
 from semantic_version import Version
 
@@ -20,7 +20,7 @@ def _get_combined_json_outputs() -> str:
     return combined_json_args.split(" ")[-1]
 
 
-def _parse_compiler_output(stdoutdata) -> dict:
+def _parse_compiler_output(stdoutdata: str) -> Dict:
     output = json.loads(stdoutdata)
 
     contracts = output.get("contracts", {})
@@ -38,10 +38,10 @@ def _parse_compiler_output(stdoutdata) -> dict:
 
 def compile_source(
     source: str,
-    output_values: list = None,
-    import_remappings: list = None,
+    output_values: List = None,
+    import_remappings: List = None,
     base_path: str = None,
-    allow_paths: list = None,
+    allow_paths: List = None,
     output_dir: str = None,
     overwrite: bool = False,
     evm_version: str = None,
@@ -55,7 +55,7 @@ def compile_source(
     solc_binary: Union[str, Path] = None,
     solc_version: Version = None,
     allow_empty: bool = False,
-) -> dict:
+) -> Dict:
     if output_values is None:
         combined_json = _get_combined_json_outputs()
     else:
@@ -97,11 +97,11 @@ def compile_source(
 
 
 def compile_files(
-    source_files: list,
-    output_values: list = None,
-    import_remappings: list = None,
+    source_files: List,
+    output_values: List = None,
+    import_remappings: List = None,
     base_path: str = None,
-    allow_paths: list = None,
+    allow_paths: List = None,
     output_dir: str = None,
     overwrite: bool = False,
     evm_version: str = None,
@@ -115,7 +115,7 @@ def compile_files(
     solc_binary: Union[str, Path] = None,
     solc_version: Version = None,
     allow_empty: bool = False,
-) -> dict:
+) -> Dict:
     if output_values is None:
         combined_json = _get_combined_json_outputs()
     else:
@@ -157,18 +157,18 @@ def compile_files(
 
 
 def compile_standard(
-    input_data: dict,
+    input_data: Dict,
     base_path: str = None,
-    allow_paths: list = None,
+    allow_paths: List = None,
     output_dir: str = None,
     overwrite: bool = False,
     solc_binary: Union[str, Path] = None,
     solc_version: Version = None,
     allow_empty: bool = False,
-):
+) -> Dict:
     if not input_data.get("sources") and not allow_empty:
         raise ContractsNotFound(
-            command=None,
+            command=[],
             return_code=None,
             stdin_data=json.dumps(input_data, sort_keys=True, indent=2),
             stdout_data=None,
@@ -210,7 +210,7 @@ def compile_standard(
     return compiler_output
 
 
-def link_code(unlinked_bytecode, libraries):
+def link_code(unlinked_bytecode: str, libraries: Dict) -> str:
     libraries_arg = ",".join(
         (":".join((lib_name, lib_address)) for lib_name, lib_address in libraries.items())
     )
