@@ -61,7 +61,7 @@ def all_versions(request):
 # run tests with no installed versions of solc
 @pytest.fixture
 def nosolc():
-    path = solcx.install.get_solc_folder()
+    path = solcx.install.get_solcx_install_folder()
     temp_path = path.parent.joinpath(".temp")
     path.rename(temp_path)
     yield

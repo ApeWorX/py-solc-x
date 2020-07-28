@@ -152,9 +152,9 @@ def set_solc_version(
 
 def set_solc_version_pragma(
     pragma_string: str, silent: bool = False, check_new: bool = False
-) -> None:
+) -> Version:
     version = _select_pragma_version(pragma_string, get_installed_solc_versions())
-    if not version:
+    if version is None:
         raise SolcNotInstalled(
             f"No compatible solc version installed."
             f" Use solcx.install_solc_version_pragma('{version}') to install."
@@ -164,6 +164,8 @@ def set_solc_version_pragma(
         latest = install_solc_pragma(pragma_string, False)
         if latest > version:
             LOGGER.info(f"Newer compatible solc version exists: {latest}")
+
+    return version
 
 
 def install_solc_pragma(
@@ -177,6 +179,7 @@ def install_solc_pragma(
         raise ValueError("Compatible solc version does not exist")
     if install:
         install_solc(version, show_progress=show_progress, solcx_binary_path=solcx_binary_path)
+
     return version
 
 

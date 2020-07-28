@@ -25,7 +25,7 @@ class ThreadWrap:
 
 
 def test_threadlock(nosolc):
-    threads = [ThreadWrap(solcx.install_solc, "0.5.0") for i in range(4)]
+    threads = [ThreadWrap(solcx.install_solc, "0.6.9") for i in range(4)]
     for t in threads:
         t.join()
 
@@ -33,10 +33,10 @@ def test_threadlock(nosolc):
 def test_processlock(nosolc):
     # have to use a context here to prevent a conflict with tqdm
     ctx = mp.get_context("spawn")
-    threads = [ctx.Process(target=solcx.install_solc, args=("0.5.0",),) for i in range(4)]
+    threads = [ctx.Process(target=solcx.install_solc, args=("0.6.9",)) for i in range(4)]
     for t in threads:
         t.start()
-    solcx.install_solc("0.5.0")
+    solcx.install_solc("0.6.9")
     for t in threads:
         t.join()
         assert t.exitcode == 0
