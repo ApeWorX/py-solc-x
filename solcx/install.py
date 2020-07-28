@@ -22,7 +22,7 @@ import requests
 from semantic_version import SimpleSpec, Version
 
 from solcx import wrapper
-from solcx.exceptions import DownloadError, SolcNotInstalled
+from solcx.exceptions import DownloadError, SolcInstallationError, SolcNotInstalled
 from solcx.utils.lock import get_process_lock
 
 try:
@@ -268,14 +268,22 @@ def install_solc(
             _install_solc_osx(version, allow_osx, show_progress, solcx_binary_path)
         elif platform == "win32":
             _install_solc_windows(version, show_progress, solcx_binary_path)
+
         binary_path = get_executable(version, solcx_binary_path)
-        _check_subprocess_call(
-            [str(binary_path), "--version"],
-            message=f"Checking installed executable version at: {binary_path}",
-        )
+        try:
+            installed_version = wrapper._get_solc_version(binary_path)
+        except Exception:
+            binary_path.unlink()
+            raise SolcInstallationError("Downloaded binary returned unexpected output")
+        if installed_version != version:
+            raise SolcInstallationError(
+                f"Attempted to install solc v{version}, but got solc v{installed_version}"
+            )
+
         if not solc_version:
             set_solc_version(version)
-            LOGGER.info(f"solc {version} successfully installed at: {binary_path}")
+        LOGGER.info(f"solc {version} successfully installed at: {binary_path}")
+
     finally:
         lock.release()
 
