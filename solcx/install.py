@@ -394,7 +394,7 @@ def _compile_solc(
     content = _download_solc(download, show_progress)
     with tarfile.open(fileobj=BytesIO(content)) as tar:
         tar.extractall(temp_path)
-    temp_path = temp_path.joinpath(f"solidity_{version[1:]}")
+    temp_path = temp_path.joinpath(f"solidity_{version}")
 
     try:
         _check_subprocess_call(
