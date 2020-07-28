@@ -43,6 +43,10 @@ class SolcInstallationError(Exception):
     pass
 
 
+class UnexpectedVersionError(Exception):
+    pass
+
+
 class SolcNotInstalled(Exception):
     pass
 

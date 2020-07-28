@@ -4,7 +4,6 @@ Install solc
 import argparse
 import logging
 import os
-import platform
 import re
 import shutil
 import stat
@@ -27,6 +26,7 @@ from solcx.exceptions import (
     DownloadError,
     SolcInstallationError,
     SolcNotInstalled,
+    UnexpectedVersionError,
     UnexpectedVersionWarning,
 )
 from solcx.utils.lock import get_process_lock
@@ -247,12 +247,6 @@ def install_solc(
 
     version = _convert_and_validate_version(version)
 
-    if not platform.machine().startswith("x86"):
-        raise SolcInstallationError(
-            f"Your chipset is '{platform.machine()}', but precompiled binaries are only "
-            f"for x86. To install on your system, use `solc.compile_solc('{version}')`."
-        )
-
     os_name = _get_os_name()
     process_lock = get_process_lock(str(version))
 
@@ -269,7 +263,14 @@ def install_solc(
         elif os_name == "win32":
             _install_solc_windows(version, show_progress, solcx_binary_path)
 
-        _validate_installation(version, solcx_binary_path)
+        try:
+            _validate_installation(version, solcx_binary_path)
+        except SolcInstallationError as exc:
+            exc.args = (
+                f"{exc.args[0]} If this issue persists, you can try to compile from "
+                f"source code using `solcx.compile_solc('{version}')`.",
+            )
+            raise exc
 
 
 def compile_solc(
@@ -401,9 +402,11 @@ def _validate_installation(version: Version, solcx_binary_path: Union[Path, str,
         installed_version = wrapper._get_solc_version(binary_path)
     except Exception:
         binary_path.unlink()
-        raise SolcInstallationError("Downloaded binary returned unexpected output")
-    if installed_version.truncate() != version.truncate():
         raise SolcInstallationError(
+            "Downloaded binary would not execute, or returned unexpected output."
+        )
+    if installed_version.truncate() != version.truncate():
+        raise UnexpectedVersionError(
             f"Attempted to install solc v{version}, but got solc v{installed_version}"
         )
     if installed_version != version:
