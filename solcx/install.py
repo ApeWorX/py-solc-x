@@ -57,14 +57,12 @@ def _get_arch() -> str:
         return platform.machine()
 
 
-def _get_platform() -> str:
+def _get_os_name() -> str:
     if sys.platform.startswith("linux"):
         return "linux"
     if sys.platform in ("darwin", "win32"):
         return sys.platform
-    raise KeyError(
-        f"Unknown platform: '{sys.platform}' - py-solc-x supports Linux, OSX and Windows"
-    )
+    raise OSError(f"Unsupported OS: '{sys.platform}' - py-solc-x supports Linux, OSX and Windows")
 
 
 def _convert_and_validate_version(version: Union[str, Version]) -> Version:
@@ -90,11 +88,11 @@ def get_solcx_install_folder(solcx_binary_path: Union[Path, str] = None) -> Path
 
 def import_installed_solc(solcx_binary_path: Union[Path, str] = None) -> None:
     path_list: List[Path] = []
-    platform = _get_platform()
+    os_name = _get_os_name()
 
     try:
         # copy active version of solc
-        if platform == "win32":
+        if os_name == "win32":
             response = subprocess.check_output(["where.exe", "solc"], encoding="utf8").strip()
         else:
             response = subprocess.check_output(["which", "solc"], encoding="utf8").strip()
@@ -104,7 +102,7 @@ def import_installed_solc(solcx_binary_path: Union[Path, str] = None) -> None:
         pass
 
     # on OSX, also copy all versions of solc from cellar
-    if platform == "darwin":
+    if os_name == "darwin":
         path_list.extend(Path("/usr/local/Cellar").glob("solidity*/**/solc"))
 
     for path in path_list:
@@ -194,7 +192,7 @@ def get_available_solc_versions(
     headers: Optional[Dict] = None, compilable: bool = False
 ) -> List[Version]:
     version_list = []
-    regex_key = "source" if compilable else _get_platform()
+    regex_key = "source" if compilable else _get_os_name()
     pattern = VERSION_REGEX[regex_key]
 
     if headers is None and os.getenv("GITHUB_TOKEN") is not None:
@@ -251,7 +249,7 @@ def install_solc(
 ) -> None:
 
     arch = _get_arch()
-    platform = _get_platform()
+    os_name = _get_os_name()
     version = _convert_and_validate_version(version)
 
     lock = get_process_lock(str(version))
@@ -265,11 +263,11 @@ def install_solc(
 
         if arch == "arm":
             _install_solc_arm(version, show_progress, solcx_binary_path)
-        elif platform == "linux":
+        elif os_name == "linux":
             _install_solc_unix(version, "solc-static-linux", show_progress, solcx_binary_path)
-        elif platform == "darwin":
+        elif os_name == "darwin":
             _install_solc_unix(version, "solc-macos", show_progress, solcx_binary_path)
-        elif platform == "win32":
+        elif os_name == "win32":
             _install_solc_windows(version, show_progress, solcx_binary_path)
 
         binary_path = get_executable(version, solcx_binary_path)
