@@ -83,13 +83,13 @@ def test_compile_files_output_types(foo_path, key):
 
 def test_compile_source_import_remapping(foo_path, bar_source):
     path = Path(foo_path).parent.as_posix()
-    output = solcx.compile_source(bar_source, import_remappings=[f"contracts={path}"])
+    output = solcx.compile_source(bar_source, import_remappings={"contracts": path})
 
     assert set(output) == {f"{foo_path.as_posix()}:Foo", "<stdin>:Bar"}
 
 
 def test_compile_files_import_remapping(foo_path, bar_path):
     path = Path(bar_path).parent.as_posix()
-    output = solcx.compile_files([bar_path], import_remappings=[f"contracts={path}"])
+    output = solcx.compile_files([bar_path], import_remappings={"contracts": path})
 
     assert set(output) == {f"{bar_path.as_posix()}:Bar", f"{foo_path.as_posix()}:Foo"}
