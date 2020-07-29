@@ -11,17 +11,17 @@ from solcx.exceptions import DownloadError, SolcNotInstalled
 @pytest.fixture(autouse=True)
 def isolation():
     p = sys.platform
-    v = solcx.install.solc_version
+    v = solcx.install._default_solc_binary
     yield
     sys.platform = p
-    solcx.install.solc_version = v
+    solcx.install._default_solc_binary = v
 
 
 def test_not_installed():
     solcx.install.get_executable()
     with pytest.raises(ValueError):
         solcx.install.get_executable("v0.4.0")
-    solcx.install.solc_version = None
+    solcx.install._default_solc_binary = None
     with pytest.raises(SolcNotInstalled):
         solcx.install.get_executable()
 
@@ -34,15 +34,8 @@ def test_unsupported_version():
 
 def test_unknown_platform():
     sys.platform = "potatoOS"
-    with pytest.raises(KeyError):
+    with pytest.raises(OSError):
         solcx.install_solc("0.5.0")
-
-
-@pytest.mark.skipif("sys.platform == 'win32'")
-def test_install_osx():
-    sys.platform = "darwin"
-
-    solcx.install_solc("0.5.4")
 
 
 def test_install_unknown_version():
@@ -52,16 +45,16 @@ def test_install_unknown_version():
 
 @pytest.mark.skipif("'--no-install' in sys.argv")
 def test_progress_bar(nosolc):
-    solcx.install_solc("0.6.0", show_progress=True)
+    solcx.install_solc("0.6.9", show_progress=True)
 
 
 def test_environment_var_path(monkeypatch, tmp_path):
-    install_folder = solcx.get_solc_folder()
+    install_folder = solcx.get_solcx_install_folder()
     monkeypatch.setenv("SOLCX_BINARY_PATH", tmp_path.as_posix())
-    assert solcx.get_solc_folder() != install_folder
+    assert solcx.get_solcx_install_folder() != install_folder
 
     monkeypatch.undo()
-    assert solcx.get_solc_folder() == install_folder
+    assert solcx.get_solcx_install_folder() == install_folder
 
 
 def test_environment_var_versions(monkeypatch, tmp_path):
@@ -75,9 +68,9 @@ def test_environment_var_versions(monkeypatch, tmp_path):
 
 @pytest.mark.skipif("'--no-install' in sys.argv")
 def test_environment_var_install(monkeypatch, tmp_path):
-    assert not tmp_path.joinpath("solc-v0.6.0").exists()
+    assert not tmp_path.joinpath("solc-v0.6.9").exists()
 
     monkeypatch.setenv("SOLCX_BINARY_PATH", tmp_path.as_posix())
 
-    solcx.install_solc("0.6.0")
-    assert tmp_path.joinpath("solc-v0.6.0").exists()
+    solcx.install_solc("0.6.9")
+    assert tmp_path.joinpath("solc-v0.6.9").exists()
