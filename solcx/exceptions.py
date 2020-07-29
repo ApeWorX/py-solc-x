@@ -1,27 +1,27 @@
-from typing import Optional
-
-DEFAULT_MESSAGE = "An error occurred during execution"
+from typing import Dict, List
 
 
 class SolcError(Exception):
-    message = DEFAULT_MESSAGE
+    message = "An error occurred during execution"
 
     def __init__(
         self,
-        command: list,
-        return_code: Optional[int],
-        stdin_data: Optional[str],
-        stdout_data: Optional[str],
-        stderr_data: Optional[str],
-        message: Optional[str] = None,
+        message: str = None,
+        command: List = None,
+        return_code: int = None,
+        stdin_data: str = None,
+        stdout_data: str = None,
+        stderr_data: str = None,
+        error_dict: Dict = None,
     ) -> None:
         if message is not None:
             self.message = message
-        self.command = command
+        self.command = command or []
         self.return_code = return_code
         self.stdin_data = stdin_data
         self.stderr_data = stderr_data
         self.stdout_data = stdout_data
+        self.error_dict = error_dict
 
     def __str__(self) -> str:
         return (
