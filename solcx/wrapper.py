@@ -1,6 +1,6 @@
 import subprocess
 from pathlib import Path
-from typing import Any, List, Tuple, Union
+from typing import Any, Dict, List, Tuple, Union
 
 from semantic_version import Version
 
@@ -9,12 +9,14 @@ from solcx.exceptions import SolcError
 
 
 def _get_solc_version(solc_binary: Union[Path, str]) -> Version:
+    # private wrapper function to get `solc` version
     stdout_data = subprocess.check_output([solc_binary, "--version"], encoding="utf8").strip()
     stdout_data = stdout_data[stdout_data.index("Version: ") + 9 : stdout_data.index("+")]
     return Version.coerce(stdout_data)
 
 
 def _to_string(key: str, value: Any) -> str:
+    # convert data into a string prior to calling `solc`
     if isinstance(value, (int, str)):
         return str(value)
     elif isinstance(value, Path):
@@ -28,11 +30,53 @@ def _to_string(key: str, value: Any) -> str:
 def solc_wrapper(
     solc_binary: Union[Path, str] = None,
     stdin: str = None,
-    source_files: list = None,
-    import_remappings: list = None,
+    source_files: List = None,
+    import_remappings: Union[Dict, List, str] = None,
     success_return_code: int = None,
     **kwargs: Any,
-) -> Tuple[str, str, list, subprocess.Popen]:
+) -> Tuple[str, str, List, subprocess.Popen]:
+    """
+    Wrapper function for calling to `solc`.
+
+    Arguments
+    ---------
+    solc_binary : Path | str, optional
+        Location of the `solc` binary. If not given, the current default binary is used.
+    stdin : str, optional
+        Input to pass to `solc` via stdin
+    source_files : list, optional
+        Paths of source files to compile
+    import_remappings : Dict | List | str,  optional
+        Path remappings. May be given as a string or list of strings formatted as `"prefix=path"`
+        or a dict of `{"prefix": "path"}`
+    success_return_code : int, optional
+        Expected exit code. Raises `SolcError` if the process returns a different value.
+
+    Keyword Arguments
+    -----------------
+    **kwargs : Any
+        Flags to be passed to `solc`. Keywords are converted to flags by prepending `--` and
+        replacing `_` with `-`, for example the keyword `evm_version` becomes `--evm-version`.
+        Values may be given in the following formats:
+
+            * `False`, `None`: ignored
+            * `True`: flag is used without any arguments
+            * str: given as an argument without modification
+            * int: given as an argument, converted to a string
+            * Path: converted to a string via `Path.as_posix()`
+            * List, Tuple: elements are converted to strings and joined with `,`
+
+    Returns
+    -------
+    str
+        Process `stdout` output
+    str
+        Process `stderr` output
+    List
+        Full command executed by the function
+    Popen
+        Subprocess object used to call `solc`
+    """
     if solc_binary:
         solc_binary = Path(solc_binary)
     else:
@@ -41,16 +85,19 @@ def solc_wrapper(
     solc_version = _get_solc_version(solc_binary)
     command: List = [solc_binary]
 
-    if "help" in kwargs:
-        success_return_code = 1
-    elif success_return_code is None:
-        success_return_code = 0
+    if success_return_code is None:
+        success_return_code = 1 if "help" in kwargs else 0
 
     if source_files is not None:
         command.extend([_to_string("source_files", i) for i in source_files])
 
     if import_remappings is not None:
-        command.extend(import_remappings)
+        if isinstance(import_remappings, str):
+            command.append(import_remappings)
+        else:
+            if isinstance(import_remappings, dict):
+                import_remappings = [f"{k}={v}" for k, v in import_remappings.items()]
+            command.extend(import_remappings)
 
     for key, value in kwargs.items():
         if value is None or value is False:
