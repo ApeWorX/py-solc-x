@@ -238,12 +238,15 @@ def get_installed_solc_versions(solcx_binary_path: Union[Path, str] = None) -> L
 
 
 def install_solc(
-    version: Union[str, Version],
+    version: Union[str, Version] = "latest",
     show_progress: bool = False,
     solcx_binary_path: Union[Path, str] = None,
 ) -> None:
 
-    version = _convert_and_validate_version(version)
+    if version == "latest":
+        version = get_available_solc_versions()[0]
+    else:
+        version = _convert_and_validate_version(version)
 
     os_name = _get_os_name()
     process_lock = get_process_lock(str(version))
