@@ -10,6 +10,14 @@ from solcx.wrapper import _get_solc_version, solc_wrapper
 
 
 def get_solc_version() -> Version:
+    """
+    Get the version of the active `solc` binary.
+
+    Returns
+    -------
+    Version
+        solc version
+    """
     solc_binary = get_executable()
     return _get_solc_version(solc_binary)
 
@@ -40,22 +48,84 @@ def compile_source(
     source: str,
     output_values: List = None,
     import_remappings: Union[Dict, List, str] = None,
-    base_path: str = None,
-    allow_paths: List = None,
-    output_dir: str = None,
+    base_path: Union[Path, str] = None,
+    allow_paths: Union[List, Path, str] = None,
+    output_dir: Union[Path, str] = None,
     overwrite: bool = False,
     evm_version: str = None,
-    revert_strings: bool = False,
+    revert_strings: Union[List, str] = None,
     metadata_hash: str = None,
     metadata_literal: bool = False,
     optimize: bool = False,
     optimize_runs: int = None,
+    optimize_yul: bool = False,
     no_optimize_yul: bool = False,
     yul_optimizations: int = None,
     solc_binary: Union[str, Path] = None,
     solc_version: Version = None,
     allow_empty: bool = False,
 ) -> Dict:
+    """
+    Compile a Solidity contract.
+
+    Compilation is handled via the `--combined-json` flag. Depending on the solc
+    version used, some keyword arguments may not be available.
+
+    Arguments
+    ---------
+    source: str
+        Solidity contract to be compiled.
+    output_values : List, optional
+        Compiler outputs to return. Valid options depend on the version of `solc`.
+        If not given, all possible outputs for the active version are returned.
+    import_remappings : Dict | List | str , optional
+        Path remappings. May be given as a string or list of strings formatted as
+        `"prefix=path"`, or a dict of `{"prefix": "path"}`.
+    base_path : Path | str, optional
+        Use the given path as the root of the source tree instead of the root
+        of the filesystem.
+    allow_paths : List | Path | str, optional
+        A path, or list of paths, to allow for imports.
+    output_dir : str, optional
+        Creates one file per component and contract/file at the specified directory.
+    overwrite : bool, optional
+        Overwrite existing files (used in combination with `output_dir`)
+    evm_version: str, optional
+        Select the desired EVM version. Valid options depend on the `solc` version.
+    revert_strings : List | str, optional
+        Strip revert (and require) reason strings or add additional debugging
+        information.
+    metadata_hash : str, optional
+        Choose hash method for the bytecode metadata or disable it.
+    metadata_literal : bool, optional
+        Store referenced sources as literal data in the metadata output.
+    optimize : bool, optional
+        Enable bytecode optimizer.
+    optimize_runs : int, optional
+        Set for how many contract runs to optimize. Lower values will optimize
+        more for initial deployment cost, higher values will optimize more for
+        high-frequency usage.
+    optimize_yul: bool, optional
+        Enable the yul optimizer.
+    no_optimize_yul : bool, optional
+        Disable the yul optimizer.
+    yul_optimizations : int, optional
+        Force yul optimizer to use the specified sequence of optimization steps
+        instead of the built-in one.
+    solc_binary : str | Path, optional
+        Path of the `solc` binary to use. If not given, the currently active
+        version is used (as set by `solcx.set_solc_version`)
+    solc_version: Version, optional
+        `solc` version to use. If not given, the currently active version is used.
+        Ignored if `solc_binary` is also given.
+    allow_empty : bool, optional
+        If `True`, do not raise when no compiled contracts are returned.
+
+    Returns
+    -------
+    Dict
+        Compiler output. The source file name is given as `<stdin>`.
+    """
     if output_values is None:
         combined_json = _get_combined_json_outputs()
     else:
@@ -100,22 +170,84 @@ def compile_files(
     source_files: List,
     output_values: List = None,
     import_remappings: Union[Dict, List, str] = None,
-    base_path: str = None,
-    allow_paths: List = None,
-    output_dir: str = None,
+    base_path: Union[Path, str] = None,
+    allow_paths: Union[List, Path, str] = None,
+    output_dir: Union[Path, str] = None,
     overwrite: bool = False,
     evm_version: str = None,
-    revert_strings: bool = False,
+    revert_strings: Union[List, str] = None,
     metadata_hash: str = None,
     metadata_literal: bool = False,
     optimize: bool = False,
     optimize_runs: int = None,
+    optimize_yul: bool = False,
     no_optimize_yul: bool = False,
     yul_optimizations: int = None,
     solc_binary: Union[str, Path] = None,
     solc_version: Version = None,
     allow_empty: bool = False,
 ) -> Dict:
+    """
+    Compile one or more Solidity source files.
+
+    Compilation is handled via the `--combined-json` flag. Depending on the solc
+    version used, some keyword arguments may not be available.
+
+    Arguments
+    ---------
+    source_files: List
+        List of paths of Solidity source files to be compiled.
+    output_values : List, optional
+        Compiler outputs to return. Valid options depend on the version of `solc`.
+        If not given, all possible outputs for the active version are returned.
+    import_remappings : Dict | List | str , optional
+        Path remappings. May be given as a string or list of strings formatted as
+        `"prefix=path"`, or a dict of `{"prefix": "path"}`.
+    base_path : Path | str, optional
+        Use the given path as the root of the source tree instead of the root
+        of the filesystem.
+    allow_paths : List | Path | str, optional
+        A path, or list of paths, to allow for imports.
+    output_dir : str, optional
+        Creates one file per component and contract/file at the specified directory.
+    overwrite : bool, optional
+        Overwrite existing files (used in combination with `output_dir`)
+    evm_version: str, optional
+        Select the desired EVM version. Valid options depend on the `solc` version.
+    revert_strings : List | str, optional
+        Strip revert (and require) reason strings or add additional debugging
+        information.
+    metadata_hash : str, optional
+        Choose hash method for the bytecode metadata or disable it.
+    metadata_literal : bool, optional
+        Store referenced sources as literal data in the metadata output.
+    optimize : bool, optional
+        Enable bytecode optimizer.
+    optimize_runs : int, optional
+        Set for how many contract runs to optimize. Lower values will optimize
+        more for initial deployment cost, higher values will optimize more for
+        high-frequency usage.
+    optimize_yul: bool, optional
+        Enable the yul optimizer.
+    no_optimize_yul : bool, optional
+        Disable the yul optimizer.
+    yul_optimizations : int, optional
+        Force yul optimizer to use the specified sequence of optimization steps
+        instead of the built-in one.
+    solc_binary : str | Path, optional
+        Path of the `solc` binary to use. If not given, the currently active
+        version is used (as set by `solcx.set_solc_version`)
+    solc_version: Version, optional
+        `solc` version to use. If not given, the currently active version is used.
+        Ignored if `solc_binary` is also given.
+    allow_empty : bool, optional
+        If `True`, do not raise when no compiled contracts are returned.
+
+    Returns
+    -------
+    Dict
+        Compiler output
+    """
     if output_values is None:
         combined_json = _get_combined_json_outputs()
     else:
@@ -165,6 +297,39 @@ def compile_standard(
     solc_version: Version = None,
     allow_empty: bool = False,
 ) -> Dict:
+    """
+    Compile Solidity contracts using the JSON-input-output interface.
+
+    See the Solidity documentation for details on the expected JSON input and output
+    formats.
+
+    Arguments
+    ---------
+    input_data : Dict
+        Compiler JSON input.
+    base_path : Path | str, optional
+        Use the given path as the root of the source tree instead of the root
+        of the filesystem.
+    allow_paths : List | Path | str, optional
+        A path, or list of paths, to allow for imports.
+    output_dir : str, optional
+        Creates one file per component and contract/file at the specified directory.
+    overwrite : bool, optional
+        Overwrite existing files (used in combination with `output_dir`)
+    solc_binary : str | Path, optional
+        Path of the `solc` binary to use. If not given, the currently active
+        version is used (as set by `solcx.set_solc_version`)
+    solc_version: Version, optional
+        `solc` version to use. If not given, the currently active version is used.
+        Ignored if `solc_binary` is also given.
+    allow_empty : bool, optional
+        If `True`, do not raise when no compiled contracts are returned.
+
+    Returns
+    -------
+    Dict
+        Compiler JSON output.
+    """
     if not input_data.get("sources") and not allow_empty:
         raise ContractsNotFound(
             "Input JSON does not contain any sources",
@@ -213,7 +378,27 @@ def link_code(
     solc_binary: Union[str, Path] = None,
     solc_version: Version = None,
 ) -> str:
+    """
+    Add library addresses into unlinked bytecode.
 
+    Arguments
+    ---------
+    unlinked_bytecode : str
+        Compiled bytecode containing one or more library placeholders.
+    libraries : Dict
+        Library addresses given as {"library name": "address"}
+    solc_binary : str | Path, optional
+        Path of the `solc` binary to use. If not given, the currently active
+        version is used (as set by `solcx.set_solc_version`)
+    solc_version: Version, optional
+        `solc` version to use. If not given, the currently active version is used.
+        Ignored if `solc_binary` is also given.
+
+    Returns
+    -------
+    str
+        Linked bytecode
+    """
     if solc_binary is None:
         solc_binary = get_executable(solc_version)
 
