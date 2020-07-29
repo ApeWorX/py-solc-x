@@ -39,7 +39,7 @@ def _parse_compiler_output(stdoutdata: str) -> Dict:
 def compile_source(
     source: str,
     output_values: List = None,
-    import_remappings: List = None,
+    import_remappings: Union[Dict, List] = None,
     base_path: str = None,
     allow_paths: List = None,
     output_dir: str = None,
@@ -60,6 +60,9 @@ def compile_source(
         combined_json = _get_combined_json_outputs()
     else:
         combined_json = ",".join(output_values)
+
+    if isinstance(import_remappings, dict):
+        import_remappings = [f"{k}={v}" for k, v in import_remappings.items()]
 
     if solc_binary is None:
         solc_binary = get_executable(solc_version)
@@ -99,7 +102,7 @@ def compile_source(
 def compile_files(
     source_files: List,
     output_values: List = None,
-    import_remappings: List = None,
+    import_remappings: Union[Dict, List] = None,
     base_path: str = None,
     allow_paths: List = None,
     output_dir: str = None,
@@ -120,6 +123,9 @@ def compile_files(
         combined_json = _get_combined_json_outputs()
     else:
         combined_json = ",".join(output_values)
+
+    if isinstance(import_remappings, dict):
+        import_remappings = [f"{k}={v}" for k, v in import_remappings.items()]
 
     if solc_binary is None:
         solc_binary = get_executable(solc_version)
