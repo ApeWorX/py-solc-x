@@ -155,7 +155,6 @@ def compile_files(
         raise ContractsNotFound(
             command=command,
             return_code=proc.returncode,
-            stdin_data=None,
             stdout_data=stdoutdata,
             stderr_data=stderrdata,
         )
@@ -174,11 +173,8 @@ def compile_standard(
 ) -> Dict:
     if not input_data.get("sources") and not allow_empty:
         raise ContractsNotFound(
-            command=[],
-            return_code=None,
+            "Input JSON does not contain any sources",
             stdin_data=json.dumps(input_data, sort_keys=True, indent=2),
-            stdout_data=None,
-            stderr_data=None,
         )
 
     if solc_binary is None:
@@ -206,12 +202,13 @@ def compile_standard(
                 )
             )
             raise SolcError(
-                command,
-                proc.returncode,
-                json.dumps(input_data),
-                stdoutdata,
-                stderrdata,
-                message=error_message,
+                error_message,
+                command=command,
+                return_code=proc.returncode,
+                stdin_data=json.dumps(input_data),
+                stdout_data=stdoutdata,
+                stderr_data=stderrdata,
+                error_dict=compiler_output["errors"],
             )
     return compiler_output
 
