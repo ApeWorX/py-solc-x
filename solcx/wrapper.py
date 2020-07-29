@@ -1,6 +1,6 @@
 import subprocess
 from pathlib import Path
-from typing import Any, List, Tuple, Union
+from typing import Any, Dict, List, Tuple, Union
 
 from semantic_version import Version
 
@@ -28,11 +28,11 @@ def _to_string(key: str, value: Any) -> str:
 def solc_wrapper(
     solc_binary: Union[Path, str] = None,
     stdin: str = None,
-    source_files: list = None,
-    import_remappings: list = None,
+    source_files: List = None,
+    import_remappings: Union[Dict, List, str] = None,
     success_return_code: int = None,
     **kwargs: Any,
-) -> Tuple[str, str, list, subprocess.Popen]:
+) -> Tuple[str, str, List, subprocess.Popen]:
     if solc_binary:
         solc_binary = Path(solc_binary)
     else:
@@ -41,16 +41,19 @@ def solc_wrapper(
     solc_version = _get_solc_version(solc_binary)
     command: List = [solc_binary]
 
-    if "help" in kwargs:
-        success_return_code = 1
-    elif success_return_code is None:
-        success_return_code = 0
+    if success_return_code is None:
+        success_return_code = 1 if "help" in kwargs else 0
 
     if source_files is not None:
         command.extend([_to_string("source_files", i) for i in source_files])
 
     if import_remappings is not None:
-        command.extend(import_remappings)
+        if isinstance(import_remappings, str):
+            command.append(import_remappings)
+        else:
+            if isinstance(import_remappings, dict):
+                import_remappings = [f"{k}={v}" for k, v in import_remappings.items()]
+            command.extend(import_remappings)
 
     for key, value in kwargs.items():
         if value is None or value is False:
