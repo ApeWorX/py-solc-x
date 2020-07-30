@@ -4,6 +4,7 @@ import shutil
 
 import pytest
 from requests import ConnectionError
+from semantic_version import Version
 
 import solcx
 
@@ -28,12 +29,16 @@ def pytest_configure(config):
             "ConnectionError while attempting to get solc versions.\n"
             "Use the --no-install flag to only run tests against already installed versions."
         )
+    config.addinivalue_line("markers", "min_solc: minimum version of solc to run test against")
 
 
 # auto-parametrize the all_versions fixture with all target solc versions
 def pytest_generate_tests(metafunc):
     if "all_versions" in metafunc.fixturenames:
-        metafunc.parametrize("all_versions", VERSIONS, indirect=True)
+        versions = VERSIONS.copy()
+        for marker in metafunc.definition.iter_markers(name="min_solc"):
+            versions = [i for i in versions if i >= Version(marker.args[0])]
+        metafunc.parametrize("all_versions", versions, indirect=True)
 
 
 # * runs a test against all target solc versions
@@ -70,7 +75,7 @@ def nosolc():
     temp_path.rename(path)
 
 
-@pytest.fixture()
+@pytest.fixture(scope="session")
 def foo_source():
     yield """pragma solidity >=0.4.11;
 
@@ -82,16 +87,30 @@ contract Foo {
 """
 
 
-@pytest.fixture()
+@pytest.fixture(scope="session")
 def bar_source():
     yield """
 pragma solidity >=0.4.11;
 
-import "contracts/Foo.sol";
+import "../contracts/Foo.sol";
 
 contract Bar is Foo {
     function getFunky() public returns (bytes4) {
         return 0x420Faded;
+    }
+}"""
+
+
+@pytest.fixture(scope="session")
+def baz_source():
+    yield """
+pragma solidity >=0.4.11;
+
+import "../other/Bar.sol";
+
+contract Baz is Bar {
+    function doStuff() public returns (uint a) {
+        return 31337;
     }
 }"""
 
@@ -102,17 +121,33 @@ def invalid_source():
 contract Foo {"""
 
 
-@pytest.fixture()
-def foo_path(tmp_path, foo_source):
-    source = tmp_path.joinpath("Foo.sol")
+@pytest.fixture(scope="session")
+def foo_path(tmp_path_factory, foo_source):
+    source = tmp_path_factory.mktemp("contracts", False).joinpath("Foo.sol")
     with source.open("w") as fp:
         fp.write(foo_source)
     return source
 
 
-@pytest.fixture()
-def bar_path(tmp_path, bar_source):
-    source = tmp_path.joinpath("Bar.sol")
+@pytest.fixture(scope="session")
+def bar_path(tmp_path_factory, bar_source):
+    source = tmp_path_factory.mktemp("other", False).joinpath("Bar.sol")
     with source.open("w") as fp:
         fp.write(bar_source)
+    return source
+
+
+@pytest.fixture(scope="session")
+def baz_path(tmp_path_factory, baz_source):
+    source = tmp_path_factory.mktemp("baz", False).joinpath("Baz.sol")
+    with source.open("w") as fp:
+        fp.write(baz_source)
+    return source
+
+
+@pytest.fixture(scope="session")
+def empty_path(tmp_path_factory, baz_source):
+    source = tmp_path_factory.mktemp("empty", False).joinpath("Empty.sol")
+    with source.open("w") as fp:
+        fp.write(" ")
     return source
