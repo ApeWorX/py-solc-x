@@ -4,9 +4,11 @@ from typing import Any, Dict, List, Optional, Union
 
 from semantic_version import Version
 
+from solcx import wrapper
 from solcx.exceptions import ContractsNotFound, SolcError
 from solcx.install import get_executable
-from solcx.wrapper import _get_solc_version, solc_wrapper
+
+# from solcx.wrapper import _get_solc_version, solc_wrapper
 
 
 def get_solc_version() -> Version:
@@ -19,7 +21,7 @@ def get_solc_version() -> Version:
         solc version
     """
     solc_binary = get_executable()
-    return _get_solc_version(solc_binary)
+    return wrapper._get_solc_version(solc_binary)
 
 
 def compile_source(
@@ -231,7 +233,7 @@ def compile_files(
 
 
 def _get_combined_json_outputs() -> str:
-    help_str = solc_wrapper(help=True)[0].split("\n")
+    help_str = wrapper.solc_wrapper(help=True)[0].split("\n")
     combined_json_args = next(i for i in help_str if i.startswith("  --combined-json"))
     return combined_json_args.split(" ")[-1]
 
@@ -280,7 +282,7 @@ def _compile_combined_json(
                 f"Target output file {target_path} already exists - use overwrite=True to overwrite"
             )
 
-    stdoutdata, stderrdata, command, proc = solc_wrapper(
+    stdoutdata, stderrdata, command, proc = wrapper.solc_wrapper(
         solc_binary=solc_binary,
         combined_json=combined_json,
         output_dir=output_dir,
@@ -362,7 +364,7 @@ def compile_standard(
     if solc_binary is None:
         solc_binary = get_executable(solc_version)
 
-    stdoutdata, stderrdata, command, proc = solc_wrapper(
+    stdoutdata, stderrdata, command, proc = wrapper.solc_wrapper(
         solc_binary=solc_binary,
         stdin=json.dumps(input_data),
         standard_json=True,
@@ -427,7 +429,7 @@ def link_code(
 
     library_list = [f"{name}:{address}" for name, address in libraries.items()]
 
-    stdoutdata = solc_wrapper(
+    stdoutdata = wrapper.solc_wrapper(
         solc_binary=solc_binary, stdin=unlinked_bytecode, link=True, libraries=library_list
     )[0]
 
