@@ -19,17 +19,21 @@ def pytest_addoption(parser):
 
 def pytest_configure(config):
     global VERSIONS
+    config.addinivalue_line("markers", "min_solc: minimum version of solc to run test against")
+
     if config.getoption("--no-install"):
         VERSIONS = solcx.get_installed_solc_versions()
         return
+
     try:
         VERSIONS = solcx.get_available_solc_versions()
+        for version in VERSIONS:
+            solcx.install_solc(version)
     except ConnectionError:
         raise pytest.UsageError(
             "ConnectionError while attempting to get solc versions.\n"
             "Use the --no-install flag to only run tests against already installed versions."
         )
-    config.addinivalue_line("markers", "min_solc: minimum version of solc to run test against")
 
 
 # auto-parametrize the all_versions fixture with all target solc versions
@@ -45,23 +49,9 @@ def pytest_generate_tests(metafunc):
 def all_versions(request):
     """
     Run a test against all solc versions.
-
-    The first test that invokes this fixture will attempt to install every version.
-    If an install fails, all subsequent tests using that version are skipped.
     """
     version = request.param
-    if version not in _installed:
-        try:
-            solcx.install_solc(version)
-            _installed[version] = True
-        except Exception:
-            _installed[version] = False
-            pytest.fail(f"Unable to install solc {version}")
-    if _installed[version]:
-        solcx.set_solc_version(version)
-    else:
-        request.applymarker("skip")
-
+    solcx.set_solc_version(version)
     return version
 
 
