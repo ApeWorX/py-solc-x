@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 
 import json
+from pathlib import Path
 
 import pytest
 
@@ -26,6 +27,14 @@ combined_json_values = (
 @pytest.fixture(autouse=True)
 def setup(all_versions):
     pass
+
+
+@pytest.fixture(scope="session")
+def empty_path(tmp_path_factory, baz_source):
+    source = tmp_path_factory.mktemp("empty", False).joinpath("Empty.sol")
+    with source.open("w") as fp:
+        fp.write(" ")
+    return source
 
 
 def test_compile_single_file(foo_path):
@@ -95,3 +104,14 @@ def test_compile_source_output_dir(tmp_path, foo_path, bar_path):
 
     assert f"{foo_path.as_posix()}:Foo" in output
     assert f"{bar_path.as_posix()}:Bar" in output
+
+
+def test_solc_binary(wrapper_mock, foo_path):
+    wrapper_mock.expect(solc_binary=Path("path/to/solc"))
+    solcx.compile_files([foo_path], ["abi"], solc_binary=Path("path/to/solc"), allow_empty=True)
+
+
+def test_solc_version(wrapper_mock, all_versions, foo_path):
+    solc_binary = solcx.install.get_executable(all_versions)
+    wrapper_mock.expect(solc_binary=solc_binary)
+    solcx.compile_files([foo_path], ["abi"], solc_version=all_versions, allow_empty=True)

@@ -1,5 +1,7 @@
 #!/usr/bin/python3
 
+from pathlib import Path
+
 import pytest
 
 import solcx
@@ -29,17 +31,17 @@ addr2 = "0xdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef"
 
 
 @pytest.fixture
-def bytecode():
+def bytecode(all_versions):
     yield solcx.compile_source(source)["<stdin>:LinkTester"]["bin"]
 
 
-def test_unlinked_bytecode(all_versions, bytecode):
+def test_unlinked_bytecode(bytecode):
     assert "_" in bytecode
     assert addr1[2:] not in bytecode
     assert addr2[2:] not in bytecode
 
 
-def test_partial_link(all_versions, bytecode):
+def test_partial_link(bytecode):
     output = solcx.link_code(bytecode, {"<stdin>:UnlinkedLib": addr1})
 
     assert output != bytecode
@@ -47,7 +49,7 @@ def test_partial_link(all_versions, bytecode):
     assert addr1[2:] in output
 
 
-def test_full_link(all_versions, bytecode):
+def test_full_link(bytecode):
     output = solcx.link_code(
         bytecode, {"<stdin>:UnlinkedLib": addr1, "<stdin>:OtherUnlinkedLib": addr2}
     )
@@ -57,3 +59,14 @@ def test_full_link(all_versions, bytecode):
 
     assert addr1[2:] in output
     assert addr2[2:] in output
+
+
+def test_solc_binary(wrapper_mock):
+    wrapper_mock.expect(solc_binary=Path("path/to/solc"))
+    solcx.link_code("0x00", {}, solc_binary=Path("path/to/solc"))
+
+
+def test_solc_version(wrapper_mock, all_versions):
+    solc_binary = solcx.install.get_executable(all_versions)
+    wrapper_mock.expect(solc_binary=solc_binary)
+    solcx.link_code("0x00", {}, solc_version=all_versions)

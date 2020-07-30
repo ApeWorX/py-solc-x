@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 
 import json
+from pathlib import Path
 
 import pytest
 
@@ -92,3 +93,14 @@ def test_compile_source_import_remapping(foo_path, bar_path, baz_source):
         f"{bar_path.as_posix()}:Bar",
         "<stdin>:Baz",
     }
+
+
+def test_solc_binary(wrapper_mock, foo_source):
+    wrapper_mock.expect(solc_binary=Path("path/to/solc"))
+    solcx.compile_source(foo_source, ["abi"], solc_binary=Path("path/to/solc"), allow_empty=True)
+
+
+def test_solc_version(wrapper_mock, all_versions, foo_source):
+    solc_binary = solcx.install.get_executable(all_versions)
+    wrapper_mock.expect(solc_binary=solc_binary)
+    solcx.compile_source(foo_source, ["abi"], solc_version=all_versions, allow_empty=True)

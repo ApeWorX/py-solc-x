@@ -1,12 +1,12 @@
 #!/usr/bin/python3
 
-import shutil
-
 import pytest
 from requests import ConnectionError
 from semantic_version import Version
 
 import solcx
+
+_installed = {}
 
 
 def pytest_addoption(parser):
@@ -41,14 +41,14 @@ def pytest_generate_tests(metafunc):
         metafunc.parametrize("all_versions", versions, indirect=True)
 
 
-# * runs a test against all target solc versions
-# * the first test using this fixture attempts to install every version
-# * if an install fails all subsequent tests on that version are skipped
-_installed = {}
-
-
-@pytest.fixture()
+@pytest.fixture
 def all_versions(request):
+    """
+    Run a test against all solc versions.
+
+    The first test that invokes this fixture will attempt to install every version.
+    If an install fails, all subsequent tests using that version are skipped.
+    """
     version = request.param
     if version not in _installed:
         try:
@@ -62,17 +62,15 @@ def all_versions(request):
     else:
         request.applymarker("skip")
 
+    return version
 
-# run tests with no installed versions of solc
+
 @pytest.fixture
-def nosolc():
-    path = solcx.install.get_solcx_install_folder()
-    temp_path = path.parent.joinpath(".temp")
-    path.rename(temp_path)
-    yield
-    if path.exists():
-        shutil.rmtree(path)
-    temp_path.rename(path)
+def nosolc(tmp_path, monkeypatch):
+    """
+    Monkeypatch the install folder, so tests run with no versions of solc installed.
+    """
+    monkeypatch.setattr("solcx.install.get_solcx_install_folder", lambda *args: tmp_path)
 
 
 @pytest.fixture(scope="session")
@@ -142,12 +140,4 @@ def baz_path(tmp_path_factory, baz_source):
     source = tmp_path_factory.mktemp("baz", False).joinpath("Baz.sol")
     with source.open("w") as fp:
         fp.write(baz_source)
-    return source
-
-
-@pytest.fixture(scope="session")
-def empty_path(tmp_path_factory, baz_source):
-    source = tmp_path_factory.mktemp("empty", False).joinpath("Empty.sol")
-    with source.open("w") as fp:
-        fp.write(" ")
     return source
