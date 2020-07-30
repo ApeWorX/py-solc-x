@@ -72,6 +72,12 @@ def _convert_and_validate_version(version: Union[str, Version]) -> Version:
     return version
 
 
+def _unlink_solc(solc_path):
+    solc_path.unlink()
+    if _get_os_name() == "win32":
+        shutil.rmtree(solc_path.parent)
+
+
 def get_solcx_install_folder(solcx_binary_path: Union[Path, str] = None) -> Path:
     """
     Return the directory where `py-solc-x` stores installed `solc` binaries.
@@ -150,9 +156,7 @@ def import_installed_solc(solcx_binary_path: Union[Path, str] = None) -> List[Ve
             assert version == wrapper._get_solc_version(copy_path)
             imported_versions.append(version)
         except Exception:
-            copy_path.unlink()
-            if _get_os_name() == "win32":
-                shutil.rmtree(copy_path.parent)
+            _unlink_solc(copy_path)
 
     return imported_versions
 
@@ -591,11 +595,12 @@ def _validate_installation(version: Version, solcx_binary_path: Union[Path, str,
     try:
         installed_version = wrapper._get_solc_version(binary_path)
     except Exception:
-        binary_path.unlink()
+        _unlink_solc(binary_path)
         raise SolcInstallationError(
             "Downloaded binary would not execute, or returned unexpected output."
         )
     if installed_version.truncate() != version.truncate():
+        _unlink_solc(binary_path)
         raise UnexpectedVersionError(
             f"Attempted to install solc v{version}, but got solc v{installed_version}"
         )
