@@ -108,7 +108,7 @@ def _get_which_solc() -> Path:
     return Path(response)
 
 
-def import_installed_solc(solcx_binary_path: Union[Path, str] = None) -> None:
+def import_installed_solc(solcx_binary_path: Union[Path, str] = None) -> List[Version]:
     """
     Search for and copy installed `solc` versions into the local installation folder.
 
@@ -116,6 +116,11 @@ def import_installed_solc(solcx_binary_path: Union[Path, str] = None) -> None:
     ---------
     solcx_binary_path : Path | str, optional
         User-defined path, used to override the default installation directory.
+
+    Returns
+    -------
+    List
+        Imported solc versions
     """
     try:
         path_list = [_get_which_solc()]
@@ -126,19 +131,30 @@ def import_installed_solc(solcx_binary_path: Union[Path, str] = None) -> None:
     if _get_os_name() == "darwin":
         path_list.extend(Path("/usr/local/Cellar").glob("solidity*/**/solc"))
 
+    imported_versions = []
     for path in path_list:
         try:
             version = wrapper._get_solc_version(path)
             assert version not in get_installed_solc_versions()
         except Exception:
             continue
-        copy_path = str(get_solcx_install_folder(solcx_binary_path).joinpath(f"solc-v{version}"))
+
+        copy_path = get_solcx_install_folder(solcx_binary_path).joinpath(f"solc-v{version}")
+        if _get_os_name() == "win32":
+            copy_path.mkdir()
+            copy_path = copy_path.joinpath("solc.exe")
+
         shutil.copy(path, copy_path)
         try:
             # confirm that solc still works after being copied
             assert version == wrapper._get_solc_version(copy_path)
+            imported_versions.append(version)
         except Exception:
-            os.unlink(copy_path)
+            copy_path.unlink()
+            if _get_os_name() == "win32":
+                shutil.rmtree(copy_path.parent)
+
+    return imported_versions
 
 
 def get_executable(
