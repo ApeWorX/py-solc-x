@@ -1,41 +1,21 @@
 #!/usr/bin/python3
 
-import sys
-
 import pytest
 
 import solcx
-from solcx.exceptions import DownloadError, SolcNotInstalled
+from solcx.exceptions import DownloadError
 
 
-@pytest.fixture(autouse=True)
-def isolation():
-    p = sys.platform
-    v = solcx.install._default_solc_binary
-    yield
-    sys.platform = p
-    solcx.install._default_solc_binary = v
+@pytest.mark.skipif("'--no-install' in sys.argv")
+def test_install_latest():
+    version = solcx.get_available_solc_versions()[0]
+    assert solcx.install_solc("latest") == version
 
 
-def test_not_installed():
-    solcx.install.get_executable()
-    with pytest.raises(ValueError):
-        solcx.install.get_executable("v0.4.0")
-    solcx.install._default_solc_binary = None
-    with pytest.raises(SolcNotInstalled):
-        solcx.install.get_executable()
-
-
-def test_unsupported_version():
-    solcx.install._convert_and_validate_version("0.4.11")
-    with pytest.raises(ValueError):
-        solcx.install._convert_and_validate_version("0.4.10")
-
-
-def test_unknown_platform():
-    sys.platform = "potatoOS"
+def test_unknown_platform(monkeypatch):
+    monkeypatch.setattr("sys.platform", "potatoOS")
     with pytest.raises(OSError):
-        solcx.install_solc("0.5.0")
+        solcx.install_solc()
 
 
 def test_install_unknown_version():

@@ -18,22 +18,23 @@ def pytest_addoption(parser):
 
 
 def pytest_configure(config):
-    global VERSIONS
     config.addinivalue_line("markers", "min_solc: minimum version of solc to run test against")
 
-    if config.getoption("--no-install"):
-        VERSIONS = solcx.get_installed_solc_versions()
-        return
 
-    try:
-        VERSIONS = solcx.get_available_solc_versions()
+def pytest_collection(session):
+    global VERSIONS
+    if session.config.getoption("--no-install"):
+        VERSIONS = solcx.get_installed_solc_versions()
+    else:
+        try:
+            VERSIONS = solcx.get_available_solc_versions()
+        except ConnectionError:
+            raise pytest.UsageError(
+                "ConnectionError while attempting to get solc versions.\n"
+                "Use the --no-install flag to only run tests against already installed versions."
+            )
         for version in VERSIONS:
             solcx.install_solc(version)
-    except ConnectionError:
-        raise pytest.UsageError(
-            "ConnectionError while attempting to get solc versions.\n"
-            "Use the --no-install flag to only run tests against already installed versions."
-        )
 
 
 # auto-parametrize the all_versions fixture with all target solc versions
@@ -53,14 +54,6 @@ def all_versions(request):
     version = request.param
     solcx.set_solc_version(version)
     return version
-
-
-@pytest.fixture
-def nosolc(tmp_path, monkeypatch):
-    """
-    Monkeypatch the install folder, so tests run with no versions of solc installed.
-    """
-    monkeypatch.setattr("solcx.install.get_solcx_install_folder", lambda *args: tmp_path)
 
 
 @pytest.fixture(scope="session")
