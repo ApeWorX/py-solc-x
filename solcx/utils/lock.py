@@ -3,7 +3,7 @@ import sys
 import tempfile
 import threading
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any, Dict, Union
 
 if sys.platform == "win32":
     import msvcrt
@@ -15,11 +15,11 @@ else:
     NON_BLOCKING = fcntl.LOCK_EX | fcntl.LOCK_NB
     BLOCKING = fcntl.LOCK_EX
 
-_locks: Dict[str, "_ProcessLock"] = {}
+_locks: Dict[str, Union["UnixLock", "WindowsLock"]] = {}
 _base_lock = threading.Lock()
 
 
-def get_process_lock(lock_id: str) -> "_ProcessLock":
+def get_process_lock(lock_id: str) -> Union["UnixLock", "WindowsLock"]:
     with _base_lock:
         if lock_id not in _locks:
             if sys.platform == "win32":
@@ -30,29 +30,23 @@ def get_process_lock(lock_id: str) -> "_ProcessLock":
 
 
 class _ProcessLock:
+    """
+    Ensure an action is both thread-safe and process-safe.
+    """
+
     def __init__(self, lock_id: str) -> None:
         self._lock = threading.Lock()
         self._lock_path = Path(tempfile.gettempdir()).joinpath(f".solcx-lock-{lock_id}")
         self._lock_file = self._lock_path.open("w")
 
+
+class UnixLock(_ProcessLock):
     def __enter__(self) -> None:
         self.acquire(True)
 
     def __exit__(self, *args: Any) -> None:
         self.release()
 
-    def acquire(self, blocking: bool) -> bool:
-        raise NotImplementedError("Method not implemented by child class")
-
-    def release(self) -> None:
-        raise NotImplementedError("Method not implemented by child class")
-
-    def wait(self) -> None:
-        self.acquire(True)
-        self.release()
-
-
-class UnixLock(_ProcessLock):
     def acquire(self, blocking: bool) -> bool:
         if not self._lock.acquire(blocking):
             return False
@@ -69,6 +63,12 @@ class UnixLock(_ProcessLock):
 
 
 class WindowsLock(_ProcessLock):
+    def __enter__(self) -> None:
+        self.acquire(True)
+
+    def __exit__(self, *args: Any) -> None:
+        self.release()
+
     def acquire(self, blocking: bool) -> bool:
         if not self._lock.acquire(blocking):
             return False
