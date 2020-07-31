@@ -6,39 +6,7 @@ import pytest
 from semantic_version import Version
 
 import solcx
-from solcx.exceptions import SolcNotInstalled
-
-
-@pytest.fixture
-def pragmapatch(monkeypatch):
-    monkeypatch.setattr(
-        "solcx.install.get_installed_solc_versions",
-        lambda: [
-            Version("0.4.2"),
-            Version("0.4.11"),
-            Version("0.4.25"),
-            Version("0.5.0"),
-            Version("0.5.4"),
-            Version("0.5.7"),
-            Version("1.2.3"),
-        ],
-    )
-    monkeypatch.setattr(
-        "solcx.install.get_available_solc_versions",
-        lambda: [
-            Version("0.4.11"),
-            Version("0.4.24"),
-            Version("0.4.26"),
-            Version("0.5.3"),
-            Version("0.6.0"),
-        ],
-    )
-    monkeypatch.setattr("solcx.install.set_solc_version", lambda *args: None)
-
-
-def test_get_solc_version(all_versions):
-    v = solcx.get_solc_version()
-    assert isinstance(v, Version)
+from solcx.exceptions import SolcNotInstalled, UnsupportedVersionError
 
 
 def test_set_solc_version_pragma(pragmapatch):
@@ -62,5 +30,5 @@ def test_install_solc_version_pragma(pragmapatch):
     assert install_pragma("pragma solidity >=0.4.2<0.5.5;") == Version("0.5.3")
     assert install_pragma("pragma solidity ^0.4.2 || 0.5.5;") == Version("0.4.26")
     assert install_pragma("pragma solidity ^0.4.2 || >=0.5.4<0.7.0;") == Version("0.6.0")
-    with pytest.raises(ValueError):
+    with pytest.raises(UnsupportedVersionError):
         install_pragma("pragma solidity ^0.7.1;")

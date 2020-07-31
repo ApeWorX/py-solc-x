@@ -36,6 +36,13 @@ jobs:
     steps:
     - uses: actions/checkout@v1
 
+    # install solc for one job to test importing already-installed versions
+    - name: Install solc
+      run: |
+        sudo add-apt-repository ppa:ethereum/ethereum
+        sudo apt-get update
+        sudo apt-get install solc
+
     - name: Setup Python 3.6
       uses: actions/setup-python@v1
       with:

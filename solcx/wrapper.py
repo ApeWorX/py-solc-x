@@ -5,7 +5,7 @@ from typing import Any, Dict, List, Tuple, Union
 from semantic_version import Version
 
 from solcx import install
-from solcx.exceptions import SolcError
+from solcx.exceptions import SolcError, UnknownOption, UnknownValue
 
 
 def _get_solc_version(solc_binary: Union[Path, str]) -> Version:
@@ -130,12 +130,14 @@ def solc_wrapper(
         if stderrdata.startswith("unrecognised option"):
             # unrecognised option '<FLAG>'
             flag = stderrdata.split("'")[1]
-            raise AttributeError(f"solc {solc_version} - unsupported flag: {flag}")
+            raise UnknownOption(f"solc {solc_version} does not support the '{flag}' option'")
         if stderrdata.startswith("Invalid option"):
             # Invalid option to <FLAG>: <OPTION>
             flag, option = stderrdata.split(": ")
             flag = flag.split(" ")[-1]
-            raise ValueError(f"solc {solc_version} - invalid option for {flag} flag: {option}")
+            raise UnknownValue(
+                f"solc {solc_version} does not accept '{option}' as an option for the '{flag}' flag"
+            )
 
         raise SolcError(
             command=command,

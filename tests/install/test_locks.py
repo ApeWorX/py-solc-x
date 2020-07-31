@@ -3,6 +3,8 @@
 import multiprocessing as mp
 import threading
 
+import pytest
+
 import solcx
 
 
@@ -24,12 +26,14 @@ class ThreadWrap:
             raise self.exc
 
 
+@pytest.mark.skipif("'--no-install' in sys.argv")
 def test_threadlock(nosolc):
     threads = [ThreadWrap(solcx.install_solc, "0.6.9") for i in range(4)]
     for t in threads:
         t.join()
 
 
+@pytest.mark.skipif("'--no-install' in sys.argv")
 def test_processlock(nosolc):
     # have to use a context here to prevent a conflict with tqdm
     ctx = mp.get_context("spawn")

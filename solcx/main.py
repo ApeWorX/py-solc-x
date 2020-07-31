@@ -1,12 +1,14 @@
 import json
 from pathlib import Path
-from typing import Dict, List, Union
+from typing import Any, Dict, List, Optional, Union
 
 from semantic_version import Version
 
+from solcx import wrapper
 from solcx.exceptions import ContractsNotFound, SolcError
 from solcx.install import get_executable
-from solcx.wrapper import _get_solc_version, solc_wrapper
+
+# from solcx.wrapper import _get_solc_version, solc_wrapper
 
 
 def get_solc_version() -> Version:
@@ -19,29 +21,7 @@ def get_solc_version() -> Version:
         solc version
     """
     solc_binary = get_executable()
-    return _get_solc_version(solc_binary)
-
-
-def _get_combined_json_outputs() -> str:
-    help_str = solc_wrapper(help=True)[0].split("\n")
-    combined_json_args = next(i for i in help_str if i.startswith("  --combined-json"))
-    return combined_json_args.split(" ")[-1]
-
-
-def _parse_compiler_output(stdoutdata: str) -> Dict:
-    output = json.loads(stdoutdata)
-
-    contracts = output.get("contracts", {})
-    sources = output.get("sources", {})
-
-    for path_str, data in contracts.items():
-        if "abi" in data:
-            data["abi"] = json.loads(data["abi"])
-        key = path_str.rsplit(":", maxsplit=1)[0]
-        if "AST" in sources.get(key, {}):
-            data["ast"] = sources[key]["AST"]
-
-    return contracts
+    return wrapper._get_solc_version(solc_binary)
 
 
 def compile_source(
@@ -126,18 +106,11 @@ def compile_source(
     Dict
         Compiler output. The source file name is given as `<stdin>`.
     """
-    if output_values is None:
-        combined_json = _get_combined_json_outputs()
-    else:
-        combined_json = ",".join(output_values)
-
-    if solc_binary is None:
-        solc_binary = get_executable(solc_version)
-
-    stdoutdata, stderrdata, command, proc = solc_wrapper(
+    return _compile_combined_json(
         solc_binary=solc_binary,
+        solc_version=solc_version,
         stdin=source,
-        combined_json=combined_json,
+        output_values=output_values,
         import_remappings=import_remappings,
         base_path=base_path,
         allow_paths=allow_paths,
@@ -151,19 +124,8 @@ def compile_source(
         optimize_runs=optimize_runs,
         no_optimize_yul=no_optimize_yul,
         yul_optimizations=yul_optimizations,
+        allow_empty=allow_empty,
     )
-
-    contracts = _parse_compiler_output(stdoutdata)
-
-    if not contracts and not allow_empty:
-        raise ContractsNotFound(
-            command=command,
-            return_code=proc.returncode,
-            stdin_data=source,
-            stdout_data=stdoutdata,
-            stderr_data=stderrdata,
-        )
-    return contracts
 
 
 def compile_files(
@@ -248,18 +210,11 @@ def compile_files(
     Dict
         Compiler output
     """
-    if output_values is None:
-        combined_json = _get_combined_json_outputs()
-    else:
-        combined_json = ",".join(output_values)
-
-    if solc_binary is None:
-        solc_binary = get_executable(solc_version)
-
-    stdoutdata, stderrdata, command, proc = solc_wrapper(
+    return _compile_combined_json(
         solc_binary=solc_binary,
+        solc_version=solc_version,
         source_files=source_files,
-        combined_json=combined_json,
+        output_values=output_values,
         import_remappings=import_remappings,
         base_path=base_path,
         allow_paths=allow_paths,
@@ -273,7 +228,77 @@ def compile_files(
         optimize_runs=optimize_runs,
         no_optimize_yul=no_optimize_yul,
         yul_optimizations=yul_optimizations,
+        allow_empty=allow_empty,
     )
+
+
+def _get_combined_json_outputs() -> str:
+    help_str = wrapper.solc_wrapper(help=True)[0].split("\n")
+    combined_json_args = next(i for i in help_str if i.startswith("  --combined-json"))
+    return combined_json_args.split(" ")[-1]
+
+
+def _parse_compiler_output(stdoutdata: str) -> Dict:
+    output = json.loads(stdoutdata)
+
+    contracts = output.get("contracts", {})
+    sources = output.get("sources", {})
+
+    for path_str, data in contracts.items():
+        if "abi" in data:
+            data["abi"] = json.loads(data["abi"])
+        key = path_str.rsplit(":", maxsplit=1)[0]
+        if "AST" in sources.get(key, {}):
+            data["ast"] = sources[key]["AST"]
+
+    return contracts
+
+
+def _compile_combined_json(
+    output_values: Optional[List],
+    solc_binary: Union[str, Path, None],
+    solc_version: Optional[Version],
+    output_dir: Union[str, Path, None],
+    overwrite: Optional[bool],
+    allow_empty: Optional[bool],
+    **kwargs: Any,
+) -> Dict:
+
+    if output_values is None:
+        combined_json = _get_combined_json_outputs()
+    else:
+        combined_json = ",".join(output_values)
+
+    if solc_binary is None:
+        solc_binary = get_executable(solc_version)
+
+    if output_dir:
+        output_dir = Path(output_dir)
+        if output_dir.is_file():
+            raise FileExistsError("`output_dir` must be as a directory, not a file")
+        if output_dir.joinpath("combined.json").exists() and not overwrite:
+            target_path = output_dir.joinpath("combined.json")
+            raise FileExistsError(
+                f"Target output file {target_path} already exists - use overwrite=True to overwrite"
+            )
+
+    stdoutdata, stderrdata, command, proc = wrapper.solc_wrapper(
+        solc_binary=solc_binary,
+        combined_json=combined_json,
+        output_dir=output_dir,
+        overwrite=overwrite,
+        **kwargs,
+    )
+
+    if output_dir:
+        output_path = Path(output_dir).joinpath("combined.json")
+        if stdoutdata:
+            output_path.parent.mkdir(parents=True, exist_ok=True)
+            with output_path.open("w") as fp:
+                fp.write(stdoutdata)
+        else:
+            with output_path.open() as fp:
+                stdoutdata = fp.read()
 
     contracts = _parse_compiler_output(stdoutdata)
 
@@ -339,7 +364,7 @@ def compile_standard(
     if solc_binary is None:
         solc_binary = get_executable(solc_version)
 
-    stdoutdata, stderrdata, command, proc = solc_wrapper(
+    stdoutdata, stderrdata, command, proc = wrapper.solc_wrapper(
         solc_binary=solc_binary,
         stdin=json.dumps(input_data),
         standard_json=True,
@@ -404,7 +429,7 @@ def link_code(
 
     library_list = [f"{name}:{address}" for name, address in libraries.items()]
 
-    stdoutdata = solc_wrapper(
+    stdoutdata = wrapper.solc_wrapper(
         solc_binary=solc_binary, stdin=unlinked_bytecode, link=True, libraries=library_list
     )[0]
 

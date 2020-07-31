@@ -26,7 +26,7 @@ class SolcError(Exception):
     def __str__(self) -> str:
         return (
             f"{self.message}"
-            f"\n> command: `{' '.join(self.command)}`"
+            f"\n> command: `{' '.join(str(i) for i in self.command)}`"
             f"\n> return code: `{self.return_code}`"
             "\n> stdout:"
             f"\n{self.stdout_data}"
@@ -43,7 +43,19 @@ class SolcInstallationError(Exception):
     pass
 
 
+class UnknownOption(AttributeError):
+    pass
+
+
+class UnknownValue(ValueError):
+    pass
+
+
 class UnexpectedVersionError(Exception):
+    pass
+
+
+class UnsupportedVersionError(ValueError):
     pass
 
 
