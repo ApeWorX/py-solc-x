@@ -7,7 +7,7 @@ Python wrapper and version management tool for the ``solc`` `Solidity <https://g
 Features
 ========
 
-* Full support for Solidity versions `>=0.4.11`
+* Full support for Solidity versions ``>=0.4.11``
 * Installs Solidity on Linux, OSX and Windows
 * Compiles Solidity from source on Linux and OSX
 
