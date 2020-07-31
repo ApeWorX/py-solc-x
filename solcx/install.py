@@ -28,6 +28,7 @@ from solcx.exceptions import (
     SolcNotInstalled,
     UnexpectedVersionError,
     UnexpectedVersionWarning,
+    UnsupportedVersionError,
 )
 from solcx.utils.lock import get_process_lock
 
@@ -68,11 +69,11 @@ def _convert_and_validate_version(version: Union[str, Version]) -> Version:
     if not isinstance(version, Version):
         version = Version(version.lstrip("v"))
     if version not in SimpleSpec(">=0.4.11"):
-        raise ValueError("py-solc-x does not support solc versions <0.4.11")
+        raise UnsupportedVersionError("py-solc-x does not support solc versions <0.4.11")
     return version
 
 
-def _unlink_solc(solc_path):
+def _unlink_solc(solc_path: Path) -> None:
     solc_path.unlink()
     if _get_os_name() == "win32":
         shutil.rmtree(solc_path.parent)
@@ -305,7 +306,7 @@ def install_solc_pragma(
     """
     version = _select_pragma_version(pragma_string, get_available_solc_versions())
     if not version:
-        raise ValueError("Compatible solc version does not exist")
+        raise UnsupportedVersionError("Compatible solc version does not exist")
     if install:
         install_solc(version, show_progress=show_progress, solcx_binary_path=solcx_binary_path)
 
@@ -462,7 +463,7 @@ def compile_solc(
         raise OSError("Compiling from source is not supported on Windows systems")
 
     if version == "latest":
-        version = get_available_solc_versions()[0]
+        version = get_available_solc_versions(compilable=True)[0]
     else:
         version = _convert_and_validate_version(version)
 

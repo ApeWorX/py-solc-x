@@ -55,6 +55,10 @@ class UnexpectedVersionError(Exception):
     pass
 
 
+class UnsupportedVersionError(ValueError):
+    pass
+
+
 class SolcNotInstalled(Exception):
     pass
 
