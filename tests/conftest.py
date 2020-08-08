@@ -6,7 +6,7 @@ from semantic_version import Version
 
 import solcx
 
-_installed = {}
+_installed: dict = {}
 
 
 def pytest_addoption(parser):
@@ -14,6 +14,11 @@ def pytest_addoption(parser):
         "--no-install",
         action="store_true",
         help="Only run solcx tests against already installed solc versions",
+    )
+    parser.addoption(
+        "--solc-versions",
+        action="store",
+        help="Only run tests against a specific version(s) of solc",
     )
 
 
@@ -23,11 +28,13 @@ def pytest_configure(config):
 
 def pytest_collection(session):
     global VERSIONS
-    if session.config.getoption("--no-install"):
+    if session.config.getoption("--solc-versions"):
+        VERSIONS = [Version(i) for i in session.config.getoption("--solc-versions").split(",")]
+    elif session.config.getoption("--no-install"):
         VERSIONS = solcx.get_installed_solc_versions()
     else:
         try:
-            VERSIONS = solcx.get_available_solc_versions()
+            VERSIONS = solcx.get_installable_solc_versions()
         except ConnectionError:
             raise pytest.UsageError(
                 "ConnectionError while attempting to get solc versions.\n"
@@ -58,7 +65,7 @@ def all_versions(request):
 
 @pytest.fixture(scope="session")
 def foo_source():
-    yield """pragma solidity >=0.4.11;
+    yield """pragma solidity >=0.4.1;
 
 contract Foo {
     function return13() public returns (uint a) {
@@ -71,7 +78,7 @@ contract Foo {
 @pytest.fixture(scope="session")
 def bar_source():
     yield """
-pragma solidity >=0.4.11;
+pragma solidity >=0.4.1;
 
 import "../contracts/Foo.sol";
 
@@ -85,7 +92,7 @@ contract Bar is Foo {
 @pytest.fixture(scope="session")
 def baz_source():
     yield """
-pragma solidity >=0.4.11;
+pragma solidity >=0.4.1;
 
 import "../other/Bar.sol";
 
@@ -98,7 +105,7 @@ contract Baz is Bar {
 
 @pytest.fixture()
 def invalid_source():
-    yield """pragma solidity >=0.4.11;
+    yield """pragma solidity >=0.4.1;
 contract Foo {"""
 
 
