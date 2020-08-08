@@ -38,16 +38,11 @@ except ImportError:
     tqdm = None
 
 
-DOWNLOAD_BASE = "https://github.com/ethereum/solidity/releases/download/v{}/{}"
-ALL_RELEASES = "https://api.github.com/repos/ethereum/solidity/releases?per_page=100"
+BINARY_DOWNLOAD_BASE = "https://solc-bin.ethereum.org/{}-amd64/{}"
+SOURCE_DOWNLOAD_BASE = "https://github.com/ethereum/solidity/releases/download/v{}/{}"
+GITHUB_RELEASES = "https://api.github.com/repos/ethereum/solidity/releases?per_page=100"
 
 MINIMAL_SOLC_VERSION = "v0.4.11"
-VERSION_REGEX = {
-    "macosx": "solc-macos",
-    "source": "solidity_[0-9].[0-9].[0-9]{1,}.tar.gz",
-    "linux": "solc-static-linux",
-    "windows": "solidity-windows.zip",
-}
 LOGGER = logging.getLogger("solcx")
 
 SOLCX_BINARY_PATH_VARIABLE = "SOLCX_BINARY_PATH"
@@ -306,7 +301,7 @@ def install_solc_pragma(
     Version
         Installed `solc` version.
     """
-    version = _select_pragma_version(pragma_string, get_available_solc_versions())
+    version = _select_pragma_version(pragma_string, get_installable_solc_versions())
     if not version:
         raise UnsupportedVersionError("Compatible solc version does not exist")
     if install:
@@ -315,18 +310,31 @@ def install_solc_pragma(
     return version
 
 
-def get_available_solc_versions(
-    headers: Optional[Dict] = None, compilable: bool = False
-) -> List[Version]:
+def get_installable_solc_versions() -> List[Version]:
     """
     Return a list of all `solc` versions that can be installed by py-solc-x.
+
+    Returns
+    -------
+    List
+        List of Versions objects of installable `solc` versions.
+    """
+    data = requests.get(BINARY_DOWNLOAD_BASE.format(_get_os_name(), "list.json"))
+    if data.status_code != 200:
+        raise ConnectionError(
+            f"Status {data.status_code} when getting solc versions from solc-bin.ethereum.org"
+        )
+    return sorted((Version(i) for i in data.json()["releases"]), reverse=True)
+
+
+def get_compilable_solc_versions(headers: Optional[Dict] = None) -> List[Version]:
+    """
+    Return a list of all `solc` versions that can be compiled from source by py-solc-x.
 
     Arguments
     ---------
     headers : Dict, optional
         Headers to include in the request to Github.
-    compilable : bool, optional
-        If True, return a list of versions that can be compiled from source.
 
     Returns
     -------
@@ -334,14 +342,13 @@ def get_available_solc_versions(
         List of Versions objects of installable `solc` versions.
     """
     version_list = []
-    regex_key = "source" if compilable else _get_os_name()
-    pattern = VERSION_REGEX[regex_key]
+    pattern = "solidity_[0-9].[0-9].[0-9]{1,}.tar.gz"
 
     if headers is None and os.getenv("GITHUB_TOKEN") is not None:
         auth = b64encode(os.environ["GITHUB_TOKEN"].encode()).decode()
         headers = {"Authorization": f"Basic {auth}"}
 
-    data = requests.get(ALL_RELEASES, headers=headers)
+    data = requests.get(GITHUB_RELEASES, headers=headers)
     if data.status_code != 200:
         msg = (
             f"Status {data.status_code} when getting solc versions from Github:"
@@ -408,7 +415,7 @@ def install_solc(
     """
 
     if version == "latest":
-        version = get_available_solc_versions()[0]
+        version = get_installable_solc_versions()[0]
     else:
         version = _convert_and_validate_version(version)
 
@@ -421,12 +428,19 @@ def install_solc(
             LOGGER.info(f"solc {version} already installed at: {path}")
             return version
 
-        elif os_name == "linux":
-            _install_solc_unix(version, "solc-static-linux", show_progress, solcx_binary_path)
+        data = requests.get(BINARY_DOWNLOAD_BASE.format(_get_os_name(), "list.json"))
+        if data.status_code != 200:
+            raise ConnectionError(
+                f"Status {data.status_code} when getting solc versions from solc-bin.ethereum.org"
+            )
+        filename = data.json()["releases"][str(version)]
+
+        if os_name == "linux":
+            _install_solc_unix(version, filename, show_progress, solcx_binary_path)
         elif os_name == "macosx":
-            _install_solc_unix(version, "solc-macos", show_progress, solcx_binary_path)
+            _install_solc_unix(version, filename, show_progress, solcx_binary_path)
         elif os_name == "windows":
-            _install_solc_windows(version, show_progress, solcx_binary_path)
+            _install_solc_windows(version, filename, show_progress, solcx_binary_path)
 
         try:
             _validate_installation(version, solcx_binary_path)
@@ -465,7 +479,7 @@ def compile_solc(
         raise OSError("Compiling from source is not supported on Windows systems")
 
     if version == "latest":
-        version = get_available_solc_versions(compilable=True)[0]
+        version = get_compilable_solc_versions()[0]
     else:
         version = _convert_and_validate_version(version)
 
@@ -478,7 +492,7 @@ def compile_solc(
             return version
 
         temp_path = _get_temp_folder()
-        download = DOWNLOAD_BASE.format(version, f"solidity_{version}.tar.gz")
+        download = SOURCE_DOWNLOAD_BASE.format(version, f"solidity_{version}.tar.gz")
         install_path = get_solcx_install_folder(solcx_binary_path).joinpath(f"solc-v{version}")
 
         content = _download_solc(download, show_progress)
@@ -540,6 +554,7 @@ def _get_temp_folder() -> Path:
 
 
 def _download_solc(url: str, show_progress: bool) -> bytes:
+    LOGGER.info(f"Downloading from {url}")
     response = requests.get(url, stream=show_progress)
     if response.status_code == 404:
         raise DownloadError(
@@ -568,10 +583,9 @@ def _download_solc(url: str, show_progress: bool) -> bytes:
 def _install_solc_unix(
     version: Version, filename: str, show_progress: bool, solcx_binary_path: Union[Path, str, None]
 ) -> None:
-    download = DOWNLOAD_BASE.format(version, filename)
+    download = BINARY_DOWNLOAD_BASE.format(_get_os_name(), filename)
     install_path = get_solcx_install_folder(solcx_binary_path).joinpath(f"solc-v{version}")
 
-    LOGGER.info(f"Downloading solc {version} from {download}")
     content = _download_solc(download, show_progress)
     with open(install_path, "wb") as fp:
         fp.write(content)
@@ -580,9 +594,9 @@ def _install_solc_unix(
 
 
 def _install_solc_windows(
-    version: Version, show_progress: bool, solcx_binary_path: Union[Path, str, None]
+    version: Version, filename: str, show_progress: bool, solcx_binary_path: Union[Path, str, None]
 ) -> None:
-    download = DOWNLOAD_BASE.format(version, "solidity-windows.zip")
+    download = BINARY_DOWNLOAD_BASE.format(_get_os_name(), filename)
     install_path = get_solcx_install_folder(solcx_binary_path).joinpath(f"solc-v{version}")
 
     temp_path = _get_temp_folder()
