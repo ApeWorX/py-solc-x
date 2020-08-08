@@ -43,10 +43,10 @@ ALL_RELEASES = "https://api.github.com/repos/ethereum/solidity/releases?per_page
 
 MINIMAL_SOLC_VERSION = "v0.4.11"
 VERSION_REGEX = {
-    "darwin": "solc-macos",
+    "macosx": "solc-macos",
     "source": "solidity_[0-9].[0-9].[0-9]{1,}.tar.gz",
     "linux": "solc-static-linux",
-    "win32": "solidity-windows.zip",
+    "windows": "solidity-windows.zip",
 }
 LOGGER = logging.getLogger("solcx")
 
@@ -58,8 +58,10 @@ _default_solc_binary = None
 def _get_os_name() -> str:
     if sys.platform.startswith("linux"):
         return "linux"
-    if sys.platform in ("darwin", "win32"):
-        return sys.platform
+    if sys.platform == "darwin":
+        return "macosx"
+    if sys.platform == "win32":
+        return "windows"
     raise OSError(f"Unsupported OS: '{sys.platform}' - py-solc-x supports Linux, OSX and Windows")
 
 
@@ -75,7 +77,7 @@ def _convert_and_validate_version(version: Union[str, Version]) -> Version:
 
 def _unlink_solc(solc_path: Path) -> None:
     solc_path.unlink()
-    if _get_os_name() == "win32":
+    if _get_os_name() == "windows":
         shutil.rmtree(solc_path.parent)
 
 
@@ -107,7 +109,7 @@ def get_solcx_install_folder(solcx_binary_path: Union[Path, str] = None) -> Path
 
 def _get_which_solc() -> Path:
     # get the path for the currently installed `solc` version, if any
-    if _get_os_name() == "win32":
+    if _get_os_name() == "windows":
         response = subprocess.check_output(["where.exe", "solc"], encoding="utf8").strip()
     else:
         response = subprocess.check_output(["which", "solc"], encoding="utf8").strip()
@@ -135,7 +137,7 @@ def import_installed_solc(solcx_binary_path: Union[Path, str] = None) -> List[Ve
         path_list = []
 
     # on OSX, also copy all versions of solc from cellar
-    if _get_os_name() == "darwin":
+    if _get_os_name() == "macosx":
         path_list.extend(Path("/usr/local/Cellar").glob("solidity*/**/solc"))
 
     imported_versions = []
@@ -147,7 +149,7 @@ def import_installed_solc(solcx_binary_path: Union[Path, str] = None) -> List[Ve
             continue
 
         copy_path = get_solcx_install_folder(solcx_binary_path).joinpath(f"solc-v{version}")
-        if _get_os_name() == "win32":
+        if _get_os_name() == "windows":
             copy_path.mkdir()
             copy_path = copy_path.joinpath("solc.exe")
 
@@ -191,7 +193,7 @@ def get_executable(
 
     version = _convert_and_validate_version(version)
     solc_bin = get_solcx_install_folder(solcx_binary_path).joinpath(f"solc-v{version}")
-    if sys.platform == "win32":
+    if _get_os_name() == "windows":
         solc_bin = solc_bin.joinpath("solc.exe")
     if not solc_bin.exists():
         raise SolcNotInstalled(
@@ -421,9 +423,9 @@ def install_solc(
 
         elif os_name == "linux":
             _install_solc_unix(version, "solc-static-linux", show_progress, solcx_binary_path)
-        elif os_name == "darwin":
+        elif os_name == "macosx":
             _install_solc_unix(version, "solc-macos", show_progress, solcx_binary_path)
-        elif os_name == "win32":
+        elif os_name == "windows":
             _install_solc_windows(version, show_progress, solcx_binary_path)
 
         try:
@@ -459,7 +461,7 @@ def compile_solc(
     Version
         installed solc version
     """
-    if _get_os_name() == "win32":
+    if _get_os_name() == "windows":
         raise OSError("Compiling from source is not supported on Windows systems")
 
     if version == "latest":
@@ -506,7 +508,7 @@ def compile_solc(
                 " while attempting to build solc from the source.\n"
                 "This is likely due to a missing or incorrect version of a build dependency."
             )
-            if _get_os_name() == "darwin":
+            if _get_os_name() == "macosx":
                 err_msg = (
                     f"{err_msg}\n\nFor suggested installation options: "
                     "https://github.com/iamdefinitelyahuman/py-solc-x/wiki/Installing-Solidity-on-OSX"  # noqa: E501
