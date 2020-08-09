@@ -1,3 +1,4 @@
+import re
 import subprocess
 from pathlib import Path
 from typing import Any, Dict, List, Tuple, Union
@@ -10,9 +11,10 @@ from solcx.exceptions import SolcError, UnknownOption, UnknownValue
 
 def _get_solc_version(solc_binary: Union[Path, str]) -> Version:
     # private wrapper function to get `solc` version
-    stdout_data = subprocess.check_output([solc_binary, "--version"], encoding="utf8").strip()
-    stdout_data = stdout_data[stdout_data.index("Version: ") + 9 : stdout_data.index("+")]
-    return Version.coerce(stdout_data)
+    stdout_data = subprocess.check_output([solc_binary, "--version"], encoding="utf8")
+    version_str = re.findall(r"(?<=Version: ).*?(?=\+)", stdout_data)[0]
+    version_str = re.sub(r"\.0(?=[1-9])", ".", version_str)
+    return Version.coerce(version_str)
 
 
 def _to_string(key: str, value: Any) -> str:
