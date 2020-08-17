@@ -435,7 +435,10 @@ def install_solc(
             raise ConnectionError(
                 f"Status {data.status_code} when getting solc versions from solc-bin.ethereum.org"
             )
-        filename = data.json()["releases"][str(version)]
+        try:
+            filename = data.json()["releases"][str(version)]
+        except KeyError:
+            raise SolcInstallationError(f"Solc binary for v{version} is not available for this OS")
 
         if os_name == "linux":
             _install_solc_unix(version, filename, show_progress, solcx_binary_path)
