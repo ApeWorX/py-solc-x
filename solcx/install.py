@@ -42,7 +42,7 @@ BINARY_DOWNLOAD_BASE = "https://solc-bin.ethereum.org/{}-amd64/{}"
 SOURCE_DOWNLOAD_BASE = "https://github.com/ethereum/solidity/releases/download/v{}/{}"
 GITHUB_RELEASES = "https://api.github.com/repos/ethereum/solidity/releases?per_page=100"
 
-MINIMAL_SOLC_VERSION = "v0.4.11"
+MINIMAL_SOLC_VERSION = Version("0.4.11")
 LOGGER = logging.getLogger("solcx")
 
 SOLCX_BINARY_PATH_VARIABLE = "SOLCX_BINARY_PATH"
@@ -324,7 +324,9 @@ def get_installable_solc_versions() -> List[Version]:
         raise ConnectionError(
             f"Status {data.status_code} when getting solc versions from solc-bin.ethereum.org"
         )
-    return sorted((Version(i) for i in data.json()["releases"]), reverse=True)
+    version_list = sorted((Version(i) for i in data.json()["releases"]), reverse=True)
+    version_list = [i for i in version_list if i >= MINIMAL_SOLC_VERSION]
+    return version_list
 
 
 def get_compilable_solc_versions(headers: Optional[Dict] = None) -> List[Version]:
@@ -363,11 +365,11 @@ def get_compilable_solc_versions(headers: Optional[Dict] = None) -> List[Version
         raise ConnectionError(msg)
 
     for release in data.json():
+        version = Version.coerce(release["tag_name"].lstrip("v"))
         asset = next((i for i in release["assets"] if re.match(pattern, i["name"])), False)
         if asset:
-            version = Version.coerce(release["tag_name"].lstrip("v"))
             version_list.append(version)
-        if release["tag_name"] == MINIMAL_SOLC_VERSION:
+        if version == MINIMAL_SOLC_VERSION:
             break
     return sorted(version_list, reverse=True)
 
