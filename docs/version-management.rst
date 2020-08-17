@@ -83,38 +83,38 @@ Setting the Active Version
         Version('0.5.17')
 
 
-Installing Solidity
-===================
-
-Getting Installable Versions
-----------------------------
-
-.. py:function:: solcx.get_available_solc_versions(headers=None, compilable=False)
-
-    Return a list of all ``solc`` versions that can be installed by py-solc-x.
-
-        ``headers`` Dict
-            Headers to include in the request to Github.
-        ``compilable`` bool
-            If ``True``, return a list of versions that can be compiled from source.
-
-    .. code-block:: python
-
-        >>> solcx.get_available_solc_versions()
-        [Version('0.7.0'), Version('0.6.12'), Version('0.6.11'), Version('0.6.10'), Version('0.6.9'), Version('0.6.8'), Version('0.6.7'), Version('0.6.6'), Version('0.6.5'), Version('0.6.4'), Version('0.6.3'), Version('0.6.2'), Version('0.6.1'), Version('0.6.0'), Version('0.5.17'), Version('0.5.16'), Version('0.5.15'), Version('0.5.14'), Version('0.5.13'), Version('0.5.12'), Version('0.5.11'), Version('0.5.10'), Version('0.5.9'), Version('0.5.8'), Version('0.5.7'), Version('0.5.6'), Version('0.5.5'), Version('0.5.4'), Version('0.5.3'), Version('0.5.2'), Version('0.5.1'), Version('0.5.0'), Version('0.4.26'), Version('0.4.25'), Version('0.4.24'), Version('0.4.23'), Version('0.4.22'), Version('0.4.21'), Version('0.4.20'), Version('0.4.19'), Version('0.4.18'), Version('0.4.17'), Version('0.4.16'), Version('0.4.15'), Version('0.4.14'), Version('0.4.13'), Version('0.4.12'), Version('0.4.11')]
-
 Importing Already-Installed Versions
-------------------------------------
+====================================
 
 .. py:function:: solcx.import_installed_solc(solcx_binary_path=None)
 
     Search for and copy installed ``solc`` versions into the local installation folder.
+
+    This function is especially useful on OSX, to access Solidity versions that you have installed from homebrew and where a precompiled binary is not available.
 
     .. code-block:: python
 
         >>> solcx.import_installed_solc()
         [Version('0.7.0'), Version('0.6.12')]
 
+
+Installing Solidity
+===================
+
+py-solc-x downloads and installs precompiled binaries from `solc-bin.ethereum.org <solc-bin.ethereum.org>`_. Different binaries are available depending on your operating system.
+
+Getting Installable Versions
+----------------------------
+
+.. py:function:: solcx.get_installable_solc_versions()
+
+    Return a list of all ``solc`` versions that can be installed by py-solc-x.
+
+
+    .. code-block:: python
+
+        >>> solcx.get_installable_solc_versions()
+        [Version('0.7.0'), Version('0.6.12'), Version('0.6.11'), Version('0.6.10'), Version('0.6.9'), Version('0.6.8'), Version('0.6.7'), Version('0.6.6'), Version('0.6.5'), Version('0.6.4'), Version('0.6.3'), Version('0.6.2'), Version('0.6.1'), Version('0.6.0'), Version('0.5.17'), Version('0.5.16'), Version('0.5.15'), Version('0.5.14'), Version('0.5.13'), Version('0.5.12'), Version('0.5.11'), Version('0.5.10'), Version('0.5.9'), Version('0.5.8'), Version('0.5.7'), Version('0.5.6'), Version('0.5.5'), Version('0.5.4'), Version('0.5.3'), Version('0.5.2'), Version('0.5.1'), Version('0.5.0'), Version('0.4.26'), Version('0.4.25'), Version('0.4.24'), Version('0.4.23'), Version('0.4.22'), Version('0.4.21'), Version('0.4.20'), Version('0.4.19'), Version('0.4.18'), Version('0.4.17'), Version('0.4.16'), Version('0.4.15'), Version('0.4.14'), Version('0.4.13'), Version('0.4.12'), Version('0.4.11')]
 
 Installing Precompiled Binaries
 -------------------------------
@@ -131,18 +131,40 @@ Installing Precompiled Binaries
         ``solcx_binary_path`` Path | str
             User-defined path, used to override the default installation directory.
 
-Buildling from Source
----------------------
+Building from Source
+====================
+
+When a precompiled version of Solidity isn't available for your operating system, you may still install it by building from the source code. Source code is downloaded from `Github <https://github.com/ethereum/solidity/releases>`_.
+
+.. note::
+
+    If you wish to compile from source you must first install the required `solc dependencies <https://solidity.readthedocs.io/en/latest/installing-solidity.html#building-from-source>`_.
+
+
+Getting Compilable Versions
+---------------------------
+
+.. py:function:: solcx.get_compilable_solc_versions(headers=None)
+
+    Return a list of all ``solc`` versions that can be installed by py-solc-x.
+
+        ``headers`` Dict
+            Headers to include in the request to Github.
+
+    .. code-block:: python
+
+        >>> solcx.get_compilable_solc_versions()
+        [Version('0.7.0'), Version('0.6.12'), Version('0.6.11'), Version('0.6.10'), Version('0.6.9'), Version('0.6.8'), Version('0.6.7'), Version('0.6.6'), Version('0.6.5'), Version('0.6.4'), Version('0.6.3'), Version('0.6.2'), Version('0.6.1'), Version('0.6.0'), Version('0.5.17'), Version('0.5.16'), Version('0.5.15'), Version('0.5.14'), Version('0.5.13'), Version('0.5.12'), Version('0.5.11'), Version('0.5.10'), Version('0.5.9'), Version('0.5.8'), Version('0.5.7'), Version('0.5.6'), Version('0.5.5'), Version('0.5.4'), Version('0.5.3'), Version('0.5.2'), Version('0.5.1'), Version('0.5.0'), Version('0.4.26'), Version('0.4.25'), Version('0.4.24'), Version('0.4.23'), Version('0.4.22'), Version('0.4.21'), Version('0.4.20'), Version('0.4.19'), Version('0.4.18'), Version('0.4.17'), Version('0.4.16'), Version('0.4.15'), Version('0.4.14'), Version('0.4.13'), Version('0.4.12'), Version('0.4.11')]
+
+
+Compiling Solidity from Source
+------------------------------
 
 .. py:function:: solcx.compile_solc(version, show_progress=False, solcx_binary_path=None)
 
     Install a version of ``solc`` by downloading and compiling source code.
 
     This function is only available when using Linux or OSX.
-
-    .. note::
-
-        If you wish to compile from source you must first install the required `solc dependencies <https://solidity.readthedocs.io/en/latest/installing-solidity.html#building-from-source>`_.
 
     **Arguments:**
 
