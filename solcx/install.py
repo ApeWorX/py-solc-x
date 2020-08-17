@@ -343,6 +343,9 @@ def get_compilable_solc_versions(headers: Optional[Dict] = None) -> List[Version
     List
         List of Versions objects of installable `solc` versions.
     """
+    if _get_os_name() == "windows":
+        raise OSError("Compiling from source is not supported on Windows systems")
+
     version_list = []
     pattern = "solidity_[0-9].[0-9].[0-9]{1,}.tar.gz"
 
