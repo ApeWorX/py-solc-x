@@ -130,7 +130,7 @@ def pragmapatch(monkeypatch):
         ],
     )
     monkeypatch.setattr(
-        "solcx.install.get_available_solc_versions",
+        "solcx.install.get_installable_solc_versions",
         lambda: [
             Version("0.4.11"),
             Version("0.4.24"),

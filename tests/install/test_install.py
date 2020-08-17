@@ -3,12 +3,12 @@
 import pytest
 
 import solcx
-from solcx.exceptions import DownloadError
+from solcx.exceptions import SolcInstallationError
 
 
 @pytest.mark.skipif("'--no-install' in sys.argv")
 def test_install_latest():
-    version = solcx.get_available_solc_versions()[0]
+    version = solcx.get_installable_solc_versions()[0]
     assert solcx.install_solc("latest") == version
 
 
@@ -19,7 +19,7 @@ def test_unknown_platform(monkeypatch):
 
 
 def test_install_unknown_version():
-    with pytest.raises(DownloadError):
+    with pytest.raises(SolcInstallationError):
         solcx.install_solc("0.4.99")
 
 
