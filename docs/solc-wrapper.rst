@@ -16,8 +16,8 @@ Along with the :ref:`main compiler functions <using-the-compiler>`, you can also
             Location of the ``solc`` binary. If not given, the current default binary is used.
         ``stdin`` : str
             Input to pass to ``solc`` via stdin
-        ``source_files`` List
-            List of Solidity source files to be compiled. Files may be given as strings or :py:class:`Path <pathlib.PurePath>` objects.
+        ``source_files`` List | Path | str
+            Solidity source file, or list of source files, to be compiled. Files may be given as strings or :py:class:`Path <pathlib.PurePath>` objects.
         ``import_remappings`` : Dict | List | str
             Path remappings. May be given as a string or list of strings formatted as ``"prefix=path"``
             or a dict of ``{"prefix": "path"}``

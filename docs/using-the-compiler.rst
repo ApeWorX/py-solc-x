@@ -116,8 +116,8 @@ Compiling Files
 
     **Required Arguments**
 
-        ``source_files`` List
-            List of Solidity source files to be compiled. Files may be given as strings or :py:class:`Path <pathlib.PurePath>` objects.
+        ``source_files`` List | Path | str
+            Solidity source file, or list of source files, to be compiled. Files may be given as strings or :py:class:`Path <pathlib.PurePath>` objects.
 
     **Optional py-solc-x Arguments**
 
