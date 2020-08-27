@@ -6,6 +6,7 @@ import pytest
 from semantic_version import Version
 
 import solcx
+from solcx.exceptions import UnknownOption, UnknownValue
 
 
 class PopenPatch:
@@ -14,6 +15,8 @@ class PopenPatch:
         self.args = []
 
     def __call__(self, cmd, **kwargs):
+        if cmd[1] == "--version":
+            return self.proc(cmd, **kwargs)
         assert cmd[0] == solcx.install.get_executable()
         for i in self.args:
             assert i in cmd
@@ -71,10 +74,16 @@ def test_removed_kwargs(popen, foo_source, kwarg, min_solc_minor):
 
     popen.expect(kwarg)
     if solc_minor_version >= min_solc_minor:
-        with pytest.raises(AttributeError):
+        with pytest.raises(UnknownOption):
             solcx.wrapper.solc_wrapper(stdin=foo_source, **{kwarg: True})
     else:
         solcx.wrapper.solc_wrapper(stdin=foo_source, **{kwarg: True})
+
+
+def test_unknown_value(foo_source, all_versions):
+    expected = UnknownValue if all_versions >= Version("0.4.21") else UnknownOption
+    with pytest.raises(expected):
+        solcx.wrapper.solc_wrapper(stdin=foo_source, evm_version="potato")
 
 
 @pytest.mark.parametrize(
@@ -90,12 +99,3 @@ def test_removed_kwargs(popen, foo_source, kwarg, min_solc_minor):
 def test_value_kwargs(popen, foo_source, kwarg, value):
     popen.expect(kwarg)
     solcx.wrapper.solc_wrapper(stdin=foo_source, **{kwarg: value})
-
-
-@pytest.mark.parametrize("kwarg,min_version", [({"base_path": "."}, "0.6.9")])
-def test_added_kwargs(popen, foo_source, kwarg, min_version):
-    if solcx.get_solc_version().truncate() >= Version(min_version):
-        solcx.wrapper.solc_wrapper(stdin=foo_source, **kwarg)
-    else:
-        with pytest.raises(AttributeError):
-            solcx.wrapper.solc_wrapper(stdin=foo_source, **kwarg)

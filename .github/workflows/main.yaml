@@ -24,7 +24,7 @@ jobs:
         python-version: 3.6
 
     - name: Install Tox
-      run: pip install tox
+      run: pip install tox wheel
 
     - name: Run Tox
       run: tox -e lint
@@ -36,13 +36,20 @@ jobs:
     steps:
     - uses: actions/checkout@v1
 
+    # install solc for one job to test importing already-installed versions
+    - name: Install solc
+      run: |
+        sudo add-apt-repository ppa:ethereum/ethereum
+        sudo apt-get update
+        sudo apt-get install solc
+
     - name: Setup Python 3.6
       uses: actions/setup-python@v1
       with:
         python-version: 3.6
 
     - name: Install Tox
-      run: pip install tox
+      run: pip install tox wheel
 
     - name: Run Tox
       run: tox -e py36
@@ -66,7 +73,7 @@ jobs:
         python-version: 3.7
 
     - name: Install Tox
-      run: pip install tox
+      run: pip install tox wheel
 
     - name: Run Tox
       run: tox -e py37
@@ -81,8 +88,9 @@ jobs:
   py38:
     runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest]
+        os: [macos-latest, ubuntu-latest, windows-latest]
 
     steps:
     - uses: actions/checkout@v1
@@ -93,7 +101,7 @@ jobs:
         python-version: 3.8
 
     - name: Install Tox
-      run: pip install tox
+      run: pip install tox wheel
 
     - name: Run Tox
       run: tox -e py38

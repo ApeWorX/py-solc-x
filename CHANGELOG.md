@@ -9,6 +9,25 @@ This project was forked from `py-solc`. View the original changelog [here](https
 
 ## [Unreleased](https://github.com/iamdefinitelyahuman/py-solc-x)
 
+## [1.0.0](https://github.com/iamdefinitelyahuman/py-solc-x/releases/tag/v1.0.0) - 2020-08-26
+### Added
+- "latest" is a valid version number when installing ([#104](https://github.com/iamdefinitelyahuman/py-solc-x/pull/104))
+- Custom exception classes ([#103](https://github.com/iamdefinitelyahuman/py-solc-x/pull/103))
+- Main compiler functions have `solc_version` and `solc_binary` kwargs for setting the version or using a custom solc binary ([#98](https://github.com/iamdefinitelyahuman/py-solc-x/pull/98))
+- MyPy types ([#99](https://github.com/iamdefinitelyahuman/py-solc-x/pull/99))
+
+### Changed
+- Major refactor of the main compiler functions and low-level solc wrapper ([#96](https://github.com/iamdefinitelyahuman/py-solc-x/pull/96))
+- Binaries are installed from [solc-bin.ethereum.org](https://solc-bin.ethereum.org/) instead of Github ([#108](https://github.com/iamdefinitelyahuman/py-solc-x/pull/108))
+- Building from source is now handled by a separate function `solcx.install.compile_solc` ([#108](https://github.com/iamdefinitelyahuman/py-solc-x/pull/108))
+- `get_available_solc_versions` has been split into `get_installable_solc_versions` and `get_compilable_solc_versions` ([#108](https://github.com/iamdefinitelyahuman/py-solc-x/pull/108))
+- `get_solc_folder` is now `get_solcx_install_folder` ([#102](https://github.com/iamdefinitelyahuman/py-solc-x/pull/102))
+- Paths are represented as `Path` objects instead of strings ([#97](https://github.com/iamdefinitelyahuman/py-solc-x/pull/97))
+- Solc versions are represented as `semantic_version.Version` objects instead of strings ([#93](https://github.com/iamdefinitelyahuman/py-solc-x/pull/93))
+
+### Removed
+- `utils.string` and `utils.types` subpackages ([#95](https://github.com/iamdefinitelyahuman/py-solc-x/pull/95))
+
 ## [0.10.1](https://github.com/iamdefinitelyahuman/py-solc-x/releases/tag/v0.10.1) - 2020-07-17
 ### Fixed
 - Support ARM 64 bit architecture (`aarch64`)
