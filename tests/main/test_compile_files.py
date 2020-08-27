@@ -44,6 +44,13 @@ def test_compile_single_file(foo_path):
         assert value in output[f"{foo_path.as_posix()}:Foo"]
 
 
+def test_compile_single_file_no_sequence(foo_path):
+    output = solcx.compile_files(foo_path)
+    assert f"{foo_path.as_posix()}:Foo" in output
+    for value in combined_json_values:
+        assert value in output[f"{foo_path.as_posix()}:Foo"]
+
+
 def test_compile_multiple_files(foo_path, bar_path, baz_path):
     output = solcx.compile_files([foo_path, bar_path, baz_path])
 
