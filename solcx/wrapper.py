@@ -32,7 +32,7 @@ def _to_string(key: str, value: Any) -> str:
 def solc_wrapper(
     solc_binary: Union[Path, str] = None,
     stdin: str = None,
-    source_files: List = None,
+    source_files: Union[List, Path, str] = None,
     import_remappings: Union[Dict, List, str] = None,
     success_return_code: int = None,
     **kwargs: Any,
@@ -46,8 +46,8 @@ def solc_wrapper(
         Location of the `solc` binary. If not given, the current default binary is used.
     stdin : str, optional
         Input to pass to `solc` via stdin
-    source_files : list, optional
-        Paths of source files to compile
+    source_files : list | Path | str, optional
+        Path, or list of paths, of sources to compile
     import_remappings : Dict | List | str,  optional
         Path remappings. May be given as a string or list of strings formatted as `"prefix=path"`
         or a dict of `{"prefix": "path"}`
@@ -91,7 +91,10 @@ def solc_wrapper(
         success_return_code = 1 if "help" in kwargs else 0
 
     if source_files is not None:
-        command.extend([_to_string("source_files", i) for i in source_files])
+        if isinstance(source_files, (str, Path)):
+            command.append(_to_string("source_files", source_files))
+        else:
+            command.extend([_to_string("source_files", i) for i in source_files])
 
     if import_remappings is not None:
         if isinstance(import_remappings, str):

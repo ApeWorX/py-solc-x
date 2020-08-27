@@ -129,7 +129,7 @@ def compile_source(
 
 
 def compile_files(
-    source_files: List,
+    source_files: Union[List, Path, str],
     output_values: List = None,
     import_remappings: Union[Dict, List, str] = None,
     base_path: Union[Path, str] = None,
@@ -157,8 +157,8 @@ def compile_files(
 
     Arguments
     ---------
-    source_files: List
-        List of paths of Solidity source files to be compiled.
+    source_files: List | Path | str
+        Path, or list of paths, of Solidity source files to be compiled.
     output_values : List, optional
         Compiler outputs to return. Valid options depend on the version of `solc`.
         If not given, all possible outputs for the active version are returned.
