@@ -12,8 +12,10 @@ from solcx.exceptions import SolcError, UnknownOption, UnknownValue
 def _get_solc_version(solc_binary: Union[Path, str]) -> Version:
     # private wrapper function to get `solc` version
     stdout_data = subprocess.check_output([solc_binary, "--version"], encoding="utf8")
-    version_str = re.findall(r"(?<=Version: ).*?(?=\+)", stdout_data)[0]
-    version_str = re.sub(r"\.0(?=[1-9])", ".", version_str)
+    try:
+        version_str = re.findall(r"\d+\.\d+\.\d+", stdout_data)[0]
+    except IndexError:
+        raise SolcError("Could not determine the solc binary version")
     return Version.coerce(version_str)
 
 
