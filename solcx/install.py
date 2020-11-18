@@ -615,7 +615,7 @@ def _install_solc_windows(
     temp_path = _get_temp_folder()
     content = _download_solc(download, show_progress)
 
-    if content.endswith("exe"):
+    if filename.endswith("exe"):
         with open(install_path, "wb") as fp:
             fp.write(content)
 
