@@ -614,10 +614,16 @@ def _install_solc_windows(
 
     temp_path = _get_temp_folder()
     content = _download_solc(download, show_progress)
-    with zipfile.ZipFile(BytesIO(content)) as zf:
-        zf.extractall(str(temp_path))
 
-    temp_path.rename(install_path)
+    if Path(filename).suffix == ".exe":
+        install_path.mkdir()
+        with open(install_path.joinpath("solc.exe"), "wb") as fp:
+            fp.write(content)
+
+    else:
+        with zipfile.ZipFile(BytesIO(content)) as zf:
+            zf.extractall(str(temp_path))
+            temp_path.rename(install_path)
 
 
 def _validate_installation(version: Version, solcx_binary_path: Union[Path, str, None]) -> None:
