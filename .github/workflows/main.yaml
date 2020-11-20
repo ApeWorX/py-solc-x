@@ -84,13 +84,8 @@ jobs:
         file: ./coverage.xml
         fail_ci_if_error: true
 
-
   py38:
-    runs-on: ${{ matrix.os }}
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [macos-latest, ubuntu-latest, windows-latest]
+    runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v1
@@ -105,6 +100,33 @@ jobs:
 
     - name: Run Tox
       run: tox -e py38
+
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v1
+      with:
+        file: ./coverage.xml
+        fail_ci_if_error: true
+
+  py39:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-latest, ubuntu-latest, windows-latest]
+
+    steps:
+    - uses: actions/checkout@v1
+
+    - name: Setup Python 3.9
+      uses: actions/setup-python@v1
+      with:
+        python-version: 3.9
+
+    - name: Install Tox
+      run: pip install tox wheel
+
+    - name: Run Tox
+      run: tox -e py39
 
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v1
