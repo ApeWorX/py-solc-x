@@ -615,7 +615,7 @@ def _install_solc_windows(
     temp_path = _get_temp_folder()
     content = _download_solc(download, show_progress)
 
-    if filename.suffix == ".exe":
+    if Path(filename).suffix == ".exe":
         install_path.mkdir()
         with open(install_path.joinpath("solc.exe"), "wb") as fp:
             fp.write(content)
