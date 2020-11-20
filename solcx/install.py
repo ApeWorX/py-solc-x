@@ -368,7 +368,12 @@ def get_compilable_solc_versions(headers: Optional[Dict] = None) -> List[Version
         raise ConnectionError(msg)
 
     for release in data.json():
-        version = Version.coerce(release["tag_name"].lstrip("v"))
+        try:
+            version = Version.coerce(release["tag_name"].lstrip("v"))
+        except ValueError:
+            # ignore non-standard releases (e.g. the 0.8.x preview)
+            continue
+
         asset = next((i for i in release["assets"] if re.match(pattern, i["name"])), False)
         if asset:
             version_list.append(version)
