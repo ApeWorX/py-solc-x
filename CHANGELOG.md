@@ -8,7 +8,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 This project was forked from `py-solc`. View the original changelog [here](https://github.com/ethereum/py-solc/blob/master/CHANGELOG).
 
 ## [Unreleased](https://github.com/iamdefinitelyahuman/py-solc-x)
-- improve `solc` version detection and raise correct error if it fails
+
+## [1.0.1](https://github.com/iamdefinitelyahuman/py-solc-x/releases/tag/v1.0.1) - 2020-11-20
+### Fixed
+- Improve `solc` version detection and raise correct error if it fails ([#110](https://github.com/iamdefinitelyahuman/py-solc-x/pull/110))
+- Correctly handle standalone Windows executables ([#112](https://github.com/iamdefinitelyahuman/py-solc-x/pull/112))
+- Correctly handle non-standard tagged versions from Github API ([#113](https://github.com/iamdefinitelyahuman/py-solc-x/pull/113))
 
 ## [1.0.0](https://github.com/iamdefinitelyahuman/py-solc-x/releases/tag/v1.0.0) - 2020-08-26
 ### Added
