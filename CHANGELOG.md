@@ -9,6 +9,10 @@ This project was forked from `py-solc`. View the original changelog [here](https
 
 ## [Unreleased](https://github.com/iamdefinitelyahuman/py-solc-x)
 
+## [1.0.2](https://github.com/iamdefinitelyahuman/py-solc-x/releases/tag/v1.0.2) - 2020-12-10
+### Fixed
+- Convert `Path` to `str` prior to calling `subprocess` ([#117](https://github.com/iamdefinitelyahuman/py-solc-x/pull/117))
+
 ## [1.0.1](https://github.com/iamdefinitelyahuman/py-solc-x/releases/tag/v1.0.1) - 2020-11-20
 ### Fixed
 - Improve `solc` version detection and raise correct error if it fails ([#110](https://github.com/iamdefinitelyahuman/py-solc-x/pull/110))
