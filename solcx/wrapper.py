@@ -11,7 +11,7 @@ from solcx.exceptions import SolcError, UnknownOption, UnknownValue
 
 def _get_solc_version(solc_binary: Union[Path, str]) -> Version:
     # private wrapper function to get `solc` version
-    stdout_data = subprocess.check_output([solc_binary, "--version"], encoding="utf8")
+    stdout_data = subprocess.check_output([str(solc_binary), "--version"], encoding="utf8")
     try:
         version_str = re.findall(r"\d+\.\d+\.\d+", stdout_data)[0]
     except IndexError:
@@ -87,7 +87,7 @@ def solc_wrapper(
         solc_binary = install.get_executable()
 
     solc_version = _get_solc_version(solc_binary)
-    command: List = [solc_binary]
+    command: List = [str(solc_binary)]
 
     if success_return_code is None:
         success_return_code = 1 if "help" in kwargs else 0
