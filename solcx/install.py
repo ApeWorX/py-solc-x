@@ -458,10 +458,11 @@ def install_solc(
         try:
             _validate_installation(version, solcx_binary_path)
         except SolcInstallationError as exc:
-            exc.args = (
-                f"{exc.args[0]} If this issue persists, you can try to compile from "
-                f"source code using `solcx.compile_solc('{version}')`.",
-            )
+            if os_name != "windows":
+                exc.args = (
+                    f"{exc.args[0]} If this issue persists, you can try to compile from "
+                    f"source code using `solcx.compile_solc('{version}')`.",
+                )
             raise exc
 
     return version

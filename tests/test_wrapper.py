@@ -17,7 +17,7 @@ class PopenPatch:
     def __call__(self, cmd, **kwargs):
         if cmd[1] == "--version":
             return self.proc(cmd, **kwargs)
-        assert cmd[0] == solcx.install.get_executable()
+        assert cmd[0] == str(solcx.install.get_executable())
         for i in self.args:
             assert i in cmd
         return self.proc(cmd, **kwargs)
