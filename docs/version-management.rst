@@ -29,14 +29,20 @@ Getting the Active Version
 
 Use the following methods to check the active ``solc`` version:
 
-.. py:function:: solcx.get_solc_version()
+.. py:function:: solcx.get_solc_version(with_commit_hash=False)
 
     Return the version of the current active ``solc`` binary, as a :py:class:`Version <semantic_version.Version>` object.
+
+    * ``with_commit_hash``: If ``True``, the returned version includes the commit hash
 
     .. code-block:: python
 
         >>> solcx.get_solc_version()
         Version('0.7.0')
+
+        >>> solcx.get_solc_version(True)
+        Version('0.7.0+commit.9e61f92b')
+
 
 .. py:function:: solcx.install.get_executable(version=None, solcx_binary_path=None)
 
