@@ -8,12 +8,15 @@ from solcx import wrapper
 from solcx.exceptions import ContractsNotFound, SolcError
 from solcx.install import get_executable
 
-# from solcx.wrapper import _get_solc_version, solc_wrapper
 
-
-def get_solc_version() -> Version:
+def get_solc_version(with_commit_hash: bool = False) -> Version:
     """
     Get the version of the active `solc` binary.
+
+    Arguments
+    ---------
+    with_commit_hash : bool, optional
+        If True, the commit hash is included within the version
 
     Returns
     -------
@@ -21,7 +24,7 @@ def get_solc_version() -> Version:
         solc version
     """
     solc_binary = get_executable()
-    return wrapper._get_solc_version(solc_binary)
+    return wrapper._get_solc_version(solc_binary, with_commit_hash)
 
 
 def compile_source(

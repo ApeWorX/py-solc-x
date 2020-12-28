@@ -32,3 +32,11 @@ def test_install_solc_version_pragma(pragmapatch):
     assert install_pragma("pragma solidity ^0.4.2 || >=0.5.4<0.7.0;") == Version("0.6.0")
     with pytest.raises(UnsupportedVersionError):
         install_pragma("pragma solidity ^0.7.1;")
+
+
+def test_get_solc_version():
+    version = solcx.get_solc_version()
+    version_with_hash = solcx.get_solc_version(with_commit_hash=True)
+
+    assert version != version_with_hash
+    assert version == version_with_hash.truncate()
