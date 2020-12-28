@@ -245,7 +245,7 @@ def _parse_compiler_output(stdoutdata: str) -> Dict:
     sources = output.get("sources", {})
 
     for path_str, data in contracts.items():
-        if "abi" in data:
+        if "abi" in data and isinstance(data["abi"], str):
             data["abi"] = json.loads(data["abi"])
         key = path_str.rsplit(":", maxsplit=1)[0]
         if "AST" in sources.get(key, {}):
