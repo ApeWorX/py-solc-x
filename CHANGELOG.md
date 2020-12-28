@@ -9,6 +9,13 @@ This project was forked from `py-solc`. View the original changelog [here](https
 
 ## [Unreleased](https://github.com/iamdefinitelyahuman/py-solc-x)
 
+## [1.1.0](https://github.com/iamdefinitelyahuman/py-solc-x/releases/tag/v1.1.0) - 2020-12-28
+### Added
+- Optional kwarg `with_commit_hash` in `solcx.get_solc_version` ([#120](https://github.com/iamdefinitelyahuman/py-solc-x/pull/120))
+
+### Fixed
+- Handle ABI format for Solidity 0.8.0 ([#119](https://github.com/iamdefinitelyahuman/py-solc-x/pull/119))
+
 ## [1.0.2](https://github.com/iamdefinitelyahuman/py-solc-x/releases/tag/v1.0.2) - 2020-12-10
 ### Fixed
 - Convert `Path` to `str` prior to calling `subprocess` ([#117](https://github.com/iamdefinitelyahuman/py-solc-x/pull/117))
