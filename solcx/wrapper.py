@@ -9,14 +9,19 @@ from solcx import install
 from solcx.exceptions import SolcError, UnknownOption, UnknownValue
 
 
-def _get_solc_version(solc_binary: Union[Path, str]) -> Version:
+def _get_solc_version(solc_binary: Union[Path, str], with_commit_hash: bool = False) -> Version:
     # private wrapper function to get `solc` version
     stdout_data = subprocess.check_output([str(solc_binary), "--version"], encoding="utf8")
     try:
-        version_str = re.findall(r"\d+\.\d+\.\d+", stdout_data)[0]
+        version_str = re.findall(r"\d+\.\d+\.\d+\+commit.\w+", stdout_data)[0]
     except IndexError:
         raise SolcError("Could not determine the solc binary version")
-    return Version.coerce(version_str)
+
+    version = Version.coerce(version_str)
+    if with_commit_hash:
+        return version
+    else:
+        return version.truncate()
 
 
 def _to_string(key: str, value: Any) -> str:
