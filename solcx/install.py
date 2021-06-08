@@ -181,7 +181,7 @@ def get_executable(
     if not version:
         if not _default_solc_binary:
             raise SolcNotInstalled(
-                "Solc is not installed. Call solcx.get_available_solc_versions()"
+                "Solc is not installed. Call solcx.get_installable_solc_versions()"
                 " to view for available versions and solcx.install_solc() to install."
             )
         return _default_solc_binary
