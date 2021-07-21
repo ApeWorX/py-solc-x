@@ -50,7 +50,6 @@ def test_help(popen):
         "version",
         "optimize",
         "gas",
-        "ast_json",
         "asm",
         "asm_json",
         "opcodes",
@@ -68,12 +67,13 @@ def test_boolean_kwargs(popen, foo_source, kwarg):
     solcx.wrapper.solc_wrapper(stdin=foo_source, **{kwarg: True})
 
 
-@pytest.mark.parametrize("kwarg,min_solc_minor", [("ast", 6), ("clone_bin", 5), ("formal", 5)])
-def test_removed_kwargs(popen, foo_source, kwarg, min_solc_minor):
-    solc_minor_version = solcx.get_solc_version().minor
-
+@pytest.mark.parametrize(
+    "kwarg,min_solc",
+    [("ast", "0.6.0"), ("clone_bin", "0.5.0"), ("formal", "0.5.0"), ("ast_json", "0.8.2")],
+)
+def test_removed_kwargs(popen, foo_source, kwarg, min_solc):
     popen.expect(kwarg)
-    if solc_minor_version >= min_solc_minor:
+    if solcx.get_solc_version() >= Version(min_solc):
         with pytest.raises(UnknownOption):
             solcx.wrapper.solc_wrapper(stdin=foo_source, **{kwarg: True})
     else:
