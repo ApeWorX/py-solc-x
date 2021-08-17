@@ -235,8 +235,8 @@ def compile_files(
     )
 
 
-def _get_combined_json_outputs() -> str:
-    help_str = wrapper.solc_wrapper(help=True)[0].split("\n")
+def _get_combined_json_outputs(solc_binary: Union[str, Path]) -> str:
+    help_str = wrapper.solc_wrapper(solc_binary=solc_binary, help=True)[0].split("\n")
     combined_json_args = next(i for i in help_str if i.startswith("  --combined-json"))
     return combined_json_args.split(" ")[-1]
 
@@ -267,13 +267,13 @@ def _compile_combined_json(
     **kwargs: Any,
 ) -> Dict:
 
-    if output_values is None:
-        combined_json = _get_combined_json_outputs()
-    else:
-        combined_json = ",".join(output_values)
-
     if solc_binary is None:
         solc_binary = get_executable(solc_version)
+
+    if output_values is None:
+        combined_json = _get_combined_json_outputs(solc_binary)
+    else:
+        combined_json = ",".join(output_values)
 
     if output_dir:
         output_dir = Path(output_dir)
