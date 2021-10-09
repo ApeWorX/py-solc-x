@@ -261,22 +261,22 @@ def _parse_compiler_output(stdoutdata: str) -> Dict:
 
 
 def _compile_combined_json(
-    output_values: Optional[List],
-    solc_binary: Union[str, Path, None],
-    solc_version: Optional[Version],
-    output_dir: Union[str, Path, None],
-    overwrite: Optional[bool],
-    allow_empty: Optional[bool],
+    output_values: Optional[List] = None,
+    solc_binary: Union[str, Path, None] = None,
+    solc_version: Optional[Version] = None,
+    output_dir: Union[str, Path, None] = None,
+    overwrite: Optional[bool] = False,
+    allow_empty: Optional[bool] = False,
     **kwargs: Any,
 ) -> Dict:
 
-    if output_values is None:
-        combined_json = _get_combined_json_outputs()
-    else:
-        combined_json = ",".join(output_values)
-
     if solc_binary is None:
         solc_binary = get_executable(solc_version)
+
+    if output_values is None:
+        combined_json = _get_combined_json_outputs(solc_binary)
+    else:
+        combined_json = ",".join(output_values)
 
     if output_dir:
         output_dir = Path(output_dir)
