@@ -4,7 +4,7 @@ from setuptools import find_packages, setup
 
 setup(
     name="py-solc-x",
-    version="1.1.0",  # don't change this manually, use bumpversion instead
+    version="1.1.1",  # don't change this manually, use bumpversion instead
     description="Python wrapper and version management tool for the solc Solidity compiler.",
     long_description_markdown_filename="README.md",
     author="Ben Hauser (forked from py-solc by Piper Merriam)",
