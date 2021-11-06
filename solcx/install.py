@@ -130,6 +130,12 @@ def import_installed_solc(solcx_binary_path: Union[Path, str] = None) -> List[Ve
         path_list = [_get_which_solc()]
     except (FileNotFoundError, subprocess.CalledProcessError):
         path_list = []
+        
+    # extend with solc-select directory
+    home_dir = os.path.expanduser("~")
+    solc_select_dir = f"{home_dir}/.solc-select"
+    solc_select_artifacts_dir = f"{solc_select_dir}/artifacts"
+    path_list.extend(Path(solc_select_artifacts_dir).glob("solc*"))
 
     # on OSX, also copy all versions of solc from cellar
     if _get_os_name() == "macosx":
@@ -436,6 +442,9 @@ def install_solc(
         if _check_for_installed_version(version, solcx_binary_path):
             path = get_solcx_install_folder(solcx_binary_path).joinpath(f"solc-v{version}")
             LOGGER.info(f"solc {version} already installed at: {path}")
+            return version
+
+        if version in import_installed_solc():
             return version
 
         data = requests.get(BINARY_DOWNLOAD_BASE.format(_get_os_name(), "list.json"))
