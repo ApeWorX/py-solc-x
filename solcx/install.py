@@ -143,6 +143,13 @@ def import_installed_solc(solcx_binary_path: Union[Path, str] = None) -> List[Ve
     imported_versions = []
     for path in path_list:
         try:
+            # we do not want to copy other solc wrappers, such as the one provided
+            # by e.g., solc-select
+            with path.open("rb") as f:
+                data = f.read(200)
+                if data.startswith(b"#!/usr/bin/") or b"solc_select" in data:
+                    continue
+
             version = wrapper._get_solc_version(path)
             assert version not in get_installed_solc_versions()
         except Exception:
