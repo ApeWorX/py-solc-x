@@ -131,6 +131,11 @@ def import_installed_solc(solcx_binary_path: Union[Path, str] = None) -> List[Ve
     except (FileNotFoundError, subprocess.CalledProcessError):
         path_list = []
 
+    # if solc-select is installed, try to import versions previously installed with it
+    solcselect_artifacts = Path("~").expanduser() / ".solc-select" / "artifacts"
+    if solcselect_artifacts.exists():
+        path_list.extend(solcselect_artifacts.glob("solc-*"))
+
     # on OSX, also copy all versions of solc from cellar
     if _get_os_name() == "macosx":
         path_list.extend(Path("/usr/local/Cellar").glob("solidity*/**/solc"))
