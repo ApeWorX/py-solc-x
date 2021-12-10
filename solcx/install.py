@@ -102,14 +102,13 @@ def get_solcx_install_folder(solcx_binary_path: Union[Path, str] = None) -> Path
         return path
 
 
-def _get_which_solc() -> Path:
+def _get_which_solc() -> Optional[Path]:
     # get the path for the currently installed `solc` version, if any
-    if _get_os_name() == "windows":
-        response = subprocess.check_output(["where.exe", "solc"], encoding="utf8").strip()
+    solc_path = shutil.which("solc")
+    if solc_path is None:
+        return None
     else:
-        response = subprocess.check_output(["which", "solc"], encoding="utf8").strip()
-
-    return Path(response)
+        return Path(solc_path)
 
 
 def import_installed_solc(solcx_binary_path: Union[Path, str] = None) -> List[Version]:
@@ -126,10 +125,10 @@ def import_installed_solc(solcx_binary_path: Union[Path, str] = None) -> List[Ve
     List
         Imported solc versions
     """
-    try:
-        path_list = [_get_which_solc()]
-    except (FileNotFoundError, subprocess.CalledProcessError):
-        path_list = []
+    path_list = []
+    solc_in_path = _get_which_solc()
+    if solc_in_path:
+        path_list.append(solc_in_path)
 
     # on OSX, also copy all versions of solc from cellar
     if _get_os_name() == "macosx":
