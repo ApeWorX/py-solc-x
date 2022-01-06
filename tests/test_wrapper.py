@@ -40,7 +40,10 @@ def setup(all_versions):
 
 def test_help(popen):
     popen.expect("help")
-    solcx.wrapper.solc_wrapper(help=True, success_return_code=1)
+    if solcx.get_solc_version() < Version("0.8.10"):
+        solcx.wrapper.solc_wrapper(help=True, success_return_code=1)
+    else:
+        solcx.wrapper.solc_wrapper(help=True, success_return_code=0)
 
 
 @pytest.mark.parametrize(
