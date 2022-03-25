@@ -624,7 +624,7 @@ def _install_solc_windows(
     else:
         with zipfile.ZipFile(BytesIO(content)) as zf:
             zf.extractall(str(temp_path))
-            temp_path.rename(install_path)
+            shutil.move(temp_path, install_path)
 
 
 def _validate_installation(version: Version, solcx_binary_path: Union[Path, str, None]) -> None:
