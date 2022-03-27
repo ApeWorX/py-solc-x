@@ -223,7 +223,7 @@ def set_solc_version(
 
 def _select_pragma_version(pragma_string: str, version_list: List[Version]) -> Optional[Version]:
     comparator_set_range = pragma_string.replace(" ", "").split("||")
-    comparator_regex = re.compile(r"(([<>]?=?|\^)\d+\.\d+\.\d+)+")
+    comparator_regex = re.compile(r"(([<>]?=?|\^)\d+\.\d+\.\d+)")
     version = None
 
     for comparator_set in comparator_set_range:
