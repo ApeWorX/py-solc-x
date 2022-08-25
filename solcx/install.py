@@ -138,7 +138,7 @@ def import_installed_solc(solcx_binary_path: Union[Path, str] = None) -> List[Ve
     imported_versions = []
     for path in path_list:
         try:
-            version = wrapper._get_solc_version(path)
+            version = wrapper.get_solc_version(path)
             assert version not in get_installed_solc_versions()
         except Exception:
             continue
@@ -151,7 +151,7 @@ def import_installed_solc(solcx_binary_path: Union[Path, str] = None) -> List[Ve
         shutil.copy(path, copy_path)
         try:
             # confirm that solc still works after being copied
-            assert version == wrapper._get_solc_version(copy_path)
+            assert version == wrapper.get_solc_version(copy_path)
             imported_versions.append(version)
         except Exception:
             _unlink_solc(copy_path)
@@ -630,7 +630,7 @@ def _install_solc_windows(
 def _validate_installation(version: Version, solcx_binary_path: Union[Path, str, None]) -> None:
     binary_path = get_executable(version, solcx_binary_path)
     try:
-        installed_version = wrapper._get_solc_version(binary_path)
+        installed_version = wrapper.get_solc_version(binary_path)
     except Exception:
         _unlink_solc(binary_path)
         raise SolcInstallationError(

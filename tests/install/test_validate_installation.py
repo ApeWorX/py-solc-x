@@ -10,7 +10,7 @@ from solcx.exceptions import SolcInstallationError, UnexpectedVersionError, Unex
 
 
 def test_validate_installation_wrong_version(monkeypatch, install_mock, install_path):
-    monkeypatch.setattr("solcx.wrapper._get_solc_version", lambda k: Version("0.0.0"))
+    monkeypatch.setattr("solcx.wrapper.get_solc_version", lambda k: Version("0.0.0"))
 
     with pytest.raises(UnexpectedVersionError):
         solcx.install_solc()
@@ -19,8 +19,8 @@ def test_validate_installation_wrong_version(monkeypatch, install_mock, install_
 
 
 def test_validate_installation_nightly(monkeypatch, install_mock, solc_binary, install_path):
-    version = solcx.wrapper._get_solc_version(solc_binary)
-    monkeypatch.setattr("solcx.wrapper._get_solc_version", lambda k: Version(f"{version}-nightly"))
+    version = solcx.wrapper.get_solc_version(solc_binary)
+    monkeypatch.setattr("solcx.wrapper.get_solc_version", lambda k: Version(f"{version}-nightly"))
 
     with pytest.warns(UnexpectedVersionWarning):
         solcx.install_solc()

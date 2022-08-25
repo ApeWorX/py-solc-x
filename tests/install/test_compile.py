@@ -22,7 +22,7 @@ def test_compile_already_installed():
 
 @pytest.mark.skipif("sys.platform == 'win32'")
 def test_compile(compile_mock, solc_binary, cwd):
-    version = solcx.wrapper._get_solc_version(solc_binary)
+    version = solcx.wrapper.get_solc_version(solc_binary)
     solcx.compile_solc(version)
 
     assert os.getcwd() == cwd
@@ -31,7 +31,7 @@ def test_compile(compile_mock, solc_binary, cwd):
 
 @pytest.mark.skipif("sys.platform == 'win32'")
 def test_compile_install_deps_fails(compile_mock, solc_binary, cwd):
-    version = solcx.wrapper._get_solc_version(solc_binary)
+    version = solcx.wrapper.get_solc_version(solc_binary)
     compile_mock.raise_on("sh")
     solcx.compile_solc(version)
 

@@ -12,8 +12,7 @@ from solcx.exceptions import SolcError, UnknownOption, UnknownValue
 VERSION_REGEX = r"(\d+\.\d+\.\d+)(?:-nightly.\d+.\d+.\d+|)(\+commit.\w+)"
 
 
-def _get_solc_version(solc_binary: Union[Path, str], with_commit_hash: bool = False) -> Version:
-    # private wrapper function to get `solc` version
+def get_solc_version(solc_binary: Union[Path, str], with_commit_hash: bool = False) -> Version:
     stdout_data = subprocess.check_output([str(solc_binary), "--version"], encoding="utf8")
     try:
         match = next(re.finditer(VERSION_REGEX, stdout_data))
@@ -95,7 +94,7 @@ def solc_wrapper(
     else:
         solc_binary = install.get_executable()
 
-    solc_version = _get_solc_version(solc_binary)
+    solc_version = get_solc_version(solc_binary)
     command: List = [str(solc_binary)]
 
     if success_return_code is None:

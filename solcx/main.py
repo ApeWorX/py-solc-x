@@ -24,7 +24,7 @@ def get_solc_version(with_commit_hash: bool = False) -> Version:
         solc version
     """
     solc_binary = get_executable()
-    return wrapper._get_solc_version(solc_binary, with_commit_hash)
+    return wrapper.get_solc_version(solc_binary, with_commit_hash)
 
 
 def compile_source(
