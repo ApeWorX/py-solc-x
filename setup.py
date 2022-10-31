@@ -2,17 +2,20 @@
 
 from setuptools import find_packages, setup
 
+with open('README.md', encoding="utf-8") as f:
+    long_description = f.read()
+
 setup(
     name="py-solc-x",
     version="1.1.1",  # don't change this manually, use bumpversion instead
     description="Python wrapper and version management tool for the solc Solidity compiler.",
-    long_description_markdown_filename="README.md",
+    long_description=long_description,
+    long_description_content_type="text/markdown",
     author="Ben Hauser (forked from py-solc by Piper Merriam)",
     author_email="ben@hauser.id",
     url="https://github.com/iamdefinitelyahuman/py-solc-x",
     include_package_data=True,
     py_modules=["solcx"],
-    setup_requires=["setuptools-markdown"],
     python_requires=">=3.6, <4",
     install_requires=["requests>=2.19.0,<3", "semantic_version>=2.8.1,<3"],
     license="MIT",
