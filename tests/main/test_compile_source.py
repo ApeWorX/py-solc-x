@@ -108,4 +108,4 @@ def test_solc_version(wrapper_mock, all_versions, foo_source):
 
 def test_value_kwargs(compile_combined_json_mock, foo_source):
     compile_combined_json_mock.expect(random_kwarg="random-value")
-    solcx.compile_files(foo_source, output_values=["abi"], random_kwarg="random-value")
+    solcx.compile_source(foo_source, output_values=["abi"], random_kwarg="random-value")
