@@ -47,6 +47,7 @@ def compile_source(
     solc_binary: Union[str, Path] = None,
     solc_version: Version = None,
     allow_empty: bool = False,
+    **kwargs: Any,
 ) -> Dict:
     """
     Compile a Solidity contract.
@@ -128,6 +129,7 @@ def compile_source(
         no_optimize_yul=no_optimize_yul,
         yul_optimizations=yul_optimizations,
         allow_empty=allow_empty,
+        **kwargs,
     )
 
 
@@ -151,6 +153,7 @@ def compile_files(
     solc_binary: Union[str, Path] = None,
     solc_version: Version = None,
     allow_empty: bool = False,
+    **kwargs: Any,
 ) -> Dict:
     """
     Compile one or more Solidity source files.
@@ -232,6 +235,7 @@ def compile_files(
         no_optimize_yul=no_optimize_yul,
         yul_optimizations=yul_optimizations,
         allow_empty=allow_empty,
+        **kwargs,
     )
 
 
