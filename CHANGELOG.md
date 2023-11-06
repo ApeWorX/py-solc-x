@@ -9,6 +9,10 @@ This project was forked from `py-solc`. View the original changelog [here](https
 
 ## [Unreleased](https://github.com/iamdefinitelyahuman/py-solc-x)
 
+## [1.1.1](https://github.com/iamdefinitelyahuman/py-solc-x/releases/tag/v1.1.1) - 2021-10-12
+### Fixed
+- Invalid default compiler outputs ([#127](https://github.com/iamdefinitelyahuman/py-solc-x/pull/127))
+
 ## [1.1.0](https://github.com/iamdefinitelyahuman/py-solc-x/releases/tag/v1.1.0) - 2020-12-28
 ### Added
 - Optional kwarg `with_commit_hash` in `solcx.get_solc_version` ([#120](https://github.com/iamdefinitelyahuman/py-solc-x/pull/120))
