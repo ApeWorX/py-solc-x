@@ -103,7 +103,10 @@ def solc_wrapper(
     command: List = [str(solc_binary)]
 
     if success_return_code is None:
-        success_return_code = 1 if "help" in kwargs else 0
+        if "help" in kwargs and solc_version < Version("0.8.10"):
+            success_return_code = 1
+        else:
+            success_return_code = 0
 
     if source_files is not None:
         if isinstance(source_files, (str, Path)):
