@@ -228,6 +228,17 @@ def set_solc_version(
 
 
 def select_pragma_version(pragma_string: str, version_list: List[Version]) -> Optional[Version]:
+    """
+    Get a matching version from the given pragma string and a version list.
+
+    Args:
+        pragma_string (str): A pragma str.
+        version_list (List[Version]): A list of valid versions.
+
+    Returns:
+        Optional[Version]: A selected version from the given list.
+    """
+
     comparator_set_range = pragma_string.replace(" ", "").split("||")
     comparator_regex = re.compile(r"(([<>]?=?|\^)\d+\.\d+\.\d+)")
     version = None
