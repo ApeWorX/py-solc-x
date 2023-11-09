@@ -122,3 +122,8 @@ def test_solc_version(wrapper_mock, all_versions, foo_path):
     solc_binary = solcx.install.get_executable(all_versions)
     wrapper_mock.expect(solc_binary=solc_binary)
     solcx.compile_files([foo_path], ["abi"], solc_version=all_versions, allow_empty=True)
+
+
+def test_value_kwargs(compile_combined_json_mock, foo_path):
+    compile_combined_json_mock.expect(random_kwarg="random-value")
+    solcx.compile_files(foo_path, output_values=["abi"], random_kwarg="random-value")
