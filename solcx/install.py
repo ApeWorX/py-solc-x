@@ -343,12 +343,17 @@ def get_installable_solc_versions() -> List[Version]:
     return version_list
 
 
-def get_compilable_solc_versions(headers: Optional[Dict] = None) -> List[Version]:
+def get_compilable_solc_versions(
+    headers: Optional[Dict] = None, rate_limit_wait_time: float = 3.0
+) -> List[Version]:
     """
     Return a list of all ``solc`` versions that can be compiled from source by py-solc-x.
 
     Args:
       headers (Optional[Dict]): Headers to include in the request to Github.
+      rate_limit_wait_time (float): A value to use when waiting for rate-limiting.
+        Defaults to 3.0 but will increment to the value plus it's half for the
+        subsequent call.
 
     Returns:
       List: List of Versions objects of installable `solc` versions.
@@ -375,6 +380,14 @@ def get_compilable_solc_versions(headers: Optional[Dict] = None) -> List[Version
                 " it as the environment variable `GITHUB_TOKEN`:\n"
                 "https://github.blog/2013-05-16-personal-api-tokens/"
             )
+            LOGGER.warning(msg)
+
+            # Wait and retry
+            time.sleep(rate_limit_wait_time)
+            return get_compilable_solc_versions(
+                headers, rate_limit_wait_time=rate_limit_wait_time + (rate_limit_wait_time / 2)
+            )
+
         raise ConnectionError(msg)
 
     for release in data.json():
@@ -678,7 +691,7 @@ def _validate_installation(version: Version, solcx_binary_path: Union[Path, str,
         raise UnexpectedVersionError(
             f"Attempted to install solc v{version}, but got solc v{installed_version}"
         )
-    if installed_version != version.base_version:
+    if Version(installed_version).base_version != version.base_version:
         # If it does have the nightly suffix, then only warn.
         warnings.warn(f"Installed solc version is v{installed_version}", UnexpectedVersionWarning)
 
