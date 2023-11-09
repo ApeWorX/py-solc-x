@@ -685,13 +685,17 @@ def _validate_installation(version: Version, solcx_binary_path: Union[Path, str,
         raise SolcInstallationError(
             "Downloaded binary would not execute, or returned unexpected output."
         )
-    if Version(installed_version.replace("-nightly", "")).base_version != version.base_version:
+
+    installed_version_clean = Version(
+        Version(installed_version.replace("-nightly", "")).base_version
+    )
+    if installed_version_clean.base_version != version.base_version:
         # Without the nightly suffix, it should be the same!
         _unlink_solc(binary_path)
         raise UnexpectedVersionError(
             f"Attempted to install solc v{version}, but got solc v{installed_version}"
         )
-    if Version(installed_version).base_version != version.base_version:
+    if installed_version_clean not in (version.base_version, f"{version}"):
         # If it does have the nightly suffix, then only warn.
         warnings.warn(f"Installed solc version is v{installed_version}", UnexpectedVersionWarning)
 
