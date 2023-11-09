@@ -227,7 +227,7 @@ def set_solc_version(
         LOGGER.info(f"Using solc version {version}")
 
 
-def _select_pragma_version(pragma_string: str, version_list: List[Version]) -> Optional[Version]:
+def select_pragma_version(pragma_string: str, version_list: List[Version]) -> Optional[Version]:
     comparator_set_range = pragma_string.replace(" ", "").split("||")
     comparator_regex = re.compile(r"(([<>]?=?|\^)\d+\.\d+\.\d+)")
     version = None
@@ -276,7 +276,7 @@ def set_solc_version_pragma(
       Version: The new active `solc` version.
     """
     installed_versions = get_installed_solc_versions()
-    if not (version := _select_pragma_version(pragma_string, installed_versions)):
+    if not (version := select_pragma_version(pragma_string, installed_versions)):
         raise SolcNotInstalled(
             f"No compatible solc version installed."
             f" Use solcx.install_solc_version_pragma('{pragma_string}') to install."
@@ -316,7 +316,7 @@ def install_solc_pragma(
     """
 
     installed_versions = get_installable_solc_versions()
-    if version := _select_pragma_version(pragma_string, installed_versions):
+    if version := select_pragma_version(pragma_string, installed_versions):
         install_solc(version, show_progress=show_progress, solcx_binary_path=solcx_binary_path)
     else:
         raise UnsupportedVersionError(
