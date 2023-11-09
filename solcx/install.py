@@ -11,6 +11,7 @@ import subprocess
 import sys
 import tarfile
 import tempfile
+import time
 import warnings
 import zipfile
 from base64 import b64encode
@@ -588,7 +589,7 @@ def _get_temp_folder() -> Path:
     return path
 
 
-def _download_solc(url: str, show_progress: bool) -> bytes:
+def _download_solc(url: str, show_progress: bool, rate_limit_wait_time: int = 3) -> bytes:
     LOGGER.info(f"Downloading from {url}")
     response = requests.get(url, stream=show_progress)
     if response.status_code == 404:
@@ -596,7 +597,14 @@ def _download_solc(url: str, show_progress: bool) -> bytes:
             "404 error when attempting to download from {} - are you sure this"
             " version of solidity is available?".format(url)
         )
-    if response.status_code != 200:
+
+    elif response.status_code == 403 and "API rate limit exceeded" in response.text:
+        # Handle GitHub API rate limiting.
+        time_to_wait = rate_limit_wait_time or 1  # Prevent accidents
+        time.sleep(time_to_wait)
+        return _download_solc(url, show_progress, rate_limit_wait_time + (rate_limit_wait_time / 2))
+
+    elif response.status_code != 200:
         raise DownloadError(
             f"Received status code {response.status_code} when attempting to download from {url}"
         )
