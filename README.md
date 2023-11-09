@@ -8,14 +8,13 @@ Forked from [`py-solc`](https://github.com/ethereum/py-solc).
 
 ## Features
 
-* Full support for Solidity `>=0.4.11`
-* Install Solidity on Linux, OSX and Windows
-* Compile Solidity from source on Linux and OSX
+- Full support for Solidity `>=0.4.11`
+- Install Solidity on Linux, OSX and Windows
+- Compile Solidity from source on Linux and OSX
 
 ## Dependencies
 
 Py-solc-x allows the use of multiple versions of solc, and can install or compile them as needed. If you wish to compile from source you must first insall the required [solc dependencies](https://solidity.readthedocs.io/en/latest/installing-solidity.html#building-from-source).
-
 
 ## Installation
 
@@ -39,7 +38,7 @@ Documentation is hosted at [Read the Docs](https://solcx.readthedocs.io/en/lates
 
 ## Testing
 
-Py-solc-x is tested on Linux, OSX and Windows with solc versions ``>=0.4.11``.
+Py-solc-x is tested on Linux, OSX and Windows with solc versions `>=0.4.11`.
 
 To run the test suite:
 

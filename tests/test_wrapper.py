@@ -1,9 +1,8 @@
-#!/usr/bin/python3
-
 import subprocess
+from typing import Mapping, cast
 
 import pytest
-from semantic_version import Version
+from packaging.version import Version
 
 import solcx
 from solcx.exceptions import UnknownOption, UnknownValue
@@ -28,9 +27,9 @@ class PopenPatch:
 
 @pytest.fixture
 def popen(monkeypatch):
-    p = PopenPatch()
-    monkeypatch.setattr("subprocess.Popen", p)
-    yield p
+    patch = PopenPatch()
+    monkeypatch.setattr("subprocess.Popen", patch)
+    yield patch
 
 
 @pytest.fixture(autouse=True)
@@ -40,10 +39,7 @@ def setup(all_versions):
 
 def test_help(popen):
     popen.expect("help")
-    if solcx.get_solc_version() < Version("0.8.10"):
-        solcx.wrapper.solc_wrapper(help=True, success_return_code=1)
-    else:
-        solcx.wrapper.solc_wrapper(help=True, success_return_code=0)
+    solcx.wrapper.solc_wrapper(help=True)
 
 
 @pytest.mark.parametrize(
@@ -67,7 +63,7 @@ def test_help(popen):
 )
 def test_boolean_kwargs(popen, foo_source, kwarg):
     popen.expect(kwarg)
-    solcx.wrapper.solc_wrapper(stdin=foo_source, **{kwarg: True})
+    solcx.wrapper.solc_wrapper(stdin=foo_source, **cast(Mapping, {kwarg: True}))
 
 
 @pytest.mark.parametrize(
@@ -76,11 +72,13 @@ def test_boolean_kwargs(popen, foo_source, kwarg):
 )
 def test_removed_kwargs(popen, foo_source, kwarg, min_solc):
     popen.expect(kwarg)
-    if solcx.get_solc_version() >= Version(min_solc):
+    data = cast(Mapping, {kwarg: True})
+    version = solcx.get_solc_version()
+    if version >= Version(min_solc):
         with pytest.raises(UnknownOption):
-            solcx.wrapper.solc_wrapper(stdin=foo_source, **{kwarg: True})
+            solcx.wrapper.solc_wrapper(stdin=foo_source, **data)
     else:
-        solcx.wrapper.solc_wrapper(stdin=foo_source, **{kwarg: True})
+        solcx.wrapper.solc_wrapper(stdin=foo_source, **data)
 
 
 def test_unknown_value(foo_source, all_versions):
@@ -101,4 +99,5 @@ def test_unknown_value(foo_source, all_versions):
 )
 def test_value_kwargs(popen, foo_source, kwarg, value):
     popen.expect(kwarg)
-    solcx.wrapper.solc_wrapper(stdin=foo_source, **{kwarg: value})
+    data = cast(Mapping, {kwarg: value})
+    solcx.wrapper.solc_wrapper(stdin=foo_source, **data)

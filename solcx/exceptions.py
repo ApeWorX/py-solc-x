@@ -1,4 +1,4 @@
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 
 class SolcError(Exception):
@@ -6,13 +6,13 @@ class SolcError(Exception):
 
     def __init__(
         self,
-        message: str = None,
-        command: List = None,
-        return_code: int = None,
-        stdin_data: str = None,
-        stdout_data: str = None,
-        stderr_data: str = None,
-        error_dict: Dict = None,
+        message: Optional[str] = None,
+        command: Optional[List[str]] = None,
+        return_code: Optional[int] = None,
+        stdin_data: Optional[str] = None,
+        stdout_data: Optional[str] = None,
+        stderr_data: Optional[str] = None,
+        error_dict: Optional[Dict] = None,
     ) -> None:
         if message is not None:
             self.message = message

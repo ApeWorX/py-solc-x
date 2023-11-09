@@ -1,12 +1,13 @@
 #!/usr/bin/python3
 
 import pytest
+from packaging.version import Version
 from requests import ConnectionError
-from semantic_version import Version
 
 import solcx
 
 _installed: dict = {}
+VERSIONS = []
 
 
 def pytest_addoption(parser):

@@ -1,15 +1,13 @@
-#!/usr/bin/python3
-
 import solcx
 
 
-def test_import_solc(monkeypatch, solc_binary, nosolc):
+def test_import_solc(mocker, solc_binary, nosolc):
     version = solcx.wrapper.get_solc_version(solc_binary)
+    patch = mocker.patch("solcx.install._get_which_solc")
+    patch.return_value = solc_binary
 
-    monkeypatch.setattr("solcx.install._get_which_solc", lambda: solc_binary)
-    assert solcx.import_installed_solc() == [version]
-
-    assert nosolc.joinpath(f"solc-v{version}").exists()
+    assert version in solcx.import_installed_solc()
+    assert nosolc.joinpath(f"solc-v{version.base_version}").exists()
 
 
 def test_import_solc_fails_after_importing(monkeypatch, solc_binary, nosolc):

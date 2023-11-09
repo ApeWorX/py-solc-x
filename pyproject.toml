@@ -1,20 +1,39 @@
+[build-system]
+requires = ["setuptools>=51.1.1", "wheel", "setuptools_scm[toml]>=5.0"]
+
+[tool.mypy]
+exclude = "build/"
+check_untyped_defs = true
+
+[tool.setuptools_scm]
+write_to = "solcx/version.py"
+
+# NOTE: you have to use single-quoted strings in TOML for regular expressions.
+# It's the equivalent of r-strings in Python.  Multiline strings are treated as
+# verbose regular expressions by Black.  Use [ ] to denote a significant space
+# character.
+
 [tool.black]
 line-length = 100
-target-version = ['py36', 'py37', 'py38']
+target-version = ['py38', 'py39', 'py310', 'py311']
 include = '\.pyi?$'
-exclude = '''
-/(
-    \.eggs
-  | \.git
-  | \.hg
-  | \.mypy_cache
-  | \.tox
-  | \.venv
-  | _build
-  | buck-out
-  | build
-  | dist
-  | env
-  | venv
-)/
-'''
+
+[tool.pytest.ini_options]
+addopts = """
+    -p no:ape_test
+    --cov-branch
+    --cov-report term
+    --cov-report html
+    --cov-report xml
+    --cov=ape_solidity
+"""
+python_files = "test_*.py"
+testpaths = "tests"
+markers = "fuzzing: Run Hypothesis fuzz test suite"
+
+[tool.isort]
+line_length = 100
+force_grid_wrap = 0
+include_trailing_comma = true
+multi_line_output = 3
+use_parentheses = true
