@@ -589,7 +589,7 @@ def _get_temp_folder() -> Path:
     return path
 
 
-def _download_solc(url: str, show_progress: bool, rate_limit_wait_time: int = 3) -> bytes:
+def _download_solc(url: str, show_progress: bool, rate_limit_wait_time: float = 3.0) -> bytes:
     LOGGER.info(f"Downloading from {url}")
     response = requests.get(url, stream=show_progress)
     if response.status_code == 404:
