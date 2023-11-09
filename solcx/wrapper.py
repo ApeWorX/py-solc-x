@@ -62,7 +62,7 @@ def solc_wrapper(
       source_files (Optional[Union[List, Path, str]]): Path, or list of
         paths, of sources to compile
       import_remappings (Optional[Union[Dict, List, str]]): Path remappings.
-        May be given as a string or list of strings formatted as ``"prefix=path"``
+        May be given as a string or list of strings, formatted as ``"prefix=path"``
         or a dict of ``{"prefix": "path"}``.
       success_return_code (Optional[int]): Expected exit code.
         Raises :class:`~solcx.exceptions.SolcError`` if the process returns a
