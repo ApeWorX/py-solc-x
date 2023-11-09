@@ -5,7 +5,7 @@ import sys
 from pathlib import Path
 
 import pytest
-from semantic_version import Version
+from packaging.version import Version
 
 import solcx
 from solcx.install import _download_solc
@@ -21,14 +21,18 @@ def solc_binary():
 
 
 @pytest.fixture
-def nosolc(tmp_path, monkeypatch):
+def nosolc(tmp_path, mocker):
     """
     Monkeypatch the install folder, so tests run with no versions of solc installed.
 
     Yields the temporary install folder.
     """
-    monkeypatch.setattr("solcx.install.get_solcx_install_folder", lambda *args: tmp_path)
-    monkeypatch.setattr("solcx.install._default_solc_binary", None)
+    install_patch = mocker.patch("solcx.install.get_solcx_install_folder")
+    install_patch.return_value = tmp_path
+
+    bin_patch = mocker.patch("solcx.install.get_default_solc_binary")
+    bin_patch.return_value = None
+
     yield tmp_path
 
 
@@ -44,7 +48,7 @@ def install_path(solc_binary, nosolc):
 
 
 @pytest.fixture
-def install_mock(monkeypatch, install_path, solc_binary):
+def install_mock(mocker, install_path, solc_binary):
     """
     Monkeypatches the install process by copying `solc_binary` to `install_path`.
     """
@@ -55,12 +59,14 @@ def install_mock(monkeypatch, install_path, solc_binary):
         else:
             shutil.copy(solc_binary, install_path)
 
-    monkeypatch.setattr("solcx.install._install_solc_unix", _mock)
-    monkeypatch.setattr("solcx.install._install_solc_windows", _mock)
+    install_patch = mocker.patch("solcx.install._install_solc_unix")
+    install_patch.side_effect = _mock
+
+    windows_patch = mocker.patch("solcx.install._install_solc_windows")
+    windows_patch.side_effect = _mock
 
 
 class CompileMock:
-
     tarfile = None
 
     def __init__(self, solc_binary):

@@ -31,6 +31,8 @@ pip-log.txt
 .tox
 coverage.xml
 nosetests.xml
+.hypothesis/
+.coverage.*
 
 # Translations
 *.mo
@@ -62,7 +64,16 @@ docs/_build
 # npm
 node_modules
 
+# setuptools-scm
+version.py
+
+# Ape stuff
+.build/
+
 # other
 .vscode
 .idea
 .mypy_cache/
+**/.DS_Store
+*.swp
+*.swo

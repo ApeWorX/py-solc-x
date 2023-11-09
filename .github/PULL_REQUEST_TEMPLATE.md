@@ -1,6 +1,8 @@
 ### What I did
 
-Related issue: #
+<!-- The `fixes:` field denotes an issue that will be marked resolved by merging this PR -->
+
+fixes: #
 
 ### How I did it
 
@@ -8,7 +10,7 @@ Related issue: #
 
 ### Checklist
 
-- [ ] I have confirmed that my PR passes all linting checks
-- [ ] I have included test cases
-- [ ] I have updated the documentation (README.md)
-- [ ] I have added an entry to the changelog
+- [ ] Passes all linting checks (pre-commit and CI jobs)
+- [ ] New test cases have been added and are passing
+- [ ] Documentation has been updated
+- [ ] PR title follows [Conventional Commit](https://www.conventionalcommits.org/en/v1.0.0/) standard (will be automatically included in the changelog)
