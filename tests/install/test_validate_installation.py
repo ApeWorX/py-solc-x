@@ -1,9 +1,23 @@
 import sys
+import warnings
 
 import pytest
 
 import solcx
 from solcx.exceptions import SolcInstallationError, UnexpectedVersionError, UnexpectedVersionWarning
+
+
+def test_validate_installation(mocker, install_mock, solc_binary, install_path):
+    version = solcx.wrapper.get_solc_version(solc_binary)
+    version_str_patch = mocker.patch("solcx.wrapper.get_version_str_from_solc_binary")
+    version_str_patch.return_value = f"{version}"
+
+    # This should not warn!
+    with warnings.catch_warnings():
+        warnings.simplefilter("error")
+        solcx.install_solc()
+
+    assert install_path.exists()
 
 
 def test_validate_installation_wrong_version(mocker, install_mock, install_path):

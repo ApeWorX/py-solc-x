@@ -709,7 +709,7 @@ def _validate_installation(version: Version, solcx_binary_path: Union[Path, str,
         raise UnexpectedVersionError(
             f"Attempted to install solc v{version}, but got solc v{installed_version}"
         )
-    if installed_version_clean not in (version.base_version, f"{version}"):
+    if installed_version not in (version.base_version, f"{version}"):
         # If it does have the nightly suffix, then only warn.
         warnings.warn(
             f"Installed solc version is v{installed_version}, expecting v{version.base_version}",
