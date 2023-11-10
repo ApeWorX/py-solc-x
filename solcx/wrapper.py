@@ -12,11 +12,6 @@ from solcx.exceptions import SolcError, UnknownOption, UnknownValue
 VERSION_REGEX = r"(\d+\.\d+\.\d+)(?:-nightly.\d+.\d+.\d+|)(\+commit.\w+)"
 
 
-def _get_solc_version(solc_binary: Union[Path, str], with_commit_hash: bool = False) -> Version:
-    # TODO: Remove around 1.2.0. Was private, kept to prevent accidentally breaking downstream.
-    return get_solc_version(solc_binary, with_commit_hash=with_commit_hash)
-
-
 def get_version_str_from_solc_binary(solc_binary: Union[Path, str]) -> str:
     stdout_data = subprocess.check_output([str(solc_binary), "--version"], encoding="utf8")
     if not (match := next(re.finditer(VERSION_REGEX, stdout_data), None)):
