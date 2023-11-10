@@ -557,24 +557,25 @@ def compile_solc(
         with tarfile.open(fileobj=BytesIO(content)) as tar:
             tar.extractall(temp_path)
 
-        temp_path = temp_path.joinpath(f"solidity_{solc_version.base_version}")
+        temp_path = temp_path / f"solidity_{solc_version.base_version}"
 
-        try:
-            LOGGER.info("Running dependency installation script `install_deps.sh`...")
-            subprocess.check_call(
-                ["sh", temp_path.joinpath("scripts/install_deps.sh")], stderr=subprocess.DEVNULL
-            )
-        except subprocess.CalledProcessError as exc:
-            LOGGER.warning(exc, exc_info=True)
+        LOGGER.info("Running dependency installation script `install_deps.sh`...")
+        install_script = temp_path / "scripts" / "install_deps.sh"
+        if install_script.is_file():
+            try:
+                subprocess.check_call(["sh", install_script], stderr=subprocess.DEVNULL)
+            except subprocess.CalledProcessError as exc:
+                LOGGER.warning(exc, exc_info=True)
 
         original_path = os.getcwd()
-        temp_path.joinpath("build").mkdir(exist_ok=True)
-        os.chdir(str(temp_path.joinpath("build").resolve()))
+        build_path = temp_path / "build"
+        build_path.mkdir(parents=True, exist_ok=True)
+        os.chdir(str(build_path.resolve()))
+
         try:
             for cmd in (["cmake", ".."], ["make"]):
                 LOGGER.info(f"Running `{cmd[0]}`...")
                 subprocess.check_call(cmd, stderr=subprocess.DEVNULL)
-            temp_path.joinpath("build/solc/solc").rename(install_path)
 
         except subprocess.CalledProcessError as exc:
             err_msg = (
@@ -592,6 +593,8 @@ def compile_solc(
         finally:
             os.chdir(original_path)
 
+        solc_path = build_path / "solc" / "solc"
+        solc_path.rename(install_path)
         install_path.chmod(install_path.stat().st_mode | stat.S_IEXEC)
         _validate_installation(solc_version, solcx_binary_path)
 
@@ -708,7 +711,10 @@ def _validate_installation(version: Version, solcx_binary_path: Union[Path, str,
         )
     if installed_version_clean not in (version.base_version, f"{version}"):
         # If it does have the nightly suffix, then only warn.
-        warnings.warn(f"Installed solc version is v{installed_version}", UnexpectedVersionWarning)
+        warnings.warn(
+            f"Installed solc version is v{installed_version}, expecting v{version.base_version}",
+            UnexpectedVersionWarning,
+        )
 
     if not get_default_solc_binary():
         set_solc_version(version)
