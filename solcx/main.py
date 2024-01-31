@@ -44,6 +44,7 @@ def compile_source(
     solc_binary: Optional[Union[str, Path]] = None,
     solc_version: Optional[Union[str, Version]] = None,
     allow_empty: bool = False,
+    via_ir: bool = False,
     **kwargs: Any,
 ) -> Dict:
     """
@@ -118,6 +119,7 @@ def compile_source(
         no_optimize_yul=no_optimize_yul,
         yul_optimizations=yul_optimizations,
         allow_empty=allow_empty,
+        via_ir=via_ir,
         **kwargs,
     )
 
@@ -142,6 +144,7 @@ def compile_files(
     solc_binary: Optional[Union[str, Path]] = None,
     solc_version: Optional[Union[str, Version]] = None,
     allow_empty: bool = False,
+    via_ir: bool = False,
     **kwargs: Any,
 ) -> Dict:
     """
@@ -192,6 +195,8 @@ def compile_files(
         the currently active version is used. Ignored if `solc_binary` is also given.
       allow_empty (bool): If ``True``, do not raise when no compiled contracts are
         returned. defaults to ``False``.
+      via_ir (bool): If ``True``, generate a IR-based codegen
+        defaults to ``False``.
 
     Returns:
       Dict: Compiler output
@@ -216,6 +221,7 @@ def compile_files(
         no_optimize_yul=no_optimize_yul,
         yul_optimizations=yul_optimizations,
         allow_empty=allow_empty,
+        via_ir=via_ir,
         **kwargs,
     )
 
