@@ -1,3 +1,5 @@
+import warnings
+
 import pytest
 
 import solcx
@@ -23,7 +25,10 @@ def test_install_unknown_version():
 
 @pytest.mark.skipif("'--no-install' in sys.argv")
 def test_progress_bar(nosolc):
-    assert solcx.install_solc("0.6.9", show_progress=True).base_version == "0.6.9"
+    # There should be no warnings!
+    with warnings.catch_warnings():
+        warnings.simplefilter("error")
+        assert solcx.install_solc("0.6.9", show_progress=True).base_version == "0.6.9"
 
 
 def test_environment_var_path(monkeypatch, tmp_path):
