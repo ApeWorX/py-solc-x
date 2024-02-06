@@ -489,8 +489,9 @@ def install_solc(
                 version, filename, show_progress, solcx_binary_path=solcx_binary_path
             )
 
+        base_version = version if isinstance(version, str) else version.base_version
         try:
-            _validate_installation(version, solcx_binary_path=solcx_binary_path)
+            _validate_installation(Version(base_version), solcx_binary_path=solcx_binary_path)
         except SolcInstallationError as exc:
             if os_name != "windows":
                 exc.args = (
@@ -703,16 +704,20 @@ def _validate_installation(version: Version, solcx_binary_path: Union[Path, str,
     installed_version_clean = Version(
         Version(installed_version.replace("-nightly", "")).base_version
     )
-    if installed_version_clean.base_version != version.base_version:
+    base_version = version if isinstance(version, str) else version.base_version
+    if installed_version_clean.base_version != base_version:
         # Without the nightly suffix, it should be the same!
         _unlink_solc(binary_path)
         raise UnexpectedVersionError(
             f"Attempted to install solc v{version}, but got solc v{installed_version}"
         )
-    if installed_version not in (version.base_version, f"{version}"):
+    if installed_version_clean not in (
+        Version(base_version),
+        f"{base_version}",
+    ) or installed_version.endswith("-nightly"):
         # If it does have the nightly suffix, then only warn.
         warnings.warn(
-            f"Installed solc version is v{installed_version}, expecting v{version.base_version}",
+            f"Installed solc version is v{installed_version_clean}, expecting v{base_version}",
             UnexpectedVersionWarning,
         )
 
