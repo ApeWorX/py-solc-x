@@ -70,7 +70,7 @@ setup(
     python_requires=">=3.8,<4",
     install_requires=[
         "requests>=2.19.0,<3",
-        "packaging>=23.1,<24",
+        "packaging>=23.1",
     ],
     extras_require=extras_require,
     py_modules=["solcx"],
