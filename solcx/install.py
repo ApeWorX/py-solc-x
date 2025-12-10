@@ -40,7 +40,7 @@ except ImportError:
     tqdm = None
 
 
-BINARY_DOWNLOAD_BASE = "https://solc-bin.ethereum.org/{}-amd64/{}"
+BINARY_DOWNLOAD_BASE = "https://binaries.soliditylang.org/{}-amd64/{}"
 SOURCE_DOWNLOAD_BASE = "https://github.com/ethereum/solidity/releases/download/v{}/{}"
 GITHUB_RELEASES = "https://api.github.com/repos/ethereum/solidity/releases?per_page=100"
 
@@ -347,7 +347,7 @@ def get_installable_solc_versions() -> List[Version]:
     data = requests.get(BINARY_DOWNLOAD_BASE.format(_get_os_name(), "list.json"))
     if data.status_code != 200:
         raise ConnectionError(
-            f"Status {data.status_code} when getting solc versions from solc-bin.ethereum.org"
+            f"Status {data.status_code} when getting solc versions from binaries.soliditylang.org"
         )
     version_list = sorted((Version(i) for i in data.json()["releases"]), reverse=True)
     version_list = [i for i in version_list if i >= MINIMAL_SOLC_VERSION]
@@ -473,7 +473,7 @@ def install_solc(
         data = requests.get(BINARY_DOWNLOAD_BASE.format(_get_os_name(), "list.json"))
         if data.status_code != 200:
             raise ConnectionError(
-                f"Status {data.status_code} when getting solc versions from solc-bin.ethereum.org"
+                f"Status {data.status_code} when getting versions from binaries.soliditylang.org"
             )
         try:
             filename = data.json()["releases"][str(version)]

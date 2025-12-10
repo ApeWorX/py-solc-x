@@ -65,7 +65,7 @@ solcx.import_installed_solc()
 
 ## Installing Solidity
 
-py-solc-x downloads and installs precompiled binaries from [solc-bin.ethereum.org](solc-bin.ethereum.org).
+py-solc-x downloads and installs precompiled binaries from [https://binaries.soliditylang.org](https://binaries.soliditylang.org).
 Different binaries are available depending on your operating system.
 
 ## Getting Installable Versions
