@@ -473,7 +473,7 @@ def install_solc(
         data = requests.get(BINARY_DOWNLOAD_BASE.format(_get_os_name(), "list.json"))
         if data.status_code != 200:
             raise ConnectionError(
-                f"Status {data.status_code} when getting solc versions from binaries.soliditylang.org"
+                f"Status {data.status_code} when getting versions from binaries.soliditylang.org"
             )
         try:
             filename = data.json()["releases"][str(version)]
