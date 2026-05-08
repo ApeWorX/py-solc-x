@@ -41,8 +41,8 @@ except ImportError:
 
 
 BINARY_DOWNLOAD_BASE = "https://binaries.soliditylang.org/{}-amd64/{}"
-SOURCE_DOWNLOAD_BASE = "https://github.com/ethereum/solidity/releases/download/v{}/{}"
-GITHUB_RELEASES = "https://api.github.com/repos/ethereum/solidity/releases?per_page=100"
+SOURCE_DOWNLOAD_BASE = "https://github.com/argotorg/solidity/releases/download/v{}/{}"
+GITHUB_RELEASES = "https://api.github.com/repos/argotorg/solidity/releases?per_page=100"
 DOWNLOAD_CHUNK_SIZE = 1024 * 1024
 
 MINIMAL_SOLC_VERSION = Version("0.4.11")

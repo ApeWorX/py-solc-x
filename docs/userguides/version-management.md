@@ -65,7 +65,7 @@ solcx.import_installed_solc()
 
 ## Installing Solidity
 
-py-solc-x downloads and installs precompiled binaries from [https://binaries.soliditylang.org](https://binaries.soliditylang.org).
+py-solc-x downloads and installs precompiled binaries from [binaries.soliditylang.org](https://binaries.soliditylang.org).
 Different binaries are available depending on your operating system.
 
 ## Getting Installable Versions
@@ -89,7 +89,7 @@ solcx.install_solc(version="latest", show_progress=False, solcx_binary_path=None
 ## Building from Source
 
 When a precompiled version of Solidity isn't available for your operating system, you may still install it by building from the source code.
-Source code is downloaded from [GitHub](https://github.com/ethereum/solidity/releases).
+Source code is downloaded from [GitHub](https://github.com/argotorg/solidity/releases).
 
 **NOTE**: If you wish to compile from source you must first install the required [solc dependencies](https://solidity.readthedocs.io/en/latest/installing-solidity.html#building-from-source).
 
