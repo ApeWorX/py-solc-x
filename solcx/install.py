@@ -43,6 +43,7 @@ except ImportError:
 BINARY_DOWNLOAD_BASE = "https://binaries.soliditylang.org/{}-amd64/{}"
 SOURCE_DOWNLOAD_BASE = "https://github.com/ethereum/solidity/releases/download/v{}/{}"
 GITHUB_RELEASES = "https://api.github.com/repos/ethereum/solidity/releases?per_page=100"
+DOWNLOAD_CHUNK_SIZE = 1024 * 1024
 
 MINIMAL_SOLC_VERSION = Version("0.4.11")
 LOGGER = logging.getLogger("solcx")
@@ -646,14 +647,14 @@ def _download_solc(url: str, show_progress: bool, rate_limit_wait_time: float = 
 
     total_size = int(response.headers.get("content-length", 0))
     progress_bar = tqdm(total=total_size, unit="iB", unit_scale=True)
-    content = bytes()
+    content = bytearray()
 
-    for data in response.iter_content(1024, decode_unicode=True):
+    for data in response.iter_content(DOWNLOAD_CHUNK_SIZE):
         progress_bar.update(len(data))
-        content += data
+        content.extend(data)
     progress_bar.close()
 
-    return content
+    return bytes(content)
 
 
 def _install_solc_unix(
