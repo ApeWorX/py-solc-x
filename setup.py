@@ -30,11 +30,10 @@ extras_require = {
         "sphinxcontrib-napoleon>=0.7",  # Allow Google-style documentation
         "sphinx-plausible>=0.1.2,<0.2",
     ],
-    "release": [  # `release` GitHub Action job uses this
+    "release": [  # local packaging; CI publish uses uv + Trusted Publishing
         "setuptools",  # Installation tool
         "setuptools-scm",  # Installation tool
         "wheel",  # Packaging tool
-        "twine",  # Package upload tool
     ],
     "dev": [
         "commitizen",  # Manage commits and publishing releases
