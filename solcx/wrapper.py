@@ -1,7 +1,7 @@
 import re
 import subprocess
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any
 
 from packaging.version import Version
 
@@ -12,7 +12,7 @@ from solcx.exceptions import SolcError, UnknownOption, UnknownValue
 VERSION_REGEX = r"(\d+\.\d+\.\d+)(?:-nightly.\d+.\d+.\d+|)(\+commit.\w+)"
 
 
-def get_version_str_from_solc_binary(solc_binary: Union[Path, str]) -> str:
+def get_version_str_from_solc_binary(solc_binary: Path | str) -> str:
     stdout_data = subprocess.check_output([str(solc_binary), "--version"], encoding="utf8")
     if not (match := next(re.finditer(VERSION_REGEX, stdout_data), None)):
         raise SolcError("Could not determine the solc binary version")
@@ -21,7 +21,7 @@ def get_version_str_from_solc_binary(solc_binary: Union[Path, str]) -> str:
     return "".join(match.groups())
 
 
-def get_solc_version(solc_binary: Union[Path, str], with_commit_hash: bool = False) -> Version:
+def get_solc_version(solc_binary: Path | str, with_commit_hash: bool = False) -> Version:
     version_str = get_version_str_from_solc_binary(solc_binary)
     version = Version(version_str.replace("-nightly", ""))
     return version if with_commit_hash else Version(version.base_version)
@@ -40,13 +40,13 @@ def _to_string(key: str, value: Any) -> str:
 
 
 def solc_wrapper(
-    solc_binary: Optional[Union[Path, str]] = None,
-    stdin: Optional[str] = None,
-    source_files: Optional[Union[List, Path, str]] = None,
-    import_remappings: Optional[Union[Dict, List, str]] = None,
-    success_return_code: Optional[int] = None,
+    solc_binary: Path | str | None = None,
+    stdin: str | None = None,
+    source_files: list | Path | str | None = None,
+    import_remappings: dict | list | str | None = None,
+    success_return_code: int | None = None,
     **kwargs: Any,
-) -> Tuple[str, str, List, subprocess.Popen]:
+) -> tuple[str, str, list, subprocess.Popen]:
     """
     Wrapper function for calling to ``solc``.
 
@@ -82,7 +82,7 @@ def solc_wrapper(
     """
     solc_binary = Path(solc_binary) if solc_binary else install.get_executable()
     solc_version = get_solc_version(solc_binary)
-    command: List = [str(solc_binary)]
+    command: list = [str(solc_binary)]
 
     if (
         success_return_code is None

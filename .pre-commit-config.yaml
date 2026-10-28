@@ -1,29 +1,32 @@
 repos:
 -   repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.5.0
+    rev: v5.0.0
     hooks:
     -   id: check-yaml
--   repo: https://github.com/psf/black
-    rev: 23.11.0
+
+-   repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.14.14
     hooks:
-      - id: black
-        name: fmt
--   repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v2.4.0
-    hooks:
-    -   id: flake8
+    -   id: ruff
+        args: [--fix]
+    -   id: ruff-format
+
 -   repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v1.6.1
+    rev: v1.19.1
     hooks:
     -   id: mypy
--   repo: https://github.com/asottile/seed-isort-config
-    rev: v2.2.0
+        additional_dependencies: [types-setuptools, types-requests]
+
+-   repo: https://github.com/executablebooks/mdformat
+    rev: 1.0.0
     hooks:
-    -   id: seed-isort-config
--   repo: https://github.com/pre-commit/mirrors-isort
-    rev: v5.10.1
+    -   id: mdformat
+        additional_dependencies: [mdformat-gfm, mdformat-frontmatter, mdformat-pyproject]
+
+-   repo: https://github.com/opensource-nepal/commitlint
+    rev: v1.3.0
     hooks:
-      - id: isort
+    -   id: commitlint
 
 default_language_version:
     python: python3

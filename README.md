@@ -24,12 +24,12 @@ Py-solc-x allows the use of multiple versions of solc, and can install or compil
 pip install py-solc-x
 ```
 
-### via `setuptools`
+### from source
 
 ```bash
-git clone https://github.com/iamdefinitelyahuman/py-solc-x.git
+git clone https://github.com/ApeWorX/py-solc-x.git
 cd py-solc-x
-python3 setup.py install
+uv sync
 ```
 
 ## Documentation
