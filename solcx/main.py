@@ -1,6 +1,6 @@
 import json
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Union
+from typing import Any
 
 from packaging.version import Version
 
@@ -26,26 +26,26 @@ def get_solc_version(with_commit_hash: bool = False) -> Version:
 
 def compile_source(
     source: str,
-    output_values: Optional[List] = None,
-    import_remappings: Optional[Union[Dict, List, str]] = None,
-    base_path: Optional[Union[Path, str]] = None,
-    allow_paths: Optional[Union[List, Path, str]] = None,
-    output_dir: Optional[Union[Path, str]] = None,
+    output_values: list | None = None,
+    import_remappings: dict | list | str | None = None,
+    base_path: Path | str | None = None,
+    allow_paths: list | Path | str | None = None,
+    output_dir: Path | str | None = None,
     overwrite: bool = False,
-    evm_version: Optional[str] = None,
-    revert_strings: Optional[Union[List, str]] = None,
-    metadata_hash: Optional[str] = None,
+    evm_version: str | None = None,
+    revert_strings: list | str | None = None,
+    metadata_hash: str | None = None,
     metadata_literal: bool = False,
     optimize: bool = False,
-    optimize_runs: Optional[int] = None,
-    optimize_yul: Optional[bool] = None,
-    no_optimize_yul: Optional[bool] = None,
-    yul_optimizations: Optional[int] = None,
-    solc_binary: Optional[Union[str, Path]] = None,
-    solc_version: Optional[Union[str, Version]] = None,
+    optimize_runs: int | None = None,
+    optimize_yul: bool | None = None,
+    no_optimize_yul: bool | None = None,
+    yul_optimizations: int | None = None,
+    solc_binary: str | Path | None = None,
+    solc_version: str | Version | None = None,
     allow_empty: bool = False,
     **kwargs: Any,
-) -> Dict:
+) -> dict:
     """
     Compile a Solidity contract.
 
@@ -123,27 +123,27 @@ def compile_source(
 
 
 def compile_files(
-    source_files: Union[List, Path, str],
-    output_values: Optional[List] = None,
-    import_remappings: Optional[Union[Dict, List, str]] = None,
-    base_path: Optional[Union[Path, str]] = None,
-    allow_paths: Optional[Union[List, Path, str]] = None,
-    output_dir: Optional[Union[Path, str]] = None,
+    source_files: list | Path | str,
+    output_values: list | None = None,
+    import_remappings: dict | list | str | None = None,
+    base_path: Path | str | None = None,
+    allow_paths: list | Path | str | None = None,
+    output_dir: Path | str | None = None,
     overwrite: bool = False,
-    evm_version: Optional[str] = None,
-    revert_strings: Optional[Union[List, str]] = None,
-    metadata_hash: Optional[str] = None,
+    evm_version: str | None = None,
+    revert_strings: list | str | None = None,
+    metadata_hash: str | None = None,
     metadata_literal: bool = False,
     optimize: bool = False,
-    optimize_runs: Optional[int] = None,
-    optimize_yul: Optional[bool] = None,
-    no_optimize_yul: Optional[bool] = None,
-    yul_optimizations: Optional[int] = None,
-    solc_binary: Optional[Union[str, Path]] = None,
-    solc_version: Optional[Union[str, Version]] = None,
+    optimize_runs: int | None = None,
+    optimize_yul: bool | None = None,
+    no_optimize_yul: bool | None = None,
+    yul_optimizations: int | None = None,
+    solc_binary: str | Path | None = None,
+    solc_version: str | Version | None = None,
     allow_empty: bool = False,
     **kwargs: Any,
-) -> Dict:
+) -> dict:
     """
     Compile one or more Solidity source files.
 
@@ -220,7 +220,7 @@ def compile_files(
     )
 
 
-def _get_combined_json_outputs(solc_binary: Optional[Union[Path, str]] = None) -> str:
+def _get_combined_json_outputs(solc_binary: Path | str | None = None) -> str:
     if solc_binary is None:
         solc_binary = get_executable()
 
@@ -229,7 +229,7 @@ def _get_combined_json_outputs(solc_binary: Optional[Union[Path, str]] = None) -
     return combined_json_args.split(" ")[-1]
 
 
-def _parse_compiler_output(stdoutdata: str) -> Dict:
+def _parse_compiler_output(stdoutdata: str) -> dict:
     output = json.loads(stdoutdata)
 
     contracts = output.get("contracts", {})
@@ -246,14 +246,14 @@ def _parse_compiler_output(stdoutdata: str) -> Dict:
 
 
 def _compile_combined_json(
-    output_values: Optional[List] = None,
-    solc_binary: Union[str, Path, None] = None,
-    solc_version: Optional[Union[Version, str]] = None,
-    output_dir: Union[str, Path, None] = None,
-    overwrite: Optional[bool] = False,
-    allow_empty: Optional[bool] = False,
+    output_values: list | None = None,
+    solc_binary: str | Path | None = None,
+    solc_version: Version | str | None = None,
+    output_dir: str | Path | None = None,
+    overwrite: bool | None = False,
+    allow_empty: bool | None = False,
     **kwargs: Any,
-) -> Dict:
+) -> dict:
     solc_binary = get_executable(version=solc_version) if solc_binary is None else solc_binary
 
     if output_values is None:
@@ -302,15 +302,15 @@ def _compile_combined_json(
 
 
 def compile_standard(
-    input_data: Dict,
-    base_path: Optional[Union[str, Path]] = None,
-    allow_paths: Optional[Union[List, Path, str]] = None,
-    output_dir: Optional[str] = None,
+    input_data: dict,
+    base_path: str | Path | None = None,
+    allow_paths: list | Path | str | None = None,
+    output_dir: str | None = None,
     overwrite: bool = False,
-    solc_binary: Optional[Union[str, Path]] = None,
-    solc_version: Optional[Union[str, Version]] = None,
+    solc_binary: str | Path | None = None,
+    solc_version: str | Version | None = None,
     allow_empty: bool = False,
-) -> Dict:
+) -> dict:
     """
     Compile Solidity contracts using the JSON-input-output interface.
 
@@ -380,9 +380,9 @@ def compile_standard(
 
 def link_code(
     unlinked_bytecode: str,
-    libraries: Dict,
-    solc_binary: Optional[Union[str, Path]] = None,
-    solc_version: Optional[Version] = None,
+    libraries: dict,
+    solc_binary: str | Path | None = None,
+    solc_version: Version | None = None,
 ) -> str:
     """
     Add library addresses into unlinked bytecode.

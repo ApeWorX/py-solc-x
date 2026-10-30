@@ -1,18 +1,15 @@
-from typing import Dict, List, Optional
-
-
 class SolcError(Exception):
     message = "An error occurred during execution"
 
     def __init__(
         self,
-        message: Optional[str] = None,
-        command: Optional[List[str]] = None,
-        return_code: Optional[int] = None,
-        stdin_data: Optional[str] = None,
-        stdout_data: Optional[str] = None,
-        stderr_data: Optional[str] = None,
-        error_dict: Optional[Dict] = None,
+        message: str | None = None,
+        command: list[str] | None = None,
+        return_code: int | None = None,
+        stdin_data: str | None = None,
+        stdout_data: str | None = None,
+        stderr_data: str | None = None,
+        error_dict: dict | None = None,
     ) -> None:
         if message is not None:
             self.message = message

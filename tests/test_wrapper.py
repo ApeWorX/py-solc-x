@@ -1,5 +1,6 @@
 import subprocess
-from typing import Mapping, cast
+from collections.abc import Mapping
+from typing import cast
 
 import pytest
 from packaging.version import Version

@@ -77,3 +77,7 @@ version.py
 **/.DS_Store
 *.swp
 *.swo
+
+# uv
+uv.lock
+.ruff_cache/

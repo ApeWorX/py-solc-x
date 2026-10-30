@@ -3,7 +3,7 @@ import sys
 import tempfile
 import threading
 from pathlib import Path
-from typing import Any, Dict, Union
+from typing import Any, Union
 
 if sys.platform == "win32":
     import msvcrt
@@ -15,7 +15,7 @@ else:
     NON_BLOCKING = fcntl.LOCK_EX | fcntl.LOCK_NB
     BLOCKING = fcntl.LOCK_EX
 
-_locks: Dict[str, Union["UnixLock", "WindowsLock"]] = {}
+_locks: dict[str, Union["UnixLock", "WindowsLock"]] = {}
 _base_lock = threading.Lock()
 
 
@@ -48,18 +48,25 @@ class UnixLock(_ProcessLock):
         self.release()
 
     def acquire(self, blocking: bool) -> bool:
-        if not self._lock.acquire(blocking):
-            return False
-        try:
-            fcntl.flock(self._lock_file, BLOCKING if blocking else NON_BLOCKING)
-        except BlockingIOError:
-            self._lock.release()
-            return False
-        return True
+        if sys.platform != "win32":
+            if not self._lock.acquire(blocking):
+                return False
+            try:
+                fcntl.flock(self._lock_file, BLOCKING if blocking else NON_BLOCKING)
+            except BlockingIOError:
+                self._lock.release()
+                return False
+            return True
+
+        raise RuntimeError("UnixLock is not available on Windows.")
 
     def release(self) -> None:
-        fcntl.flock(self._lock_file, fcntl.LOCK_UN)
-        self._lock.release()
+        if sys.platform != "win32":
+            fcntl.flock(self._lock_file, fcntl.LOCK_UN)
+            self._lock.release()
+            return
+
+        raise RuntimeError("UnixLock is not available on Windows.")
 
 
 class WindowsLock(_ProcessLock):
@@ -70,21 +77,26 @@ class WindowsLock(_ProcessLock):
         self.release()
 
     def acquire(self, blocking: bool) -> bool:
-        if not self._lock.acquire(blocking):
-            return False
-        while True:
-            try:
-                fd = os.open(self._lock_path, OPEN_MODE)  # type: ignore
-                msvcrt.locking(  # type: ignore
-                    fd, msvcrt.LK_LOCK if blocking else msvcrt.LK_NBLCK, 1  # type: ignore
-                )
-                self._fd = fd
-                return True
-            except OSError:
-                if not blocking:
-                    self._lock.release()
-                    return False
+        if sys.platform == "win32":
+            if not self._lock.acquire(blocking):
+                return False
+            while True:
+                try:
+                    fd = os.open(self._lock_path, OPEN_MODE)
+                    msvcrt.locking(fd, msvcrt.LK_LOCK if blocking else msvcrt.LK_NBLCK, 1)
+                    self._fd = fd
+                    return True
+                except OSError:
+                    if not blocking:
+                        self._lock.release()
+                        return False
+
+        raise RuntimeError("WindowsLock is only available on Windows.")
 
     def release(self) -> None:
-        msvcrt.locking(self._fd, msvcrt.LK_UNLCK, 1)  # type: ignore
-        self._lock.release()
+        if sys.platform == "win32":
+            msvcrt.locking(self._fd, msvcrt.LK_UNLCK, 1)
+            self._lock.release()
+            return
+
+        raise RuntimeError("WindowsLock is only available on Windows.")
