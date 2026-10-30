@@ -14,7 +14,7 @@ import solcx
 solcx.compile_source(
     "contract Foo { function bar() public { return; } }",
     output_values=["abi", "bin-runtime"],
-    solc_version="0.7.0"
+    solc_version="0.7.0",
 )
 ```
 
@@ -28,11 +28,7 @@ Returns a dict, where each top-level key is a contract.
 ```python
 import solcx
 
-solcx.compile_files(
-    ["Foo.sol"],
-    output_values=["abi", "bin-runtime"],
-    solc_version="0.7.0"
-)
+solcx.compile_files(["Foo.sol"], output_values=["abi", "bin-runtime"], solc_version="0.7.0")
 ```
 
 ## Compiling with the Standard JSON Format
@@ -43,10 +39,7 @@ See the Solidity documentation on [the compiler input-output JSON](https://solid
 ```python
 import solcx
 
-solcx.compile_standard(
-    {},
-    solc_version="0.7.0"
-)
+solcx.compile_standard({}, solc_version="0.7.0")
 ```
 
 ## Linking Libraries
@@ -59,8 +52,5 @@ import solcx
 
 unlinked_bytecode = "606060405260768060106000396000f3606060405260e060020a6000350463e7f09e058114601a575b005b60187f0c55699c00000000000000000000000000000000000000000000000000000000606090815273__TestA_________________________________90630c55699c906064906000906004818660325a03f41560025750505056"
 
-solcx.link_code(
-    unlinked_bytecode,
-    {'TestA': "0xd3cda913deb6f67967b99d67acdfa1712c293601"}
-)
+solcx.link_code(unlinked_bytecode, {"TestA": "0xd3cda913deb6f67967b99d67acdfa1712c293601"})
 ```

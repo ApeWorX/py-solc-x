@@ -54,10 +54,10 @@ lint = [
     "mdformat-pyproject>=0.0.2",
 ]
 docs = [
-    "myst-parser>=1.0.0,<2",
-    "sphinx-click>=4.4.0,<5",
-    "Sphinx>=6.1.3,<7",
-    "sphinx_rtd_theme>=1.2.0,<2",
+    "myst-parser>=4.0.0",
+    "sphinx-click>=6.0.0",
+    "Sphinx>=8.0.0",
+    "sphinx_rtd_theme>=3.0.0",
     "sphinxcontrib-napoleon>=0.7",
     "sphinx-plausible>=0.1.2,<0.2",
 ]

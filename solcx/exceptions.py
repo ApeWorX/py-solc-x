@@ -1,5 +1,3 @@
-
-
 class SolcError(Exception):
     message = "An error occurred during execution"
 

@@ -10,6 +10,7 @@ You can also give a custom directory to most installation functions using the op
 
 ```python
 import solcx
+
 solcx.get_solcx_install_folder()
 ```
 
@@ -40,7 +41,7 @@ Set the currently active `solc` version:
 ```python
 import solcx
 
-solcx.set_solc_version('0.5.0')
+solcx.set_solc_version("0.5.0")
 ```
 
 Set the currently active `solc` binary based on a pragma statement.
@@ -49,7 +50,7 @@ The newest installed version that matches the pragma is chosen.
 ```python
 import solcx
 
-solcx.set_solc_version_pragma('pragma solidity ^0.5.0;')
+solcx.set_solc_version_pragma("pragma solidity ^0.5.0;")
 ```
 
 ## Importing Already-Installed Versions
